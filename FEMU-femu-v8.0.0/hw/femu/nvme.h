@@ -30,6 +30,26 @@
 
 #define NVME_ID_NS_LBAF_DS(ns, lba_index) (ns->id_ns.lbaf[lba_index].lbads)
 #define NVME_ID_NS_LBAF_MS(ns, lba_index) (ns->id_ns.lbaf[lba_index].ms)
+/**
+ * @brief 
+ * Advance Channel latency emulating
+ * inhoinno 
+ */
+#define ADVANCE_PER_CH_ENDTIME 1
+#define SK_HYNIX_VALIDATION 0
+#define MK_ZONE_CONVENTIONAL 0
+#define NVME_PRIORITY_SCHED_MODE 1      //future feature for ConfZNS
+
+#define PCIe_TIME_SIMULATION 1
+#define Interface_PCIeGen3x4_bwmb (4034 * MiB) //MB.s
+#define Interface_PCIeGen3x4_bw 4034
+typedef struct _PCIe_Gen3_x4 {
+    //lock
+    uint64_t bw;
+    uint64_t stime;
+    uint64_t ntime; 
+    bool busy;
+}PCIe_Gen3_x4; //FOR real zns
 
 typedef struct NvmeBar {
     uint64_t    cap;
@@ -287,6 +307,42 @@ enum NvmePsdt {
     NVME_PSDT_SGL_MPTR_CONTIGUOUS = 0x1,
     NVME_PSDT_SGL_MPTR_SGL        = 0x2,
 };
+//inho added for debugging
+typedef struct nvme_zone_info_entry {
+	uint8_t		zone_condition_rsvd : 4;
+	uint8_t		rsvd0 : 4;
+	uint8_t		rsvd1 : 4;
+	uint8_t		zone_condition : 4;
+	uint8_t		rsvd8[6];
+	uint64_t		zone_capacity;
+	uint64_t		zone_start_lba;
+	uint64_t		write_pointer;
+	uint64_t		cnt_read;
+	uint64_t		cnt_write;
+	uint32_t		cnt_reset;
+	uint8_t		rsvd56[12];
+}nvme_zone_info_entry;
+
+typedef struct nvme_passthru_cmd {
+	uint8_t	opcode;
+	uint8_t	flags;
+	uint16_t	rsvd1;
+	uint32_t	nsid;
+	uint32_t	cdw2;
+	uint32_t	cdw3;
+	uint64_t	metadata;
+	uint64_t	addr;
+	uint32_t	metadata_len;
+	uint32_t	data_len;
+	uint32_t	cdw10;
+	uint32_t	cdw11;
+	uint32_t	cdw12;
+	uint32_t	cdw13;
+	uint32_t	cdw14;
+	uint32_t	cdw15;
+	uint32_t	timeout_ms;
+	uint32_t	result;
+}nvme_passthru_cmd;
 
 typedef struct NvmeCmd {
     uint16_t    opcode : 8;
@@ -326,6 +382,7 @@ enum NvmeAdminCommands {
     NVME_ADM_CMD_SECURITY_SEND  = 0x81,
     NVME_ADM_CMD_SECURITY_RECV  = 0x82,
     NVME_ADM_CMD_SET_DB_MEMORY  = 0x7c,
+    NVME_ADM_CMD_CONF_DEBUG     = 0xec,
     NVME_ADM_CMD_FEMU_DEBUG     = 0xee,
     NVME_ADM_CMD_FEMU_FLIP      = 0xef,
 };
@@ -1174,7 +1231,10 @@ typedef struct FemuCtrl {
     MemoryRegion    ctrl_mem;
     NvmeBar         bar;
 
+    bool            wrr_enable;
+
     /* Coperd: ZNS FIXME */
+    struct zns      *zns;   // for ZNS Latency emualting, Inhoinno
     QemuUUID        uuid;
     uint32_t        zasl_bs;
     uint8_t         zasl;
@@ -1185,6 +1245,8 @@ typedef struct FemuCtrl {
     uint32_t        max_active_zones;
     uint32_t        max_open_zones;
     uint32_t        zd_extension_size;
+    PCIe_Gen3_x4    *pci_simulation;
+    pthread_spinlock_t pci_lock;
 
     const uint32_t  *iocs;
     uint8_t         csi;
@@ -1266,6 +1328,9 @@ typedef struct FemuCtrl {
     NvmeNamespace   *namespaces;
     NvmeSQueue      **sq;
     NvmeCQueue      **cq;
+
+    NvmeSQueue      **psched_q; //inhoinno : for the WRR sched
+
     NvmeSQueue      admin_sq;
     NvmeCQueue      admin_cq;
     NvmeFeatureVal  features;
