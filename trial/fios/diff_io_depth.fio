@@ -3,7 +3,7 @@ direct=1
 zonemode=zbd
 name=diff_io_depth
 bs=1m
-size=16z
+size=1z
 filename=/dev/nvme0n1
 
 [1depth_write]
@@ -19,7 +19,7 @@ iodepth=1
 rw=read
 offset=0z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [1depth_randread]
@@ -28,131 +28,156 @@ iodepth=1
 rw=randread
 offset=0z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [2depth_write]
 ioengine=psync
 iodepth=2
 rw=write
-offset=16z
+offset=1z
 stonewall
 
 [2depth_read]
 ioengine=psync
 iodepth=2
 rw=read
-offset=16z
+offset=1z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [2depth_randread]
 ioengine=io_uring
 iodepth=2
 rw=randread
-offset=16z
+offset=1z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [4depth_write]
 ioengine=psync
 iodepth=4
 rw=write
-offset=32z
+offset=2z
 stonewall
 
 [4depth_read]
 ioengine=psync
 iodepth=4
 rw=read
-offset=32z
+offset=2z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [4depth_randread]
 ioengine=io_uring
 iodepth=4
 rw=randread
-offset=32z
+offset=2z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [8depth_write]
 ioengine=psync
 iodepth=8
 rw=write
-offset=48z
+offset=3z
 stonewall
 
 [8depth_read]
 ioengine=psync
 iodepth=8
 rw=read
-offset=48z
+offset=3z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [8depth_randread]
 ioengine=io_uring
 iodepth=8
 rw=randread
-offset=48z
+offset=3z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [16depth_write]
 ioengine=psync
 iodepth=16
 rw=write
-offset=64z
+offset=4z
 stonewall
 
 [16depth_read]
 ioengine=psync
 iodepth=16
 rw=read
-offset=64z
+offset=4z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [16depth_randread]
 ioengine=io_uring
 iodepth=16
 rw=randread
-offset=64z
+offset=4z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [32depth_write]
 ioengine=psync
 iodepth=32
 rw=write
-offset=80z
+offset=5z
 stonewall
 
 [32depth_read]
 ioengine=psync
 iodepth=32
 rw=read
-offset=80z
+offset=5z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [32depth_randread]
 ioengine=io_uring
 iodepth=32
 rw=randread
-offset=80z
+offset=5z
 time_based
-runtime=20
+runtime=8
+stonewall
+
+[64depth_write]
+ioengine=psync
+iodepth=64
+rw=write
+offset=6z
+stonewall
+
+[64depth_read]
+ioengine=psync
+iodepth=64
+rw=read
+offset=6z
+time_based
+runtime=8
+stonewall
+
+[64depth_randread]
+ioengine=io_uring
+iodepth=64
+rw=randread
+offset=6z
+time_based
+runtime=8
 stonewall
 

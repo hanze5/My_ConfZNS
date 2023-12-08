@@ -3,7 +3,7 @@ direct=1
 zonemode=zbd
 name=diff_bs
 iodepth=1
-size=8z
+size=1z
 filename=/dev/nvme0n1
 
 [1k_write]
@@ -19,7 +19,7 @@ bs=1k
 rw=read
 offset=0z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [1k_randread]
@@ -28,381 +28,381 @@ bs=1k
 rw=randread
 offset=0z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [2k_write]
 ioengine=psync
 bs=2k
 rw=write
-offset=8z
+offset=1z
 stonewall
 
 [2k_read]
 ioengine=psync
 bs=2k
 rw=read
-offset=8z
+offset=1z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [2k_randread]
 ioengine=io_uring
 bs=2k
 rw=randread
-offset=8z
+offset=1z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [4k_write]
 ioengine=psync
 bs=4k
 rw=write
-offset=16z
+offset=2z
 stonewall
 
 [4k_read]
 ioengine=psync
 bs=4k
 rw=read
-offset=16z
+offset=2z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [4k_randread]
 ioengine=io_uring
 bs=4k
 rw=randread
-offset=16z
+offset=2z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [8k_write]
 ioengine=psync
 bs=8k
 rw=write
-offset=24z
+offset=3z
 stonewall
 
 [8k_read]
 ioengine=psync
 bs=8k
 rw=read
-offset=24z
+offset=3z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [8k_randread]
 ioengine=io_uring
 bs=8k
 rw=randread
-offset=24z
+offset=3z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [16k_write]
 ioengine=psync
 bs=16k
 rw=write
-offset=32z
+offset=4z
 stonewall
 
 [16k_read]
 ioengine=psync
 bs=16k
 rw=read
-offset=32z
+offset=4z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [16k_randread]
 ioengine=io_uring
 bs=16k
 rw=randread
-offset=32z
+offset=4z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [32k_write]
 ioengine=psync
 bs=32k
 rw=write
-offset=40z
+offset=5z
 stonewall
 
 [32k_read]
 ioengine=psync
 bs=32k
 rw=read
-offset=40z
+offset=5z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [32k_randread]
 ioengine=io_uring
 bs=32k
 rw=randread
-offset=40z
+offset=5z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [64k_write]
 ioengine=psync
 bs=64k
 rw=write
-offset=48z
+offset=6z
 stonewall
 
 [64k_read]
 ioengine=psync
 bs=64k
 rw=read
-offset=48z
+offset=6z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [64k_randread]
 ioengine=io_uring
 bs=64k
 rw=randread
-offset=48z
+offset=6z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [128k_write]
 ioengine=psync
 bs=128k
 rw=write
-offset=56z
+offset=7z
 stonewall
 
 [128k_read]
 ioengine=psync
 bs=128k
 rw=read
-offset=56z
+offset=7z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [128k_randread]
 ioengine=io_uring
 bs=128k
 rw=randread
-offset=56z
+offset=7z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [256k_write]
 ioengine=psync
 bs=256k
 rw=write
-offset=64z
+offset=8z
 stonewall
 
 [256k_read]
 ioengine=psync
 bs=256k
 rw=read
-offset=64z
+offset=8z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [256k_randread]
 ioengine=io_uring
 bs=256k
 rw=randread
-offset=64z
+offset=8z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [512k_write]
 ioengine=psync
 bs=512k
 rw=write
-offset=72z
+offset=9z
 stonewall
 
 [512k_read]
 ioengine=psync
 bs=512k
 rw=read
-offset=72z
+offset=9z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [512k_randread]
 ioengine=io_uring
 bs=512k
 rw=randread
-offset=72z
+offset=9z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [1024k_write]
 ioengine=psync
 bs=1024k
 rw=write
-offset=80z
+offset=10z
 stonewall
 
 [1024k_read]
 ioengine=psync
 bs=1024k
 rw=read
-offset=80z
+offset=10z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [1024k_randread]
 ioengine=io_uring
 bs=1024k
 rw=randread
-offset=80z
+offset=10z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [2048k_write]
 ioengine=psync
 bs=2048k
 rw=write
-offset=88z
+offset=11z
 stonewall
 
 [2048k_read]
 ioengine=psync
 bs=2048k
 rw=read
-offset=88z
+offset=11z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [2048k_randread]
 ioengine=io_uring
 bs=2048k
 rw=randread
-offset=88z
+offset=11z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [4096k_write]
 ioengine=psync
 bs=4096k
 rw=write
-offset=96z
+offset=12z
 stonewall
 
 [4096k_read]
 ioengine=psync
 bs=4096k
 rw=read
-offset=96z
+offset=12z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [4096k_randread]
 ioengine=io_uring
 bs=4096k
 rw=randread
-offset=96z
+offset=12z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [8192k_write]
 ioengine=psync
 bs=8192k
 rw=write
-offset=104z
+offset=13z
 stonewall
 
 [8192k_read]
 ioengine=psync
 bs=8192k
 rw=read
-offset=104z
+offset=13z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [8192k_randread]
 ioengine=io_uring
 bs=8192k
 rw=randread
-offset=104z
+offset=13z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [16384k_write]
 ioengine=psync
 bs=16384k
 rw=write
-offset=112z
+offset=14z
 stonewall
 
 [16384k_read]
 ioengine=psync
 bs=16384k
 rw=read
-offset=112z
+offset=14z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [16384k_randread]
 ioengine=io_uring
 bs=16384k
 rw=randread
-offset=112z
+offset=14z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [32768k_write]
 ioengine=psync
 bs=32768k
 rw=write
-offset=120z
+offset=15z
 stonewall
 
 [32768k_read]
 ioengine=psync
 bs=32768k
 rw=read
-offset=120z
+offset=15z
 time_based
-runtime=20
+runtime=8
 stonewall
 
 [32768k_randread]
 ioengine=io_uring
 bs=32768k
 rw=randread
-offset=120z
+offset=15z
 time_based
-runtime=20
+runtime=8
 stonewall
 

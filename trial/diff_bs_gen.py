@@ -1,13 +1,13 @@
 operations = ['write', 'read', 'randread']  # 操作类型
 ioengines = {'write': 'psync', 'read': 'psync', 'randread': 'io_uring'}  # I/O引擎
 
-with open('diff_bs.fio', 'w') as f:
+with open('fios/diff_bs.fio', 'w') as f:
     f.write("[global]\n")
     f.write("direct=1\n")
     f.write("zonemode=zbd\n")
     f.write("name=diff_bs\n")
     f.write("iodepth=1\n")
-    f.write("size=8z\n")
+    f.write("size=1z\n")
     f.write("filename=/dev/nvme0n1\n")
     f.write("\n")
 
@@ -21,7 +21,7 @@ with open('diff_bs.fio', 'w') as f:
             f.write(f"offset={offset}z\n")
             if op != 'write':
                 f.write("time_based\n")
-                f.write("runtime=20\n")
+                f.write("runtime=8\n")
             f.write("stonewall\n")
             f.write("\n")
-        offset +=  8
+        offset +=  1
