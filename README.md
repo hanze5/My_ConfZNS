@@ -46,4 +46,6 @@ The current version of ConfZNS supports built-in configuration, so user have to 
 
 TODO：
 磁盘性能理论值计算
+读延迟 65000  写延迟450000 传输延迟25000
 
+读延迟模拟 写延迟模拟

@@ -17,4 +17,16 @@ python3 analyze.py results/diff_bs.json
 python3 analyze.py results/diff_io_depth.json
 
 
-clear && python3 analyze.py results/mu11_diff_bs.json && python3 extract.py
+clear && python3 analyze.py results/mu11/diff_bs.json && python3 extract.py
+
+clear && python3 analyze.py results/mu11/0_1_together.json && python3 extract.py
+
+clear && python3 analyze.py results/mu11/0_2_together.json && python3 extract.py
+
+clear && python3 analyze.py results/mu11/0_4_together.json && python3 extract.py
+
+clear && python3 analyze.py results/mu11/0_8_together.json && python3 extract.py
+
+clear && python3 analyze.py results/mu11/0_16_together.json && python3 extract.py
+
+clear && python3 analyze.py results/mu11/all_together.json && python3 extract.py
