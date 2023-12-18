@@ -2,22 +2,22 @@ import argparse
 import json
 
 
-parser_folder = "results/mu11/"
+parser_folder = "results/mu84/"
 
 parser_files=[
-    "0_1_write_together.json",
-    "0_1_read_together.json",
-    "0_2_write_together.json",
-    "0_2_read_together.json",
-    "0_4_write_together.json",
-    "0_4_read_together.json",
-    "0_8_write_together.json",
-    "0_8_read_together.json",
-    "0_16_write_together.json",
-    "0_16_read_together.json"
+    # "0_1_write_together.json",
+    # "0_1_read_together.json",
+    # "0_2_write_together.json",
+    # "0_2_read_together.json",
+    # "0_4_write_together.json",
+    # "0_4_read_together.json",
+    # "0_8_write_together.json",
+    # "0_8_read_together.json",
+    # "0_16_write_together.json",
+    # "0_16_read_together.json"
     # ,
-    # "all_write_together.json",
-    # "all_read_together.json"
+    "all_write_together.json",
+    "all_read_together.json"
 ]
 
 output = []
@@ -35,16 +35,16 @@ for parser_files in parser_files:
             # job_data['IOPS'] = job['write']['iops']
             job_data['速率'] = job['write']['bw']/1024
             job_data['延迟'] = job['write']['lat_ns']['mean']/1000
-            # job_data['99%尾延迟'] = job['write']['clat_ns']['percentile']['99.000000']/1000
+            job_data['99%尾延迟'] = job['write']['clat_ns']['percentile']['99.000000']/1000
             job_data['99.9%尾延迟'] = job['write']['clat_ns']['percentile']['99.900000']/1000
-            # job_data['99.99%尾延迟'] = job['write']['clat_ns']['percentile']['99.990000']/1000
+            job_data['99.99%尾延迟'] = job['write']['clat_ns']['percentile']['99.990000']/1000
         elif(job['job options']['rw']=="read" or job['job options']['rw']=="randread"):
             # job_data['IOPS'] = job['read']['iops']
             job_data['速率'] = job['read']['bw']/1024
             job_data['延迟'] = job['read']['lat_ns']['mean']/1000
-            # job_data['99%尾延迟'] = job['read']['clat_ns']['percentile']['99.000000']/1000
+            job_data['99%尾延迟'] = job['read']['clat_ns']['percentile']['99.000000']/1000
             job_data['99.9%尾延迟'] = job['read']['clat_ns']['percentile']['99.900000']/1000
-            # job_data['99.99%尾延迟'] = job['read']['clat_ns']['percentile']['99.990000']/1000
+            job_data['99.99%尾延迟'] = job['read']['clat_ns']['percentile']['99.990000']/1000
         output.append(job_data)
 
 

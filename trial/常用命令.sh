@@ -30,3 +30,6 @@ clear && python3 analyze.py results/mu11/0_8_together.json && python3 extract.py
 clear && python3 analyze.py results/mu11/0_16_together.json && python3 extract.py
 
 clear && python3 analyze.py results/mu11/all_together.json && python3 extract.py
+
+
+clear && python3 analyze.py && python3 extract.py 
