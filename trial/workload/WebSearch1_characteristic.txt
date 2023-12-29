@@ -1,0 +1,90 @@
+ASU 0:
+Min LBA = 12592
+Max LBA = 34999520
+Range = 16.683 GB
+Read Requests = 355906
+Write Requests = 0
+Read/Write Ratio = N/A
+Min Read Request Size = 4.0 MB
+Max Read Request Size = 16.0 MB
+Average Read Request Size = 7.466 MB
+Min Write Request Size = N/A
+Max Write Request Size = N/A
+Average Write Request Size = N/A
+Average Request Interval = 0.009 seconds
+==================================================
+ASU 1:
+Min LBA = 5216
+Max LBA = 34694192
+Range = 16.541 GB
+Read Requests = 349744
+Write Requests = 1
+Read/Write Ratio = 1.0
+Min Read Request Size = 4.0 MB
+Max Read Request Size = 16.0 MB
+Average Read Request Size = 7.622 MB
+Min Write Request Size = 4.0 MB
+Max Write Request Size = 4.0 MB
+Average Write Request Size = 4.0 MB
+Average Request Interval = 0.009 seconds
+==================================================
+ASU 2:
+Min LBA = 0
+Max LBA = 26014800
+Range = 12.405 GB
+Read Requests = 348927
+Write Requests = 211
+Read/Write Ratio = 0.999
+Min Read Request Size = 256.0 KB
+Max Read Request Size = 555.5 MB
+Average Read Request Size = 7.634 MB
+Min Write Request Size = 4.0 MB
+Max Write Request Size = 32.0 MB
+Average Write Request Size = 4.303 MB
+Average Request Interval = 0.009 seconds
+==================================================
+ASU 3:
+Min LBA = 225552
+Max LBA = 25957536
+Range = 12.27 GB
+Read Requests = 214
+Write Requests = 0
+Read/Write Ratio = N/A
+Min Read Request Size = 4.0 MB
+Max Read Request Size = 16.0 MB
+Average Read Request Size = 7.963 MB
+Min Write Request Size = N/A
+Max Write Request Size = N/A
+Average Write Request Size = N/A
+Average Request Interval = 14.535 seconds
+==================================================
+ASU 4:
+Min LBA = 12592
+Max LBA = 34981088
+Range = 16.674 GB
+Read Requests = 219
+Write Requests = 0
+Read/Write Ratio = N/A
+Min Read Request Size = 4.0 MB
+Max Read Request Size = 16.0 MB
+Average Read Request Size = 7.397 MB
+Min Write Request Size = N/A
+Max Write Request Size = N/A
+Average Write Request Size = N/A
+Average Request Interval = 14.403 seconds
+==================================================
+ASU 5:
+Min LBA = 56544
+Max LBA = 34648496
+Range = 16.495 GB
+Read Requests = 226
+Write Requests = 0
+Read/Write Ratio = N/A
+Min Read Request Size = 4.0 MB
+Max Read Request Size = 16.0 MB
+Average Read Request Size = 7.752 MB
+Min Write Request Size = N/A
+Max Write Request Size = N/A
+Average Write Request Size = N/A
+Average Request Interval = 13.937 seconds
+==================================================
