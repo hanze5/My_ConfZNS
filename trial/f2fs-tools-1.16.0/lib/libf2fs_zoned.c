@@ -29,6 +29,12 @@
 
 #ifdef HAVE_LINUX_BLKZONED_H
 
+/**
+ * 根据设备信息和属性名，
+ * 获取设备在sysfs文件系统中的路径，并将其存储在缓冲区中。
+ * 可能会在挂载设备的时候用到，也可能会在其他需要访问设备属性的时候用到。
+ * sysfs文件系统是一种虚拟的文件系统，它可以显示和修改内核中的设备和驱动信息
+*/
 int get_sysfs_path(struct device_info *dev, const char *attr,
 		   char *buf, size_t buflen)
 {
@@ -85,6 +91,9 @@ out:
 	return 0;
 }
 
+/**
+ * 检查zone 的分区模式
+*/
 int f2fs_get_zoned_model(int i)
 {
 	struct device_info *dev = c.devices + i;
@@ -144,6 +153,7 @@ int f2fs_get_zoned_model(int i)
 	return 0;
 }
 
+//可以得知一个zone是由多少个扇区构成的
 uint32_t f2fs_get_zone_chunk_sectors(struct device_info *dev)
 {
 	uint32_t sectors;
@@ -173,6 +183,7 @@ uint32_t f2fs_get_zone_chunk_sectors(struct device_info *dev)
 	return sectors;
 }
 
+
 int f2fs_get_zone_blocks(int i)
 {
 	struct device_info *dev = c.devices + i;
@@ -185,8 +196,8 @@ int f2fs_get_zone_blocks(int i)
 	if (!sectors)
 		return -1;
 
-	dev->zone_size = sectors << SECTOR_SHIFT;
-	dev->zone_blocks = sectors >> (F2FS_BLKSIZE_BITS - SECTOR_SHIFT);
+	dev->zone_size = sectors << SECTOR_SHIFT; //单位B
+	dev->zone_blocks = sectors >> (F2FS_BLKSIZE_BITS - SECTOR_SHIFT);//单位是4KB
 	sectors = dev->zone_size / c.sector_size;
 
 	/*
@@ -199,7 +210,9 @@ int f2fs_get_zone_blocks(int i)
 
 	return 0;
 }
-
+/**
+ * 报告一个zone的信息
+*/
 int f2fs_report_zone(int i, uint64_t sector, struct blk_zone *blkzone)
 {
 	struct one_zone_report {
@@ -233,7 +246,8 @@ out:
 	return ret;
 }
 
-#define F2FS_REPORT_ZONES_BUFSZ	524288
+
+#define F2FS_REPORT_ZONES_BUFSZ	524288   //分区报告的缓冲区大小  单位字节
 
 int f2fs_report_zones(int j, report_zones_cb_t *report_zones_cb, void *opaque)
 {
@@ -246,19 +260,32 @@ int f2fs_report_zones(int j, report_zones_cb_t *report_zones_cb, void *opaque)
 	uint64_t sector = 0;
 	int ret = -1;
 
+	/**
+	 * 定义一个名为rep的指针变量，指向一个blk_zone_report类型的结构体，
+	 * 用于存储分区报告的参数，包括扇区号和分区数。
+	 * 然后，使用malloc函数，分配一块大小为F2FS_REPORT_ZONES_BUFSZ的内存空间，
+	 * 并将其赋值给rep指针。
+	*/
 	rep = malloc(F2FS_REPORT_ZONES_BUFSZ);
 	if (!rep) {
 		ERR_MSG("No memory for report zones\n");
 		return -ENOMEM;
 	}
 
+	//从设备的第一个扇区开始，遍历设备的所有扇区
 	while (sector < total_sectors) {
 
 		/* Get zone info */
+		//给rep指针指向的结构体的sector成员变量赋值，将其设为当前的扇区号
 		rep->sector = sector;
+		//根据缓冲区大小计算一次可以获取的分区数
 		rep->nr_zones = (F2FS_REPORT_ZONES_BUFSZ - sizeof(struct blk_zone_report))
 			/ sizeof(struct blk_zone);
 
+		/**
+		 * 使用ioctl函数，向设备文件描述符c.devices[j].fd发送BLKREPORTZONE命令，
+		 * 传递rep指针作为参数，用于获取设备的分区信息。
+		*/
 		ret = ioctl(dev->fd, BLKREPORTZONE, rep);
 		if (ret != 0) {
 			ret = -errno;
@@ -272,9 +299,17 @@ int f2fs_report_zones(int j, report_zones_cb_t *report_zones_cb, void *opaque)
 			ERR_MSG("Unexpected ioctl BLKREPORTZONE result\n");
 			goto out;
 		}
-
+		/**
+		 * 如果获取到了分区信息，
+		 * 那么定义一个名为blkz的指针变量，指向一个blk_zone类型的结构体，用于存储分区的详细信息，
+		 * 包括类型，状态，容量，写入指针等。
+		 * 然后，将rep指针加一，得到一个指向分区信息数组的指针，并将其赋值给blkz指针。
+		*/
 		blkz = (struct blk_zone *)(rep + 1);
 		for (i = 0; i < rep->nr_zones; i++) {
+			/**
+			 * 调用分区报告回调函数report_zones_cb，传递分区序号n，分区信息结构体blkz，
+			*/
 			ret = report_zones_cb(n, blkz, opaque);
 			if (ret)
 				goto out;
@@ -288,6 +323,9 @@ out:
 	return ret;
 }
 
+/**
+ * 检查设备的分区状态，并统计分区的容量和类型
+*/
 int f2fs_check_zones(int j)
 {
 	struct device_info *dev = c.devices + j;
@@ -304,7 +342,7 @@ int f2fs_check_zones(int j)
 		ERR_MSG("No memory for report zones\n");
 		return -ENOMEM;
 	}
-
+	//zone包含的block数  是个数组 说明每个zone可以包含不同数量的blk
 	dev->zone_cap_blocks = malloc(dev->nr_zones * sizeof(size_t));
 	if (!dev->zone_cap_blocks) {
 		ERR_MSG("No memory for zone capacity list.\n");
@@ -440,6 +478,7 @@ int f2fs_reset_zone(int i, void *blkzone)
 	/* Non empty sequential zone: reset */
 	range.sector = blk_zone_sector(blkz);
 	range.nr_sectors = blk_zone_length(blkz);
+	//就是通过ioctl 来管理zone
 	ret = ioctl(dev->fd, BLKRESETZONE, &range);
 	if (ret != 0) {
 		ret = -errno;
