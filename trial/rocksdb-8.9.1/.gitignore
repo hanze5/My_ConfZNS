@@ -67,6 +67,7 @@ java/include/org_rocksdb_*.h
 .idea/
 *.iml
 
+rocksdbtest/*
 rocksdb.cc
 rocksdb.h
 unity.cc
