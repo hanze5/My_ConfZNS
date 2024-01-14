@@ -53,6 +53,8 @@ TODO：
 
 一些常用的命令
 ```shell
+nvme zns report-zones /dev/nvme0n1
+
 DEBUG_LEVEL=0 ROCKSDB_PLUGINS=zenfs make clean
 export CXXFLAGS="-I/usr/include -L/usr/lib/x86_64-linux-gnu"
 DEBUG_LEVEL=0 ROCKSDB_PLUGINS=zenfs make -j2 db_bench install
@@ -65,14 +67,43 @@ make
 
 
 echo mq-deadline > /sys/block/nvme0n1/queue/scheduler
-./plugin/zenfs/util/zenfs mkfs --zbd=nvme0n1 --aux_path=/home/femu/workspace/My_ConfZNS/trial/rocksdblogs
+./plugin/zenfs/util/zenfs mkfs --zbd=nvme0n1 --aux_path=/home/femu/workspace/My_ConfZNS/trial/rocksdblogs --force
 ./plugin/zenfs/util/zenfs ls-uuid
 ./plugin/zenfs/util/zenfs list --zbd=nvme0n1
 ./plugin/zenfs/util/zenfs fs-info --zbd=nvme0n1
 ./plugin/zenfs/util/zenfs df --zbd=nvme0n1 
 ./plugin/zenfs/util/zenfs backup --zbd=nvme0n1 
 
-./db_bench --fs_uri=zenfs://dev:nvme0n1 --benchmarks=fillrandom --use_direct_io_for_flush_and_compaction
+./db_bench --num_column_families=2 --num_hot_column_families=2 --column_families_name=1st --column_family_distribution=0,100  --fs_uri=zenfs://dev:nvme0n1 --benchmarks=fillrandom --use_direct_io_for_flush_and_compaction
+
+
+./db_bench \
+  --fs_uri=zenfs://dev:nvme0n1\
+  --statistics\
+  --benchmarks="mixgraph" \
+  -use_direct_io_for_flush_and_compaction=true \
+  -use_direct_reads=true \
+  -cache_size=268435456 \
+  -keyrange_dist_a=14.18 \
+  -keyrange_dist_b=-2.917 \
+  -keyrange_dist_c=0.0164 \
+  -keyrange_dist_d=-0.08082 \
+  -keyrange_num=30 \
+  -value_k=0.2615 \
+  -value_sigma=25.45 \
+  -iter_k=2.517 \
+  -iter_sigma=14.236 \
+  -mix_get_ratio=0.85 \
+  -mix_put_ratio=0.14 \
+  -mix_seek_ratio=0.01 \
+  -sine_mix_rate_interval_milliseconds=5000 \
+  -sine_a=1000 \
+  -sine_b=0.000073 \
+  -sine_d=4500 \
+  --perf_level=2 \
+  -reads=42000000 \
+  -num=5000000 \
+  -key_size=48
 ```
 
 
@@ -151,8 +182,8 @@ ZenFS是一个为RocksDB设计的文件系统插件，它使用RocksDB的文件�
 因此，ZenFS需要一个独立的ZBD设备，以便能够有效地管理数据的生命周期，减少写入放大，并优化空间利用。
 # 代码实现思路形成过程
 我们的最主要目标还是要初步实现对zone的分配，目前zenfs的zone分配基于生命周期。
-**step 1**，我们把目光放到`ZonedBlockDevice::AllocateIOZone`与`ZonedBlockDevice::AllocateMetaZone`.分配MetaZone就是遍历所有MetaZone找到没有被使用的进行分配。至于zone是MetaZone还是IOzone在`ZonedBlockDevice::Open`的时候就被规定好了。目前的实现是取前3个zone为MetaZone（*后面可以根据工作负载数量来进行调整*），后面都是IOzone。IOZone通过调用`ZonedBlockDevice::GetBestOpenZoneMatch`来遍历每一个IOZone来比对生命周期找到最适合的那个,发现这个函数不止被`ZonedBlockDevice::AllocateIOZone`调用。还被`ZonedBlockDevice::TakeMigrateZone`调用。
-目前的想法是修改`ZonedBlockDevice::GetBestOpenZoneMatch`，在选择IOZone时候来增加限制。也就是说目前这个思路需要修改三个函数，
+**step 1**，我们把目光放到`ZonedBlockDevice::AllocateIOZone`与`ZonedBlockDevice::AllocateMetaZone`.分配MetaZone就是遍历所有MetaZone找到没有被使用的进行分配。至于zone是MetaZone还是IOzone在`ZonedBlockDevice::Open`的时候就被规定好了。目前的实现是取前3个zone为MetaZone（*后面可以根据工作负载数量来进行调整*），后面都是IOzone。IOZone通过调用`ZonedBlockDevice::GetBestOpenZoneMatch`和`ZonedBlockDevice::FinishCheapestIOZone`来遍历每一个IOZone来比对生命周期找到最适合的那个以及结束最廉价的那个,发现这个函数不止被`ZonedBlockDevice::AllocateIOZone`调用。还被`ZonedBlockDevice::TakeMigrateZone`调用。
+目前的想法是修改`ZonedBlockDevice::GetBestOpenZoneMatch`和`ZonedBlockDevice::FinishCheapestIOZone`，在选择IOZone时候来增加限制。也就是说目前这个思路需要修改三个函数.
 **step 2**，接着我们来看是谁在调用`ZonedBlockDevice::AllocateIOZone`与`ZonedBlockDevice::TakeMigrateZone`。
 - `ZonedBlockDevice::AllocateIOZone`被`ZoneFile::AllocateNewZone`调用，那么想法是给zonefile增加一个成员属性叫做appID_。只需要在`ZoneFile`实例化时候传入，因此需要修改该类的构造函数。
 - `ZonedBlockDevice::TakeMigrateZone`被`ZenFS::MigrateFileExtents`调用。该函数为传入的名为fname的ZoneFile的某些需要被迁移的extent选择适合的IOZone，因此吾认为此处的修改和上面是一样的。即给zonefile增加一个成员属性叫做appID_。只需要在`ZoneFile`实例化时候传入，因此需要修改该类的构造函数。
@@ -187,13 +218,58 @@ IOStatus ZenFS::NewSequentialFile(const std::string& filename,
 - `ZenFS::LinkFile` 创建硬链接
 - `ZenFS::DecodeFileUpdateFrom` 从slice对象中解码文件更新 这里面会有`std::shared_ptr<ZoneFile> update(new ZoneFile(zbd_, 0, &metadata_writer_));`
 - `ZenFS::DecodeSnapshotFrom` 目的是将文件删除操作编码到一个字符串中，里面会有`std::shared_ptr<ZoneFile> zoneFile(new ZoneFile(zbd_, 0, &metadata_writer_));`
+
+需要重点关注的三个：
+- `ZenFS::OpenWritableFile` 被 ZenFS::NewWritableFile ZenFS::ReuseWritableFile ReopenWritableFile调用 
+
+- ZenFS::DecodeFileUpdateFrom与ZenFS::DecodeSnapshotFrom 则是会在崩溃回复时被 ZenFS::RecoverFrom 调用 暂且不管
+
+
+
 到现在反应过来了，ZoneFile的实例化根本就不需要传入lifetime_,而是会在构造函数中自动被设置为`Env::WLTH_NOT_SET`。那appID应该可以参考这个去设计，通过`ZoneFile::SetWriteLifeTimeHint` 或者 `ZoneFile::DecodeFrom` 进行设置。到时候就在搜索lifetime_对照着看看加什么就好了。
-**step 4**那么接下来就看看是谁在调用`ZoneFile::SetWriteLifeTimeHint`和 `ZoneFile::DecodeFrom`就好了。
+**step 4**那么接下来就看看是谁在调用`ZoneFile::SetWriteLifeTimeHint`和 `ZoneFile::DecodeFrom`就好了。而对于RocksDB来说是感知不到ZoneFile的，他调用的是上层接口的`SetWriteLifeTimeHint`。例如：
+```c++
+void ZonedWritableFile::SetWriteLifeTimeHint
+```
+与生命周期不同的是，appid应该是创建的时候就确定好，后面不会更改，而这也让我意识到一个问题，`ZenFS`统一管理所有文件，那么多个用户程序似乎不能有相同名称的文件。这样的话似乎要在应用程序创建文件的时候加上一点后缀用于标识了，是不是似乎反而更加容易了呢？那么现在决定反向来看了，去看看dbbench的代码。在`tools`目录下
+。。。。。。
+目前了解到RocksDB有，Column Families  在RocksDB中，每个键值对都与一个确切的列族（Column Family）相关联。如果没有指定列族，键值对就会与默认的列族（“default”）相关联。列族提供了一种逻辑上划分数据库的方式。这意味着你可以根据不同的应用场景或数据类型，将数据分配到不同的列族中，从而实现数据的逻辑隔离和独立管理。不同的列族可以有相同的键（key）。每个键值对都与一个确切的列族相关联，这意味着即使多个列族中有相同的键，它们也是独立存储和管理的。
+。。。。。。
+目前大概的路线是，运行工作负载时指定Column Families，这样不同的Column Families 的数据会被写入到不同的SSTFile中。不管怎么说，先去看看SSTFile的构建过程以及合并过程确定是隔离的。
+。。。。。。
+现在在创建SSTFile时候会加入Column Families name信息，现在目标就是让benchmark运行命令可以指定Columun Families就好了。Benchmark::db_何时初始化,应该查找 `db_->CreateColumnFamily` 或者  `DB::Open`。已在`void OpenDb`中找到.
+。。。。。。
+假设colmun_family name是 1st 2nd 3rd 4th
+。。。。。。
+`ZonedBlockDevice::GetBestOpenZoneMatch`和`ZonedBlockDevice::FinishCheapestIOZone`和`ZonedBlockDevice::AllocateEmptyZone`已经重载。需要改调用他们的，需要改 
+- `ZonedBlockDevice::AllocateIOZone`
+- `ZonedBlockDevice::TakeMigrateZone` 
+改完了 然后再看看 谁调用了这俩,有下面这两个
+- `ZenFS::MigrateFileExtents` 该函数里面可以直接获取到fname 因此改动不大
+- `ZoneFile::AllocateNewZone` 似乎需要给ZoneFile加一个 fname的成员. fname与ZoneFile似乎并不是1对1的关系而是n对1的关系. 通过一个fname确实可以确定一个ZoneFile,那是否可以通过其中一个fname就确定ZoneFile属于哪一个app呢，这个需要实验
+。。。。。。
+看了这么多  发现有一个方法就可以直接修改文件名  其实是文件路径  就是参数上加
+`DEFINE_string(db, "", "Use the db with the following name.");`
+这样文件名称就会是：
+`rocksdbtest/<db>/*.*`  好无语啊。。。不过离真相更近了
+
+
+# benchmark.sh里面的一些负载：
+## benchmark_bulkload_fillrandom
+- benchmarks=fillrandom,stats：运行 fillrandom 和 stats 两种基准测试。fillrandom 测试会随机填充数据库，stats 测试会输出数据库的统计信息。
+- use_existing_db=0：这意味着每次运行基准测试时，都会创建一个新的数据库。
+- disable_auto_compactions=1：禁用自动压缩。在 RocksDB 中，压缩是一种重要的后台操作，用于合并多个数据文件以提高读取效率。但在填充数据库时，可能希望禁用它以提高写入速度。
+- sync=0：禁用同步写入。这意味着写入操作可能不会立即写入磁盘，这可以提高写入速度，但在系统崩溃时可能会丢失数据。
+- $params_bulkload：这是一个变量，包含了一组额外的参数，这些参数在执行批量加载操作时会用到。
+- threads=1：这意味着基准测试将在单个线程上运行。
+- memtablerep=vector：这设置了内存表的实现方式，vector 表示使用向量作为内存表的数据结构。
+- allow_concurrent_memtable_write=false：这禁止了并发的内存表写入。
+- disable_wal=1：这禁用了写前日志（WAL）。WAL 是一种用于在系统崩溃时恢复数据的机制。禁用它可以提高写入速度，但在系统崩溃时可能会丢失数据。
+- seed=$( date +%s )：这设置了随机数生成器的种子，使得每次运行测试时的随机数序列都不同。
 
 
 
-
-
+Slice 是一个重要的数据结构，它代表了一个不可变的字节数组。它通常用于表示键（key）和值（value），以及在数据库操作中传递数据。Slice 由一个指向数据的指针和数据长度组成，这使得它可以高效地引用数据，而无需进行复制。
 
 
 

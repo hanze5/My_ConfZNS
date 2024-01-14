@@ -258,6 +258,11 @@ DEFINE_int64(merge_keys, -1,
              "ReadRandomMergeRandom. "
              "If negative, there will be FLAGS_num keys.");
 DEFINE_int32(num_column_families, 1, "Number of Column Families to use.");
+/**
+ * dz added
+ * 自定义column_families名称
+*/
+DEFINE_string(column_families_name, "", "Name of Column Families to use(only when num_column_families=1).");
 
 DEFINE_int32(
     num_hot_column_families, 0,
@@ -1248,7 +1253,7 @@ DEFINE_uint64(
 DEFINE_bool(
     auto_readahead_size, false,
     "When set true, RocksDB does auto tuning of readahead size during Scans");
-
+//将字符串类型的压缩方式转换为 RocksDB 中定义的 CompressionType 枚举类型
 static enum ROCKSDB_NAMESPACE::CompressionType StringToCompressionType(
     const char* ctype) {
   assert(ctype);
@@ -1274,13 +1279,27 @@ static enum ROCKSDB_NAMESPACE::CompressionType StringToCompressionType(
     exit(1);
   }
 }
-
+//一个字符串。这个函数的目的是生成一个列族（Column Family）的名称 
+//在 RocksDB 中，列族是一种将数据库中的键值对分组的机制，每个列族都有一个唯一的名称
 static std::string ColumnFamilyName(size_t i) {
   if (i == 0) {
     return ROCKSDB_NAMESPACE::kDefaultColumnFamilyName;
   } else {
     char name[100];
     snprintf(name, sizeof(name), "column_family_name_%06zu", i);
+    return std::string(name);
+  }
+}
+/**
+ * dz added:
+ * 重载ColumnFamilyName函数 传入用户自定义column_family
+*/
+static std::string ColumnFamilyName(std::string ColumnFamilyName,size_t i) {
+  if (i == 0) {
+    return ROCKSDB_NAMESPACE::kDefaultColumnFamilyName;
+  } else {
+    char name[100];
+    snprintf(name, sizeof(name), "%s_%06zu",ColumnFamilyName.c_str(),i);
     return std::string(name);
   }
 }
@@ -1324,7 +1343,7 @@ DEFINE_bool(compression_use_zstd_dict_trainer,
             ROCKSDB_NAMESPACE::CompressionOptions().use_zstd_dict_trainer,
             "If true, use ZSTD_TrainDictionary() to create dictionary, else"
             "use ZSTD_FinalizeDictionary() to create dictionary");
-
+//验证 value 的值是否在 0 到 20 的范围内
 static bool ValidateTableCacheNumshardbits(const char* flagname,
                                            int32_t value) {
   if (0 >= value || value >= 20) {
@@ -1617,7 +1636,7 @@ DEFINE_int32(num_deletion_threads, 1,
 DEFINE_int32(max_successive_merges, 0,
              "Maximum number of successive merge operations on a key in the "
              "memtable");
-
+//主要目的是验证 value 的值是否在 0 到 2000000000 的范围内
 static bool ValidatePrefixSize(const char* flagname, int32_t value) {
   if (value < 0 || value >= 2000000000) {
     fprintf(stderr, "Invalid value for --%s: %d. 0<= PrefixSize <=2000000000\n",
@@ -1750,6 +1769,7 @@ DEFINE_bool(track_and_verify_wals_in_manifest, false,
 
 namespace ROCKSDB_NAMESPACE {
 namespace {
+//根据 FLAGS_memtablerep 的值来创建不同类型的内存表表示（MemTableRep）工厂，并将其存储在 factory 中
 static Status CreateMemTableRepFactory(
     const ConfigOptions& config_options,
     std::shared_ptr<MemTableRepFactory>* factory) {
@@ -1775,7 +1795,7 @@ static Status CreateMemTableRepFactory(
 }
 
 }  // namespace
-
+//分布类型
 enum DistributionType : unsigned char { kFixed = 0, kUniform, kNormal };
 
 static enum DistributionType FLAGS_value_size_distribution_type_e = kFixed;
@@ -1793,7 +1813,7 @@ static enum DistributionType StringToDistributionType(const char* ctype) {
   fprintf(stdout, "Cannot parse distribution type '%s'\n", ctype);
   exit(1);
 }
-
+//抽象类，用于生成一定范围内的随机数
 class BaseDistribution {
  public:
   BaseDistribution(unsigned int _min, unsigned int _max)
@@ -1815,7 +1835,7 @@ class BaseDistribution {
   unsigned int min_value_size_;
   unsigned int max_value_size_;
 };
-
+//生成固定大小随机数 （在某些应用场景中，可能需要生成一系列固定大小的随机数，而不是每次调用都产生不同的随机数。例如，在模拟测试中，可能需要固定的输入大小来评估算法的性能。）
 class FixedDistribution : public BaseDistribution {
  public:
   FixedDistribution(unsigned int size)
@@ -1826,7 +1846,7 @@ class FixedDistribution : public BaseDistribution {
   virtual bool NeedTruncate() override { return false; }
   unsigned int size_;
 };
-
+//生成指定范围内符合正态分布的随机数
 class NormalDistribution : public BaseDistribution,
                            public std::normal_distribution<double> {
  public:
@@ -1845,7 +1865,7 @@ class NormalDistribution : public BaseDistribution,
   std::random_device rd_;
   std::mt19937 gen_;
 };
-
+//生成指定范围内符合均匀分布的随机数
 class UniformDistribution : public BaseDistribution,
                             public std::uniform_int_distribution<unsigned int> {
  public:
@@ -1861,7 +1881,7 @@ class UniformDistribution : public BaseDistribution,
   std::mt19937 gen_;
 };
 
-// Helper for quickly generating random data.
+// Helper for quickly generating random data.快速生成随机数据的辅助工具
 class RandomGenerator {
  private:
   std::string data_;
@@ -1913,7 +1933,7 @@ class RandomGenerator {
     return Generate(len);
   }
 };
-
+//将一个Slice类型的消息msg附加到一个std::string类型的字符串str上，并在两者之间添加一个空格
 static void AppendWithSpace(std::string* str, Slice msg) {
   if (msg.empty()) return;
   if (!str->empty()) {
@@ -1922,18 +1942,19 @@ static void AppendWithSpace(std::string* str, Slice msg) {
   str->append(msg.data(), msg.size());
 }
 
+
 struct DBWithColumnFamilies {
-  std::vector<ColumnFamilyHandle*> cfh;
+  std::vector<ColumnFamilyHandle*> cfh;//列族（Column Families）是通过ColumnFamilyHandle来处理和引用的。可以将其视为一个打开的文件描述符
   DB* db;
-  OptimisticTransactionDB* opt_txn_db;
-  std::atomic<size_t> num_created;  // Need to be updated after all the
-                                    // new entries in cfh are set.
-  size_t num_hot;  // Number of column families to be queried at each moment.
+  OptimisticTransactionDB* opt_txn_db; //指向OptimisticTransactionDB对象的指针opt_txn_db，这是一个支持乐观事务的数据库类
+  std::atomic<size_t> num_created;  // Need to be updated after all the new entries in cfh are set.
+                                    // 用于安全地在多线程环境中更新已创建的列族数量
+  size_t num_hot;  // Number of column families to be queried at each moment.在任何时刻要查询的热门列族的数量
                    // After each CreateNewCf(), another num_hot number of new
                    // Column families will be created and used to be queried.
-  port::Mutex create_cf_mutex;  // Only one thread can execute CreateNewCf()
-  std::vector<int> cfh_idx_to_prob;  // ith index holds probability of operating
-                                     // on cfh[i].
+  port::Mutex create_cf_mutex;  // Only one thread can execute CreateNewCf()确保 CreateNewCf()函数在同一时间只能由一个线程执行。
+  std::vector<int> cfh_idx_to_prob;  // ith index holds probability of operating on cfh[i].
+                                     //其中的每个索引i存储了对cfh[i]进行操作的概率
 
   DBWithColumnFamilies()
       : db(nullptr)
@@ -1966,9 +1987,10 @@ struct DBWithColumnFamilies {
       db = nullptr;
     }
   }
-
+  //从一个ColumnFamilyHandle的向量中选择一个ColumnFamilyHandle
   ColumnFamilyHandle* GetCfh(int64_t rand_num) {
-    assert(num_hot > 0);
+    assert(num_hot > 0);//检查num_hot是否大于0，这是一个前提条件，因为如果没有热门列族（hot column families），就无法选择
+    //如果cfh_idx_to_prob不为空，这意味着我们有一个概率分布，用于决定选择哪个列族。
     size_t rand_offset = 0;
     if (!cfh_idx_to_prob.empty()) {
       assert(cfh_idx_to_prob.size() == num_hot);
@@ -1986,7 +2008,7 @@ struct DBWithColumnFamilies {
   }
 
   // stage: assume CF from 0 to stage * num_hot has be created. Need to create
-  //        stage * num_hot + 1 to stage * (num_hot + 1).
+  //        stage * num_hot + 1 to stage * (num_hot + 1).用于在RocksDB数据库中创建新的列族（Column Family）
   void CreateNewCf(ColumnFamilyOptions options, int64_t stage) {
     MutexLock l(&create_cf_mutex);
     if ((stage + 1) * num_hot <= num_created) {
@@ -2008,7 +2030,7 @@ struct DBWithColumnFamilies {
   }
 };
 
-// A class that reports stats to CSV file.
+//这个类负责将统计数据报告输出到CSV文件中 A class that reports stats to CSV file.
 class ReporterAgent {
  public:
   ReporterAgent(Env* env, const std::string& fname,
@@ -2097,7 +2119,7 @@ class ReporterAgent {
   std::condition_variable stop_cv_;
   bool stop_;
 };
-
+//用于表示不同的数据库操作。每个枚举值都代表一种特定的操作
 enum OperationType : unsigned char {
   kRead = 0,
   kWrite,
@@ -2107,7 +2129,7 @@ enum OperationType : unsigned char {
   kUpdate,
   kCompress,
   kUncompress,
-  kCrc,
+  kCrc,//计算循环冗余校验（CRC）的操作
   kHash,
   kOthers
 };
@@ -2121,7 +2143,7 @@ static std::unordered_map<OperationType, std::string, std::hash<unsigned char>>
                            {kOthers, "op"}};
 
 class CombinedStats;
-class Stats {
+class Stats {//可能用于性能监控系统，其中收集和报告关键性能指标
  private:
   SystemClock* clock_;
   int id_;
@@ -2410,7 +2432,7 @@ class Stats {
 
 class CombinedStats {
  public:
-  void AddStats(const Stats& stat) {
+  void AddStats(const Stats& stat) {//它用于计算和记录性能统计数据。函数接收一个 Stats 结构体作为参数，该结构体包含了完成的操作数 done_、传输的字节数 bytes_ 以及开始和结束时间 start_ 和 finish_
     uint64_t total_ops = stat.done_;
     uint64_t total_bytes_ = stat.bytes_;
     double elapsed;
@@ -2508,6 +2530,7 @@ class CombinedStats {
   }
 
  private:
+  //计算vector<double>平均值
   double CalcAvg(std::vector<double>& data) {
     double avg = 0;
     for (double x : data) {
@@ -2516,10 +2539,14 @@ class CombinedStats {
     avg = avg / data.size();
     return avg;
   }
-
   // Calculates 95% CI assuming a normal distribution of samples.
   // Samples are not from a normal distribution, but it still
   // provides useful approximation.
+ /**
+  * 一组数据vector<double>的95%置信区间（CI）。
+  * 置信区间是一种统计学概念，用于表示对总体参数的估计范围。
+  * 这里的函数假设数据样本来自正态分布，即使实际样本不是正态分布的，计算出的置信区间仍然是一个有用的近似值。
+ */
   double CalcConfidence95(std::vector<double>& data) {
     assert(data.size() > 1);
     double avg = CalcAvg(data);
@@ -2529,7 +2556,7 @@ class CombinedStats {
     // see https://en.wikipedia.org/wiki/1.96
     return 1.959964 * std_error;
   }
-
+  //计算一组数据vector<double>的中位数
   double CalcMedian(std::vector<double>& data) {
     assert(data.size() > 0);
     std::sort(data.begin(), data.end());
@@ -2543,7 +2570,7 @@ class CombinedStats {
       return (data[mid] + data[mid - 1]) / 2;
     }
   }
-
+  //计算vector<double>的标准差
   double CalcStdDev(std::vector<double>& data, double average) {
     assert(data.size() > 1);
     double squared_sum = 0.0;
@@ -2556,19 +2583,19 @@ class CombinedStats {
     return std::sqrt(squared_sum / (data.size() - 1));
   }
 
-  std::vector<double> throughput_ops_;
-  std::vector<double> throughput_mbs_;
+  std::vector<double> throughput_ops_;//存储操作的吞吐量数据，每个元素代表在特定时间段内完成的操作数量
+  std::vector<double> throughput_mbs_;//存储数据传输的吞吐量数据，每个元素代表在特定时间段内传输的数据量（以兆字节为单位）
 };
-
+//用于模拟时间戳的生成和管理
 class TimestampEmulator {
  private:
-  std::atomic<uint64_t> timestamp_;
+  std::atomic<uint64_t> timestamp_;//一个原子类型的私有成员变量，用于存储时间戳值，确保多线程环境下的线程安全
 
  public:
-  TimestampEmulator() : timestamp_(0) {}
-  uint64_t Get() const { return timestamp_.load(); }
-  void Inc() { timestamp_++; }
-  Slice Allocate(char* scratch) {
+  TimestampEmulator() : timestamp_(0) {}//构造函数，初始化时间戳为0
+  uint64_t Get() const { return timestamp_.load(); }//返回当前的时间戳值
+  void Inc() { timestamp_++; }//用于递增时间戳值
+  Slice Allocate(char* scratch) {//一个公有成员函数，分配并返回一个新的时间戳。它使用 EncodeFixed64 函数将时间戳编码到提供的缓冲区中，并返回一个 Slice 对象，该对象包含编码后的时间戳。
     // TODO: support larger timestamp sizes
     assert(FLAGS_user_timestamp_size == 8);
     assert(scratch);
@@ -2576,7 +2603,7 @@ class TimestampEmulator {
     EncodeFixed64(scratch, ts);
     return Slice(scratch, FLAGS_user_timestamp_size);
   }
-  Slice GetTimestampForRead(Random64& rand, char* scratch) {
+  Slice GetTimestampForRead(Random64& rand, char* scratch) {//用于获取读操作的时间戳。如果设置了 FLAGS_read_with_latest_user_timestamp 标志，则返回最新的时间戳；否则，从过去的时间戳中随机选择一个。
     assert(FLAGS_user_timestamp_size == 8);
     assert(scratch);
     if (FLAGS_read_with_latest_user_timestamp) {
@@ -2589,7 +2616,7 @@ class TimestampEmulator {
   }
 };
 
-// State shared by all concurrent executions of the same benchmark.
+// State shared by all concurrent executions of the same benchmark. 用于在数据库上运行相同基准测试的多个线程之间同步状态
 struct SharedState {
   port::Mutex mu;
   port::CondVar cv;
@@ -2611,7 +2638,7 @@ struct SharedState {
   SharedState() : cv(&mu), perf_level(FLAGS_perf_level) {}
 };
 
-// Per-thread state for concurrent executions of the same benchmark.
+// Per-thread state for concurrent executions of the same benchmark.用于存储在并发执行相同基准测试的每个线程中的状态信息
 struct ThreadState {
   int tid;        // 0..n-1 when running in n threads
   Random64 rand;  // Has different seeds for different threads
@@ -2621,7 +2648,7 @@ struct ThreadState {
   explicit ThreadState(int index, int my_seed)
       : tid(index), rand(*seed_base + my_seed) {}
 };
-
+//用于控制某些操作的持续时间
 class Duration {
  public:
   Duration(uint64_t max_seconds, int64_t max_ops, int64_t ops_per_stage = 0) {
@@ -2631,9 +2658,9 @@ class Duration {
     ops_ = 0;
     start_at_ = FLAGS_env->NowMicros();
   }
-
+  ////当前操作的阶段，这是通过将已完成的操作数 ops_ 除以每阶段操作数 ops_per_stage_ 来计算的
   int64_t GetStage() { return std::min(ops_, max_ops_ - 1) / ops_per_stage_; }
-
+  //接受一个 increment 参数，用于增加操作计数 ops_。如果 max_seconds_ 非零，该方法将检查是否已经达到最大秒数；如果 max_seconds_ 为零，则检查操作数是否超过 max_ops_。
   bool Done(int64_t increment) {
     if (increment <= 0) increment = 1;  // avoid Done(0) and infinite loops
     ops_ += increment;
@@ -2653,38 +2680,38 @@ class Duration {
   }
 
  private:
-  uint64_t max_seconds_;
-  int64_t max_ops_;
-  int64_t ops_per_stage_;
+  uint64_t max_seconds_;//最大秒数
+  int64_t max_ops_;//最大操作数
+  int64_t ops_per_stage_;//每阶段操作数
   int64_t ops_;
   uint64_t start_at_;
 };
 
 class Benchmark {
  private:
-  std::shared_ptr<Cache> cache_;
-  std::shared_ptr<Cache> compressed_cache_;
-  std::shared_ptr<const SliceTransform> prefix_extractor_;
-  DBWithColumnFamilies db_;
-  std::vector<DBWithColumnFamilies> multi_dbs_;
-  int64_t num_;
-  int key_size_;
-  int user_timestamp_size_;
-  int prefix_size_;
-  int total_thread_count_;
-  int64_t keys_per_prefix_;
-  int64_t entries_per_batch_;
-  int64_t writes_before_delete_range_;
-  int64_t writes_per_range_tombstone_;
-  int64_t range_tombstone_width_;
-  int64_t max_num_range_tombstones_;
-  ReadOptions read_options_;
-  WriteOptions write_options_;
-  Options open_options_;  // keep options around to properly destroy db later
+  std::shared_ptr<Cache> cache_;//未压缩数据的缓存
+  std::shared_ptr<Cache> compressed_cache_;//压缩数据的缓存
+  std::shared_ptr<const SliceTransform> prefix_extractor_;//用于从键中提取前缀的对象。
+  DBWithColumnFamilies db_;//包含列族的数据库实例
+  std::vector<DBWithColumnFamilies> multi_dbs_;//多个数据库实例的集合
+  int64_t num_;//要执行的操作数量
+  int key_size_;//键的大小
+  int user_timestamp_size_;//用户定义的时间戳大小。
+  int prefix_size_;//前缀的大小
+  int total_thread_count_;//线程总数
+  int64_t keys_per_prefix_;//每个前缀的键数
+  int64_t entries_per_batch_;//每批次的条目数
+  int64_t writes_before_delete_range_;//在执行删除范围操作之前的写入次数。
+  int64_t writes_per_range_tombstone_;//每个范围墓碑的写入次数。
+  int64_t range_tombstone_width_;//范围墓碑的宽度
+  int64_t max_num_range_tombstones_;//最大范围墓碑数量。
+  ReadOptions read_options_;//读取操作
+  WriteOptions write_options_;//写入操作
+  Options open_options_;  // 打开操作keep options around to properly destroy db later
   TraceOptions trace_options_;
-  TraceOptions block_cache_trace_options_;
-  int64_t reads_;
-  int64_t deletes_;
+  TraceOptions block_cache_trace_options_;//追踪操作的选项
+  int64_t reads_;//读取操作数量
+  int64_t deletes_;//删除操作数量
   double read_random_exp_range_;
   int64_t writes_;
   int64_t readwrites_;
@@ -2693,7 +2720,7 @@ class Benchmark {
   bool use_blob_db_;    // Stacked BlobDB
   bool read_operands_;  // read via GetMergeOperands()
   std::vector<std::string> keys_;
-
+  //监听数据库错误恢复事件
   class ErrorHandlerListener : public EventListener {
    public:
     ErrorHandlerListener()
@@ -2742,10 +2769,10 @@ class Benchmark {
     bool recovery_complete_;
   };
 
-  std::shared_ptr<ErrorHandlerListener> listener_;
+  std::shared_ptr<ErrorHandlerListener> listener_;//用于监听数据库的错误处理事件，如错误恢复的开始和完成。
 
-  std::unique_ptr<TimestampEmulator> mock_app_clock_;
-
+  std::unique_ptr<TimestampEmulator> mock_app_clock_;//一个模拟应用程序时钟的类，它可能用于在性能测试中模拟时间戳的生成和管理
+  //确保 compression_ratio 的值在预期的范围内，防止因为不合理的设置导致程序运行出错。在RocksDB中，压缩比率是一个重要的参数，它影响数据压缩的效果和存储空间的使用。因此，进行合理性检查是很有必要的
   bool SanityCheck() {
     if (FLAGS_compression_ratio > 1) {
       fprintf(stderr, "compression_ratio should be between 0 and 1\n");
@@ -2753,7 +2780,7 @@ class Benchmark {
     }
     return true;
   }
-
+  //用于压缩数据
   inline bool CompressSlice(const CompressionInfo& compression_info,
                             const Slice& input, std::string* compressed) {
     constexpr uint32_t compress_format_version = 2;
@@ -2761,7 +2788,7 @@ class Benchmark {
     return CompressData(input, compression_info, compress_format_version,
                         compressed);
   }
-
+  //在标准输出中打印数据库的配置信息 用于性能测试和监控，帮助开发者了解数据库的当前状态和配置
   void PrintHeader(const Options& options) {
     PrintEnvironment();
     fprintf(stdout,
@@ -2823,7 +2850,7 @@ class Benchmark {
     PrintWarnings(compression.c_str());
     fprintf(stdout, "------------------------------------------------\n");
   }
-
+  //执行基准测试时打印出可能影响性能的警告信息
   void PrintWarnings(const char* compression) {
 #if defined(__GNUC__) && !defined(__OPTIMIZE__)
     fprintf(
@@ -2856,7 +2883,7 @@ class Benchmark {
     }
   }
 
-// Current the following isn't equivalent to OS_LINUX.
+// Current the following isn't equivalent to OS_LINUX. 去除 Slice 类型字符串两端的空白字符
 #if defined(__linux)
   static Slice TrimSpace(Slice s) {
     unsigned int start = 0;
@@ -2870,7 +2897,7 @@ class Benchmark {
     return Slice(s.data() + start, limit - start);
   }
 #endif
-
+  //打印当前环境的信息 操作系统 cpu型号 内存啥的
   void PrintEnvironment() {
     fprintf(stderr, "RocksDB:    version %s\n",
             GetRocksVersionAsString(true).c_str());
@@ -2949,7 +2976,7 @@ class Benchmark {
 #endif
 #endif
   }
-
+  //判断一个键是否已经过期
   static bool KeyExpired(const TimestampEmulator* timestamp_emulator,
                          const Slice& key) {
     const char* pos = key.data();
@@ -2966,7 +2993,7 @@ class Benchmark {
     }
     return timestamp_emulator->Get() - timestamp > FLAGS_time_range;
   }
-
+  //在RocksDB的压缩过程中过滤掉已经过期的键
   class ExpiredTimeFilter : public CompactionFilter {
    public:
     explicit ExpiredTimeFilter(
@@ -2982,7 +3009,7 @@ class Benchmark {
    private:
     std::shared_ptr<TimestampEmulator> timestamp_emulator_;
   };
-
+  //在RocksDB的压缩过程中保留所有键值对，不进行任何过滤操作。这个类可以用于调试或者特定的场景，其中不希望自动删除任何数据。
   class KeepFilter : public CompactionFilter {
    public:
     bool Filter(int /*level*/, const Slice& /*key*/, const Slice& /*value*/,
@@ -2993,7 +3020,7 @@ class Benchmark {
 
     const char* Name() const override { return "KeepFilter"; }
   };
-
+  //根据编译时的定义和运行时的标志，选择合适的内存分配器。它在需要优化内存使用或者使用特定内存管理策略的场景中非常有用。
   static std::shared_ptr<MemoryAllocator> GetCacheAllocator() {
     std::shared_ptr<MemoryAllocator> allocator;
 
@@ -3014,12 +3041,12 @@ class Benchmark {
 
     return allocator;
   }
-
+  //获取缓存哈希种子 是为了生成一个稳定且非负的整数值，用作缓存哈希的种子，这在需要固定哈希行为的场景中非常有用
   static int32_t GetCacheHashSeed() {
     // For a fixed Cache seed, need a non-negative int32
     return static_cast<int32_t>(*seed_base) & 0x7fffffff;
   }
-
+  //创建一个新的缓存对象
   static std::shared_ptr<Cache> NewCache(int64_t capacity) {
     CompressedSecondaryCacheOptions secondary_cache_opts;
     bool use_tiered_cache = false;
@@ -3110,17 +3137,17 @@ class Benchmark {
 
  public:
   Benchmark()
-      : cache_(NewCache(FLAGS_cache_size)),
-        compressed_cache_(NewCache(FLAGS_compressed_cache_size)),
-        prefix_extractor_(FLAGS_prefix_size != 0
+      : cache_(NewCache(FLAGS_cache_size)),//使用NewCache(FLAGS_cache_size)创建一个新的缓存实例
+        compressed_cache_(NewCache(FLAGS_compressed_cache_size)),//创建一个压缩缓存实例
+        prefix_extractor_(FLAGS_prefix_size != 0//创建一个固定长度的前缀提取器
                               ? NewFixedPrefixTransform(FLAGS_prefix_size)
                               : nullptr),
         num_(FLAGS_num),
-        key_size_(FLAGS_key_size),
-        user_timestamp_size_(FLAGS_user_timestamp_size),
-        prefix_size_(FLAGS_prefix_size),
+        key_size_(FLAGS_key_size),//设置键的大小(key_size_)
+        user_timestamp_size_(FLAGS_user_timestamp_size),//用户定义的时间戳大小
+        prefix_size_(FLAGS_prefix_size),//前缀大小
         total_thread_count_(0),
-        keys_per_prefix_(FLAGS_keys_per_prefix),
+        keys_per_prefix_(FLAGS_keys_per_prefix),//每个前缀的键数
         entries_per_batch_(1),
         reads_(FLAGS_reads < 0 ? FLAGS_num : FLAGS_reads),
         read_random_exp_range_(0.0),
@@ -3142,18 +3169,18 @@ class Benchmark {
         cache_ = NewSimCache(cache_, FLAGS_simcache_size, 0);
       }
     }
-
+    //报告文件
     if (report_file_operations_) {
       FLAGS_env = new CompositeEnvWrapper(
           FLAGS_env,
           std::make_shared<CountedFileSystem>(FLAGS_env->GetFileSystem()));
     }
-
+    //key前缀大小检查
     if (FLAGS_prefix_size > FLAGS_key_size) {
       fprintf(stderr, "prefix size is larger than key size");
       exit(1);
     }
-
+    //删除特定以"heap-"开头的文件
     std::vector<std::string> files;
     FLAGS_env->GetChildren(FLAGS_db, &files);
     for (size_t i = 0; i < files.size(); i++) {
@@ -3161,6 +3188,7 @@ class Benchmark {
         FLAGS_env->DeleteFile(FLAGS_db + "/" + files[i]);
       }
     }
+    //数据库重建
     if (!FLAGS_use_existing_db) {
       Options options;
       options.env = FLAGS_env;
@@ -3183,13 +3211,13 @@ class Benchmark {
         }
       }
     }
-
+    //重置错误处理监听器
     listener_.reset(new ErrorHandlerListener());
     if (user_timestamp_size_ > 0) {
       mock_app_clock_.reset(new TimestampEmulator());
     }
   }
-
+  //删除DB
   void DeleteDBs() {
     db_.DeleteDBs();
     for (const DBWithColumnFamilies& dbwcf : multi_dbs_) {
@@ -3206,7 +3234,12 @@ class Benchmark {
       cache_->DisownData();
     }
   }
-
+  /**
+   * 分配并初始化一个键的内存空间，并返回一个Slice对象 
+   * 当需要创建一个新的键值对时，会先分配键的内存空间，然后再进行其他操作。
+   * Slice对象是一个轻量级的结构，它只包含数据的指针和长度，不负责数据的生命周期管理，这由key_guard来完成。
+   * 这样可以确保在键不再需要时，能够正确地释放内存。在RocksDB中，这种模式被广泛使用，以便高效地处理键值对。
+  */      
   Slice AllocateKey(std::unique_ptr<const char[]>* key_guard) {
     char* data = new char[key_size_];
     const char* const_data = data;
@@ -3228,6 +3261,10 @@ class Benchmark {
   //     ----------------------------
   //     |        key 00000         |
   //     ----------------------------
+  //说明了如何根据给定的规范和随机数生成键值。生成的键值格式取决于keys_per_prefix_的值
+  //果keys_per_prefix_是正数，则会根据前缀值生成键值，并且如果键值的字节长度超出了指定的大小，多余的字节会被截断或者用’0’填充。这里的前缀值是从键值中派生出来的。
+  //例如，如果键值是12345，并且keys_per_prefix_设置为3，则生成的键值可能是12300000，其中123是前缀，00000是填充的’0’。
+  //如果keys_per_prefix_是0，则键值仅仅是随机数的二进制表示，后面跟着填充的’0’
   void GenerateKeyFromInt(uint64_t v, int64_t num_keys, Slice* key) {
     if (!keys_.empty()) {
       assert(FLAGS_use_existing_keys);
@@ -3269,7 +3306,10 @@ class Benchmark {
       memset(pos, '0', key_size_ - (pos - start));
     }
   }
-
+  /**
+   * 生成用于查找操作的键  GenerateKeyFromInt函数默认会用’0’填充键的空白部分，所以改变一个字节可以确保生成的键在数据库中不存在，这对于某些查找测试可能是有用的。
+   * 简而言之，这个函数的目的是为了生成一个特定格式的键，这个键在数据库中是不存在的，用于测试查找操作的性能
+  */
   void GenerateKeyFromIntForSeek(uint64_t v, int64_t num_keys, Slice* key) {
     GenerateKeyFromInt(v, num_keys, key);
     if (FLAGS_seek_missing_prefix) {
@@ -3280,7 +3320,7 @@ class Benchmark {
       key_ptr[8] = '1';
     }
   }
-
+  //生成一个包含多个路径的字符串 实际上就是base_name和id拼接到一起返回
   std::string GetPathForMultiple(std::string base_name, size_t id) {
     if (!base_name.empty()) {
 #ifndef OS_WIN
@@ -3295,7 +3335,9 @@ class Benchmark {
     }
     return base_name + std::to_string(id);
   }
-
+  /**
+   * 验证两个数据库内容是否一致 就是遍历所有键值对
+  */
   void VerifyDBFromDB(std::string& truth_db_name) {
     DBWithColumnFamilies truth_db;
     auto s = DB::OpenForReadOnly(open_options_, truth_db_name, &truth_db.db);
@@ -3328,12 +3370,12 @@ class Benchmark {
     assert(!truth_iter->Valid());
     fprintf(stderr, "...Verified\n");
   }
-
+  //遇到错误退出程序
   void ErrorExit() {
     DeleteDBs();
     exit(1);
   }
-
+  //运行某一个benchmark
   void Run() {
     if (!SanityCheck()) {
       ErrorExit();
@@ -3383,7 +3425,7 @@ class Benchmark {
       int num_threads = FLAGS_threads;
 
       int num_repeat = 1;
-      int num_warmup = 0;
+      int num_warmup = 0;//预热阶段？
       if (!name.empty() && *name.rbegin() == ']') {
         auto it = name.find('[');
         if (it == std::string::npos) {
@@ -3415,6 +3457,10 @@ class Benchmark {
       // Both fillseqdeterministic and filluniquerandomdeterministic
       // fill the levels except the max level with UNIQUE_RANDOM
       // and fill the max level with fillseq and filluniquerandom, respectively
+      // 说明了在RocksDB中进行数据填充的两种策略。
+      // fillseqdeterministic和filluniquerandomdeterministic都是用于填充数据库的方法，它们的区别在于如何填充最大层级（max level）
+      //fillseqdeterministic：         除了最大层级外，其他层级都使用UNIQUE_RANDOM（唯一随机）方式填充。最大层级使用fillseq（顺序填充）方式填充。
+      //filluniquerandomdeterministic：除了最大层级外，其他层级同样使用UNIQUE_RANDOM方式填充。         最大层级使用filluniquerandom（唯一随机填充）方式填充。
       if (name == "fillseqdeterministic" ||
           name == "filluniquerandomdeterministic") {
         if (!FLAGS_disable_auto_compactions) {
@@ -3758,7 +3804,7 @@ class Benchmark {
         if (num_warmup > 0) {
           printf("Warming up benchmark by running %d times\n", num_warmup);
         }
-
+        //调用RunBenchmark来运行  预热几次就运行几次
         for (int i = 0; i < num_warmup; i++) {
           RunBenchmark(num_threads, name, method);
         }
@@ -3767,6 +3813,7 @@ class Benchmark {
           printf("Running benchmark for %d times\n", num_repeat);
         }
 
+        //真正运行的部分
         CombinedStats combined_stats;
         for (int i = 0; i < num_repeat; i++) {
           Stats stats = RunBenchmark(num_threads, name, method);
@@ -3853,6 +3900,7 @@ class Benchmark {
     SetPerfLevel(static_cast<PerfLevel>(shared->perf_level));
     perf_context.EnablePerLevelPerfContext();
     thread->stats.Start(thread->tid);
+    //在这里线程去运行相应的method
     (arg->bm->*(arg->method))(thread);
     if (FLAGS_perf_level > ROCKSDB_NAMESPACE::PerfLevel::kDisable) {
       thread->stats.AddMessage(std::string("PERF_CONTEXT:\n") +
@@ -3919,6 +3967,7 @@ class Benchmark {
       arg[i].thread = new ThreadState(i, total_thread_count_);
       arg[i].thread->stats.SetReporterAgent(reporter_agent.get());
       arg[i].thread->shared = &shared;
+      //在这里运行
       FLAGS_env->StartThread(ThreadBody, &arg[i]);
     }
 
@@ -3948,7 +3997,7 @@ class Benchmark {
 
     return merge_stats;
   }
-
+  //执行校验和计算的性能测试。
   template <OperationType kOpType, typename FnType, typename... Args>
   static inline void ChecksumBenchmark(FnType fn, ThreadState* thread,
                                        Args... args) {
@@ -3987,6 +4036,7 @@ class Benchmark {
     ChecksumBenchmark<kHash>(XXH3_64bits, thread);
   }
 
+  //不太懂
   void AcquireLoad(ThreadState* thread) {
     int dummy;
     std::atomic<void*> ap(&dummy);
@@ -4002,7 +4052,7 @@ class Benchmark {
     }
     if (ptr == nullptr) exit(1);  // Disable unused variable warning.
   }
-
+  //主要是调用 CompressSlice函数
   void Compress(ThreadState* thread) {
     RandomGenerator gen;
     Slice input = gen.Generate(FLAGS_block_size);
@@ -4035,7 +4085,7 @@ class Benchmark {
       thread->stats.AddBytes(bytes);
     }
   }
-
+  //解压缩似乎也不需要关注
   void Uncompress(ThreadState* thread) {
     RandomGenerator gen;
     Slice input = gen.Generate(FLAGS_block_size);
@@ -4076,7 +4126,7 @@ class Benchmark {
   }
 
   // Returns true if the options is initialized from the specified
-  // options file.
+  // options file. 从文件中加载RocksDB的配置选项，并在加载失败时进行适当的错误处理
   bool InitializeOptionsFromFile(Options* opts) {
     printf("Initializing RocksDB Options from the specified file\n");
     DBOptions db_opts;
@@ -4099,7 +4149,7 @@ class Benchmark {
     }
     return false;
   }
-
+  //从命令参数中加载RocksDB的配置选项，并在加载失败时进行适当的错误处理
   void InitializeOptionsFromFlags(Options* opts) {
     printf("Initializing RocksDB Options from command-line flags\n");
     Options& options = *opts;
@@ -4628,7 +4678,12 @@ class Benchmark {
     options.block_protection_bytes_per_key =
         FLAGS_block_protection_bytes_per_key;
   }
-
+  /**
+   * 它的目的是配置那些对于基准测试运行必要的设置，以及那些尚未通过OPTIONS文件配置的共享对象设置。
+   * 此外，它还包括需要动态调用API的设置，以及基准测试本身的设置。这个函数的实现需要谨慎，以避免意外覆盖已经由OPTIONS文件配置好的设置。
+   * 简而言之，这个函数确保了基准测试可以在正确配置的环境中运行，同时保留了用户通过OPTIONS文件自定义的设置。
+   * 这对于性能测试和数据库优化来说是非常重要的，因为它允许测试者控制哪些选项被设置，以及如何设置这些选项，从而确保测试结果的准确性和可靠性
+  */
   void InitializeOptionsGeneral(Options* opts) {
     // Be careful about what is set here to avoid accidentally overwriting
     // settings already configured by OPTIONS file. Only configure settings that
@@ -4756,7 +4811,7 @@ class Benchmark {
       FLAGS_num = keys_.size();
     }
   }
-
+  //open就是初始化参数 先从文件或者命令参数中找  然后在初始话通用的
   void Open(Options* opts) {
     if (!InitializeOptionsFromFile(opts)) {
       InitializeOptionsFromFlags(opts);
@@ -4764,13 +4819,13 @@ class Benchmark {
 
     InitializeOptionsGeneral(opts);
   }
-
+  //打开一个RocksDB数据库实例，并将其与列族相关联  如果数据库成功打开，db 参数将指向一个包含数据库实例的对象
   void OpenDb(Options options, const std::string& db_name,
               DBWithColumnFamilies* db) {
     uint64_t open_start = FLAGS_report_open_timing ? FLAGS_env->NowNanos() : 0;
     Status s;
     // Open with column families if necessary.
-    if (FLAGS_num_column_families > 1) {
+    if (FLAGS_num_column_families >1) {
       size_t num_hot = FLAGS_num_column_families;
       if (FLAGS_num_hot_column_families > 0 &&
           FLAGS_num_hot_column_families < FLAGS_num_column_families) {
@@ -4778,10 +4833,15 @@ class Benchmark {
       } else {
         FLAGS_num_hot_column_families = FLAGS_num_column_families;
       }
+      //直接就创建一定数量的列族么
       std::vector<ColumnFamilyDescriptor> column_families;
+      /**
+       * dz modified： 
+       * db中的cf名称
+      */
       for (size_t i = 0; i < num_hot; i++) {
-        column_families.push_back(ColumnFamilyDescriptor(
-            ColumnFamilyName(i), ColumnFamilyOptions(options)));
+        column_families.push_back(ColumnFamilyDescriptor(ColumnFamilyName(FLAGS_column_families_name,i),
+                                                         ColumnFamilyOptions(options)));
       }
       std::vector<int> cfh_idx_to_prob;
       if (!FLAGS_column_family_distribution.empty()) {
@@ -4835,13 +4895,16 @@ class Benchmark {
       db->num_hot = num_hot;
       db->cfh_idx_to_prob = std::move(cfh_idx_to_prob);
     } else if (FLAGS_readonly) {
+      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
       s = DB::OpenForReadOnly(options, db_name, &db->db);
     } else if (FLAGS_optimistic_transaction_db) {
+      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
       s = OptimisticTransactionDB::Open(options, db_name, &db->opt_txn_db);
       if (s.ok()) {
         db->db = db->opt_txn_db->GetBaseDB();
       }
     } else if (FLAGS_transaction_db) {
+      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
       TransactionDB* ptr = nullptr;
       TransactionDBOptions txn_db_options;
       if (options.unordered_write) {
@@ -4858,6 +4921,7 @@ class Benchmark {
       }
     } else if (FLAGS_use_blob_db) {
       // Stacked BlobDB
+      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
       blob_db::BlobDBOptions blob_db_options;
       blob_db_options.enable_garbage_collection = FLAGS_blob_db_enable_gc;
       blob_db_options.garbage_collection_cutoff = FLAGS_blob_db_gc_cutoff;
@@ -4874,6 +4938,7 @@ class Benchmark {
         db->db = ptr;
       }
     } else if (FLAGS_use_secondary_db) {
+      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
       if (FLAGS_secondary_path.empty()) {
         std::string default_secondary_path;
         FLAGS_env->GetTestDirectory(&default_secondary_path);
@@ -4900,6 +4965,7 @@ class Benchmark {
             FLAGS_secondary_update_interval, db));
       }
     } else {
+      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
       s = DB::Open(options, db_name, &db->db);
     }
     if (FLAGS_report_open_timing) {
@@ -4912,7 +4978,7 @@ class Benchmark {
       exit(1);
     }
   }
-
+  //三种写入模式
   enum WriteMode { RANDOM, SEQUENTIAL, UNIQUE_RANDOM };
 
   void WriteSeqDeterministic(ThreadState* thread) {
@@ -4931,7 +4997,7 @@ class Benchmark {
   void WriteUniqueRandom(ThreadState* thread) {
     DoWrite(thread, UNIQUE_RANDOM);
   }
-
+  //根据不同的写入模式生成键的值
   class KeyGenerator {
    public:
     KeyGenerator(Random64* rand, WriteMode mode, uint64_t num,
@@ -4980,6 +5046,7 @@ class Benchmark {
     std::vector<uint64_t> values_;
   };
 
+  //允许测试在多个数据库实例之间进行选择，以便进行不同的测试场景。
   DB* SelectDB(ThreadState* thread) { return SelectDBWithCfh(thread)->db; }
 
   DBWithColumnFamilies* SelectDBWithCfh(ThreadState* thread) {
@@ -4993,28 +5060,28 @@ class Benchmark {
       return &multi_dbs_[rand_int % multi_dbs_.size()];
     }
   }
-
+  //计算并返回一个基于正弦函数的结果不知道干嘛用的
   double SineRate(double x) {
     return FLAGS_sine_a * sin((FLAGS_sine_b * x) + FLAGS_sine_c) + FLAGS_sine_d;
   }
 
   void DoWrite(ThreadState* thread, WriteMode write_mode) {
-    const int test_duration = write_mode == RANDOM ? FLAGS_duration : 0;
-    const int64_t num_ops = writes_ == 0 ? num_ : writes_;
+    const int test_duration = write_mode == RANDOM ? FLAGS_duration : 0;//测试持续时间
+    const int64_t num_ops = writes_ == 0 ? num_ : writes_; //操作次数
 
-    size_t num_key_gens = 1;
+    size_t num_key_gens = 1;//键生成器数量 有多少个db实例就创建多少个key生成器
     if (db_.db == nullptr) {
       num_key_gens = multi_dbs_.size();
     }
     std::vector<std::unique_ptr<KeyGenerator>> key_gens(num_key_gens);
     int64_t max_ops = num_ops * num_key_gens;
     int64_t ops_per_stage = max_ops;
-    if (FLAGS_num_column_families > 1 && FLAGS_num_hot_column_families > 0) {
+    if (FLAGS_num_column_families > 1 && FLAGS_num_hot_column_families > 0) {//根据列族的数量和热列族的数量来调整
       ops_per_stage = (max_ops - 1) / (FLAGS_num_column_families /
                                        FLAGS_num_hot_column_families) +
                       1;
     }
-
+    //实例化初始化键生成器
     Duration duration(test_duration, max_ops, ops_per_stage);
     const uint64_t num_per_key_gen = num_ + max_num_range_tombstones_;
     for (size_t i = 0; i < num_key_gens; i++) {
@@ -5028,7 +5095,8 @@ class Benchmark {
       thread->stats.AddMessage(msg);
     }
 
-    RandomGenerator gen;
+    RandomGenerator gen;//随机数生成器
+    //用于存储一批写入操作
     WriteBatch batch(/*reserved_bytes=*/0, /*max_bytes=*/0,
                      FLAGS_write_batch_protection_bytes_per_key,
                      user_timestamp_size_);
@@ -5045,7 +5113,7 @@ class Benchmark {
     uint64_t num_overwrites = 0, num_unique_keys = 0, num_selective_deletes = 0;
     // If user set overwrite_probability flag,
     // check if value is in [0.0,1.0].
-    if (FLAGS_overwrite_probability > 0.0) {
+    if (FLAGS_overwrite_probability > 0.0) {//覆写概率检查
       p = FLAGS_overwrite_probability > 1.0 ? 1.0 : FLAGS_overwrite_probability;
       // If overwrite set by user, and UNIQUE_RANDOM mode on,
       // the overwrite_window_size must be > 0.
@@ -5068,6 +5136,7 @@ class Benchmark {
     // We use a deque struct because:
     // - random access is O(1)
     // - insertion/removal at beginning/end is also O(1).
+    // 用于存储最近插入到数据库中的N个键值
     std::deque<int64_t> inserted_key_window;
     Random64 reservoir_id_gen(*seed_base);
 
@@ -5082,6 +5151,14 @@ class Benchmark {
     // done on the first set of keys S1. The next sequence can start as soon
     // as the last disposable entry in the set S1 of this sequence is
     // inserted, if the delay is non negligible"
+    /**
+     * 解释了在RocksDB数据库基准测试工具中模拟一次性/持久键值操作的变量用途。
+     * 当disposable_entries_batch_size大于0时，模拟以下工作负载：
+     * 一次性条目: 首先插入一组键值S1（称为"一次性条目"），然后在一段延迟之后，插入另一组键值S2（称为"持久条目"）。
+     * 删除操作: 插入S2后，删除之前的一组键值S1。
+     * 计算结果模拟: S2代表了对S1进行某种未定义计算后的假设结果。
+     * 序列重复: 一旦S1中的最后一个一次性条目被插入，且如果延迟时间不可忽略，就可以开始下一个序列。
+    */
     bool skip_for_loop = false, is_disposable_entry = true;
     std::vector<uint64_t> disposable_entries_index(num_key_gens, 0);
     std::vector<uint64_t> persistent_ent_and_del_index(num_key_gens, 0);
@@ -5133,7 +5210,7 @@ class Benchmark {
     int64_t next_seq_db_at = num_ops;
     size_t id = 0;
     int64_t num_range_deletions = 0;
-
+    //DO write的核心循环内容了
     while ((num_per_key_gen != 0) && !duration.Done(entries_per_batch_)) {
       if (duration.GetStage() != stage) {
         stage = duration.GetStage();
@@ -5163,11 +5240,12 @@ class Benchmark {
           }
         }
       }
+      //多个db均匀分key
       DBWithColumnFamilies* db_with_cfh = SelectDBWithCfh(id);
 
       batch.Clear();
       int64_t batch_bytes = 0;
-
+      //也就是说 这个循环里每次一个条目咯
       for (int64_t j = 0; j < entries_per_batch_; j++) {
         int64_t rand_num = 0;
         if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
@@ -5281,6 +5359,7 @@ class Benchmark {
         } else {
           val = gen.Generate();
         }
+        
         if (use_blob_db_) {
           // Stacked BlobDB
           blob_db::BlobDB* blobdb =
@@ -6423,7 +6502,7 @@ class Benchmark {
     }
   };
 
-  // The social graph workload mixed with Get, Put, Iterator queries.
+  // The social graph workload mixed with Get, Put, Iterator queries.社交图谱工作负载
   // The value size and iterator length follow Pareto distribution.
   // The overall key access follow power distribution. If user models the
   // workload based on different key-ranges (or different prefixes), user
@@ -8588,7 +8667,7 @@ int db_bench_tool(int argc, char** argv) {
   if (FLAGS_db.empty()) {
     std::string default_db_path;
     FLAGS_env->GetTestDirectory(&default_db_path);
-    default_db_path += "/dbbench";
+    default_db_path += "/dbbench2";
     FLAGS_db = default_db_path;
   }
 

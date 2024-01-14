@@ -18,86 +18,86 @@ function display_usage() {
   echo "usage: benchmark.sh [--help] <test>"
   echo ""
   echo "These are the available benchmark tests:"
-  echo -e "\tbulkload"
-  echo -e "\tfillseq_disable_wal\t\tSequentially fill the database with no WAL"
-  echo -e "\tfillseq_enable_wal\t\tSequentially fill the database with WAL"
-  echo -e "\toverwrite"
-  echo -e "\tupdaterandom"
-  echo -e "\treadrandom"
-  echo -e "\tmergerandom"
-  echo -e "\tfilluniquerandom"
-  echo -e "\tmultireadrandom"
-  echo -e "\tfwdrange"
-  echo -e "\trevrange"
-  echo -e "\treadwhilewriting"
-  echo -e "\treadwhilemerging"
-  echo -e "\tfwdrangewhilewriting"
-  echo -e "\trevrangewhilewriting"
-  echo -e "\tfwdrangewhilemerging"
-  echo -e "\trevrangewhilemerging"
-  echo -e "\trandomtransaction"
-  echo -e "\tuniversal_compaction"
-  echo -e "\tdebug"
+  echo -e "\tbulkload 批量加载数据"
+  echo -e "\tfillseq_disable_wal\t\tSequentially fill the database with no WAL 顺序填充数据库，不使用WAL（写入前日志）"
+  echo -e "\tfillseq_enable_wal\t\tSequentially fill the database with WAL 顺序填充数据库，使用WAL"
+  echo -e "\toverwrite 覆盖已有数据"
+  echo -e "\tupdaterandom 随机更新数据"
+  echo -e "\treadrandom 随机读取数据"
+  echo -e "\tmergerandom 随机合并数据"
+  echo -e "\tfilluniquerandom 填充唯一的随机数据"
+  echo -e "\tmultireadrandom 多线程随机读取数据"
+  echo -e "\tfwdrange 前向范围查询"
+  echo -e "\trevrange 反向范围查询"
+  echo -e "\treadwhilewriting 边写边读"
+  echo -e "\treadwhilemerging 边合并边读"
+  echo -e "\tfwdrangewhilewriting 边写边进行前向范围查询"
+  echo -e "\trevrangewhilewriting 边写边进行反向范围查询"
+  echo -e "\tfwdrangewhilemerging 边合并边进行前向范围查询"
+  echo -e "\trevrangewhilemerging 边合并边进行反向范围查询"
+  echo -e "\trandomtransaction 随机事务"
+  echo -e "\tuniversal_compaction 通用压缩"
+  echo -e "\tdebug 调试模式"
   echo ""
-  echo "Generic enviroment Variables:"
-  echo -e "\tJOB_ID\t\t\t\tAn identifier for the benchmark job, will appear in the results"
-  echo -e "\tDB_DIR\t\t\t\tPath to write the database data directory"
-  echo -e "\tWAL_DIR\t\t\t\tPath to write the database WAL directory"
-  echo -e "\tOUTPUT_DIR\t\t\tPath to write the benchmark results to (default: /tmp)"
-  echo -e "\tNUM_KEYS\t\t\tThe number of keys to use in the benchmark"
-  echo -e "\tKEY_SIZE\t\t\tThe size of the keys to use in the benchmark (default: 20 bytes)"
-  echo -e "\tVALUE_SIZE\t\t\tThe size of the values to use in the benchmark (default: 400 bytes)"
-  echo -e "\tBLOCK_SIZE\t\t\tThe size of the database blocks in the benchmark (default: 8 KB)"
-  echo -e "\tDB_BENCH_NO_SYNC\t\tDisable fsync on the WAL"
-  echo -e "\tNUMACTL\t\t\t\tWhen defined use numactl --interleave=all"
-  echo -e "\tNUM_THREADS\t\t\tThe number of threads to use (default: 64)"
-  echo -e "\tMB_WRITE_PER_SEC\t\t\tRate limit for background writer"
-  echo -e "\tNUM_NEXTS_PER_SEEK\t\t(default: 10)"
-  echo -e "\tCACHE_SIZE\t\t\tSize of the block cache (default: 16GB)"
-  echo -e "\tCACHE_NUMSHARDBITS\t\t\tNumber of shards for the block cache is 2 ** cache_numshardbits (default: 6)"
+  echo "Generic enviroment Variables(一些通用的环境变量):"
+  echo -e "\tJOB_ID\t\t\t\t 基准测试任务的标识符，将出现在结果中 An identifier for the benchmark job, will appear in the results"
+  echo -e "\tDB_DIR\t\t\t\t 写入数据库数据目录的路径 Path to write the database data directory"
+  echo -e "\tWAL_DIR\t\t\t\t 写入数据库WAL（写前日志）目录的路径 Path to write the database WAL directory "
+  echo -e "\tOUTPUT_DIR\t\t\t 写入基准测试结果的路径（默认为/tmp） Path to write the benchmark results to (default: /tmp)"
+  echo -e "\tNUM_KEYS\t\t\t 在基准测试中使用的键的数量 The number of keys to use in the benchmark"
+  echo -e "\tKEY_SIZE\t\t\t 在基准测试中使用的key的大小（默认为20字节） The size of the keys to use in the benchmark (default: 20 bytes)"
+  echo -e "\tVALUE_SIZE\t\t\t 在基准测试中使用的value的大小（默认为400字节） The size of the values to use in the benchmark (default: 400 bytes)"
+  echo -e "\tBLOCK_SIZE\t\t\t 在基准测试中数据库块的大小（默认为8KB） The size of the database blocks in the benchmark (default: 8 KB)"
+  echo -e "\tDB_BENCH_NO_SYNC\t\t 禁用WAL上的fsync Disable fsync on the WAL"
+  echo -e "\tNUMACTL\t\t\t\t 定义时使用numactl --interleave=all When defined use numactl --interleave=all"
+  echo -e "\tNUM_THREADS\t\t\t 要使用的线程数（默认为64） The number of threads to use (default: 64)"
+  echo -e "\tMB_WRITE_PER_SEC\t\t\t 后台写入者的速率限制 Rate limit for background writer"
+  echo -e "\tNUM_NEXTS_PER_SEEK\t\t (default: 10)"
+  echo -e "\tCACHE_SIZE\t\t\t 块缓存的大小（默认为16GB） Size of the block cache (default: 16GB)"
+  echo -e "\tCACHE_NUMSHARDBITS\t\t\t 块缓存的分片数是2 ** cache_numshardbits（默认为6） Number of shards for the block cache is 2 ** cache_numshardbits (default: 6)"
   echo -e "\tCOMPRESSION_MAX_DICT_BYTES"
-  echo -e "\tCOMPRESSION_TYPE\t\tDefault compression(default: zstd)"
+  echo -e "\tCOMPRESSION_TYPE\t\t 默认压缩（默认为zstd） Default compression(default: zstd)"
   echo -e "\tBOTTOMMOST_COMPRESSION\t\t(default: none)"
-  echo -e "\tMIN_LEVEL_TO_COMPRESS\t\tValue for min_level_to_compress for Leveled"
-  echo -e "\tCOMPRESSION_SIZE_PERCENT\tValue for compression_size_percent for Universal"
-  echo -e "\tDURATION\t\t\tNumber of seconds for which the test runs"
-  echo -e "\tWRITES\t\t\t\tNumber of writes for which the test runs"
-  echo -e "\tWRITE_BUFFER_SIZE_MB\t\tThe size of the write buffer in MB (default: 128)"
-  echo -e "\tTARGET_FILE_SIZE_BASE_MB\tThe value for target_file_size_base in MB (default: 128)"
-  echo -e "\tMAX_BYTES_FOR_LEVEL_BASE_MB\tThe value for max_bytes_for_level_base in MB (default: 128)"
-  echo -e "\tMAX_BACKGROUND_JOBS\t\tThe value for max_background_jobs (default: 16)"
-  echo -e "\tCACHE_INDEX_AND_FILTER_BLOCKS\tThe value for cache_index_and_filter_blocks (default: 0)"
-  echo -e "\tUSE_O_DIRECT\t\t\tUse O_DIRECT for user reads and compaction"
-  echo -e "\tBYTES_PER_SYNC\t\t\tValue for bytes_per_sync, set to zero when USE_O_DIRECT is true"
-  echo -e "\tSTATS_INTERVAL_SECONDS\t\tValue for stats_interval_seconds"
-  echo -e "\tREPORT_INTERVAL_SECONDS\t\tValue for report_interval_seconds"
-  echo -e "\tSUBCOMPACTIONS\t\t\tValue for subcompactions"
-  echo -e "\tCOMPACTION_STYLE\t\tOne of leveled, universal, blob. Default is leveled."
-  echo -e "\nEnvironment variables (mostly) for leveled compaction:"
-  echo -e "\tLEVEL0_FILE_NUM_COMPACTION_TRIGGER\t\tValue for level0_file_num_compaction_trigger"
-  echo -e "\tLEVEL0_SLOWDOWN_WRITES_TRIGGER\t\t\tValue for level0_slowdown_writes_trigger"
-  echo -e "\tLEVEL0_STOP_WRITES_TRIGGER\t\t\tValue for level0_stop_writes_trigger"
-  echo -e "\tPER_LEVEL_FANOUT\t\t\t\tValue for max_bytes_for_level_multiplier"
-  echo -e "\tSOFT_PENDING_COMPACTION_BYTES_LIMIT_IN_GB\tThe value for soft_pending_compaction_bytes_limit in GB"
-  echo -e "\tHARD_PENDING_COMPACTION_BYTES_LIMIT_IN_GB\tThe value for hard_pending_compaction_bytes_limit in GB"
-  echo -e "\nEnvironment variables for universal compaction:"
-  echo -e "\tUNIVERSAL_MIN_MERGE_WIDTH\tValue of min_merge_width option for universal"
-  echo -e "\tUNIVERSAL_MAX_MERGE_WIDTH\tValue of min_merge_width option for universal"
-  echo -e "\tUNIVERSAL_SIZE_RATIO\t\tValue of size_ratio option for universal"
-  echo -e "\tUNIVERSAL_MAX_SIZE_AMP\t\tmax_size_amplification_percent for universal"
-  echo -e "\tUNIVERSAL_ALLOW_TRIVIAL_MOVE\tSet allow_trivial_move to true for universal, default is false"
+  echo -e "\tMIN_LEVEL_TO_COMPRESS\t\t 对于分层压缩，设置min_level_to_compress的值 Value for min_level_to_compress for Leveled"
+  echo -e "\tCOMPRESSION_SIZE_PERCENT\t 对于通用压缩，设置compression_size_percent的值 Value for compression_size_percent for Universal"
+  echo -e "\tDURATION\t\t\t 测试运行的秒数 Number of seconds for which the test runs"
+  echo -e "\tWRITES\t\t\t\t 测试运行的写入次数 Number of writes for which the test runs"
+  echo -e "\tWRITE_BUFFER_SIZE_MB\t\t 写入缓冲区的大小，单位为MB（默认为128） The size of the write buffer in MB (default: 128)"
+  echo -e "\tTARGET_FILE_SIZE_BASE_MB\t target_file_size_base的值，单位为MB（默认为128） The value for target_file_size_base in MB (default: 128)"
+  echo -e "\tMAX_BYTES_FOR_LEVEL_BASE_MB\t max_bytes_for_level_base的值，单位为MB（默认为128） The value for max_bytes_for_level_base in MB (default: 128)"
+  echo -e "\tMAX_BACKGROUND_JOBS\t\t max_background_jobs的值（默认为16） The value for max_background_jobs (default: 16)"
+  echo -e "\tCACHE_INDEX_AND_FILTER_BLOCKS\t 对用户读取和压缩使用O_DIRECT cache_index_and_filter_blocks的值（默认为0） The value for cache_index_and_filter_blocks (default: 0)"
+  echo -e "\tUSE_O_DIRECT\t\t\t bytes_per_sync的值，当USE_O_DIRECT为真时设置为零 Use O_DIRECT for user reads and compaction"
+  echo -e "\tBYTES_PER_SYNC\t\t\t stats_interval_seconds的值 Value for bytes_per_sync, set to zero when USE_O_DIRECT is true"
+  echo -e "\tSTATS_INTERVAL_SECONDS\t\t report_interval_seconds的值 Value for stats_interval_seconds"
+  echo -e "\tREPORT_INTERVAL_SECONDS\t\t subcompactions的值 Value for report_interval_seconds"
+  echo -e "\tSUBCOMPACTIONS\t\t\t subcompactions的值 Value for subcompactions"
+  echo -e "\tCOMPACTION_STYLE\t\t 压缩样式，可以是分层、通用、blob。默认为分层 One of leveled, universal, blob. Default is leveled."
+  echo -e "\nEnvironment variables (mostly) for leveled compaction(主要用于分层压缩的环境变量设置):"
+  echo -e "\tLEVEL0_FILE_NUM_COMPACTION_TRIGGER\t\t 当L0级别的文件数量达到此值时，RocksDB将触发压缩操作 Value for level0_file_num_compaction_trigger"
+  echo -e "\tLEVEL0_SLOWDOWN_WRITES_TRIGGER\t\t\t 当L0级别的文件数量达到此值时，RocksDB将减慢写入速度Value for level0_slowdown_writes_trigger"
+  echo -e "\tLEVEL0_STOP_WRITES_TRIGGER\t\t\t 当L0级别的文件数量达到此值时，RocksDB将停止写入 Value for level0_stop_writes_trigger"
+  echo -e "\tPER_LEVEL_FANOUT\t\t\t\t 每个级别的大小是上一个级别的这个值倍 Value for max_bytes_for_level_multiplier"
+  echo -e "\tSOFT_PENDING_COMPACTION_BYTES_LIMIT_IN_GB\t 当挂起的压缩字节数达到此值时，RocksDB将减慢写入速度 The value for soft_pending_compaction_bytes_limit in GB"
+  echo -e "\tHARD_PENDING_COMPACTION_BYTES_LIMIT_IN_GB\t 当挂起的压缩字节数达到此值时，RocksDB将停止写入 The value for hard_pending_compaction_bytes_limit in GB"
+  echo -e "\nEnvironment variables for universal compaction(对于通用压缩，有以下的环境变量):"
+  echo -e "\tUNIVERSAL_MIN_MERGE_WIDTH\t 通用压缩选项的最小合并宽度值 Value of min_merge_width option for universal"
+  echo -e "\tUNIVERSAL_MAX_MERGE_WIDTH\t 通用压缩选项的最大合并宽度值 Value of min_merge_width option for universal"
+  echo -e "\tUNIVERSAL_SIZE_RATIO\t\t 通用压缩选项的大小比例值 Value of size_ratio option for universal"
+  echo -e "\tUNIVERSAL_MAX_SIZE_AMP\t\t 通用压缩的最大大小放大百分比 max_size_amplification_percent for universal"
+  echo -e "\tUNIVERSAL_ALLOW_TRIVIAL_MOVE\t 是否允许在通用压缩中进行微不足道的移动操作，默认为否。 Set allow_trivial_move to true for universal, default is false"
   echo -e "\nOptions for integrated BlobDB"
-  echo -e "\tMIN_BLOB_SIZE\tValue for min_blob_size"
-  echo -e "\tBLOB_FILE_SIZE\tValue for blob_file_size"
-  echo -e "\tBLOB_COMPRESSION_TYPE\tValue for blob_compression_type"
-  echo -e "\tBLOB_GC_AGE_CUTOFF\tValue for blob_garbage_collection_age_cutoff"
-  echo -e "\tBLOB_GC_FORCE_THRESHOLD\tValue for blob_garbage_collection_force_threshold"
-  echo -e "\tBLOB_FILE_STARTING_LEVEL\t\tBlob file starting level (default: 0)"
-  echo -e "\tUSE_BLOB_CACHE\t\t\tEnable blob cache (default: 1)"
-  echo -e "\tUSE_SHARED_BLOCK_AND_BLOB_CACHE\t\t\tUse the same backing cache for block cache and blob cache (default: 1)"
-  echo -e "\tBLOB_CACHE_SIZE\t\t\tSize of the blob cache (default: 16GB)"
-  echo -e "\tBLOB_CACHE_NUMSHARDBITS\t\t\tNumber of shards for the blob cache is 2 ** blob_cache_numshardbits (default: 6)"
-  echo -e "\tPREPOPULATE_BLOB_CACHE\t\t\tPre-populate hot/warm blobs in blob cache (default: 0)"
+  echo -e "\tMIN_BLOB_SIZE\t Blob的最小大小 Value for min_blob_size"
+  echo -e "\tBLOB_FILE_SIZE\t Blob文件的大小 Value for blob_file_size"
+  echo -e "\tBLOB_COMPRESSION_TYPE\t Blob的压缩类型 Value for blob_compression_type"
+  echo -e "\tBLOB_GC_AGE_CUTOFF\t Blob垃圾收集的年龄截止值 Value for blob_garbage_collection_age_cutoff"
+  echo -e "\tBLOB_GC_FORCE_THRESHOLD\t Blob垃圾收集的强制阈值 Value for blob_garbage_collection_force_threshold"
+  echo -e "\tBLOB_FILE_STARTING_LEVEL\t\t Blob文件的起始级别，默认为0 Blob file starting level (default: 0)"
+  echo -e "\tUSE_BLOB_CACHE\t\t\t 是否启用Blob缓存，默认为1 Enable blob cache (default: 1)"
+  echo -e "\tUSE_SHARED_BLOCK_AND_BLOB_CACHE\t\t\t 是否对块缓存和Blob缓存使用相同的后备缓存，默认为1 Use the same backing cache for block cache and blob cache (default: 1)"
+  echo -e "\tBLOB_CACHE_SIZE\t\t\t Blob缓存的大小，默认为16GB Size of the blob cache (default: 16GB)"
+  echo -e "\tBLOB_CACHE_NUMSHARDBITS\t\t\t Blob缓存的分片数是2的blob_cache_numshardbits次方，默认为6 Number of shards for the blob cache is 2 ** blob_cache_numshardbits (default: 6)"
+  echo -e "\tPREPOPULATE_BLOB_CACHE\t\t\t 是否在Blob缓存中预填充热/暖Blob，默认为0Pre-populate hot/warm blobs in blob cache (default: 0)"
 }
 
 if [ $# -lt 1 ]; then
@@ -120,6 +120,7 @@ if [ ! -x ./db_bench ]; then
   exit $EXIT_INVALID_PATH
 fi
 
+# 处理压缩测试
 # Make it easier to run only the compaction test. Getting valid data requires
 # a number of iterations and having an ability to run the test separately from
 # rest of the benchmarks helps.
@@ -128,16 +129,17 @@ if [ "$COMPACTION_TEST" == "1" -a "$bench_cmd" != "universal_compaction" ]; then
   exit $EXIT_NOT_COMPACTION_TEST
 fi
 
+#检查写入数据库数据目录的路径
 if [ -z $DB_DIR ]; then
   echo "DB_DIR is not defined"
   exit $EXIT_INVALID_ARGS
 fi
-
+#检查写入数据库WAL（写前日志）目录的路径
 if [ -z $WAL_DIR ]; then
   echo "WAL_DIR is not defined"
   exit $EXIT_INVALID_ARGS
 fi
-
+#处理写入基准测试结果的路径
 output_dir=${OUTPUT_DIR:-/tmp}
 if [ ! -d $output_dir ]; then
   mkdir -p $output_dir
@@ -146,14 +148,14 @@ fi
 report="$output_dir/report.tsv"
 schedule="$output_dir/schedule.txt"
 
-# all multithreaded tests run with sync=1 unless
+# all multithreaded tests run with sync=1 unless 是否在所有多线程测试中启用同步
 # $DB_BENCH_NO_SYNC is defined
 syncval="1"
 if [ ! -z $DB_BENCH_NO_SYNC ]; then
   echo "Turning sync off for all multithreaded tests"
   syncval="0";
 fi
-
+#设置RocksDB的压缩策略
 compaction_style=${COMPACTION_STYLE:-leveled}
 if [ $compaction_style = "leveled" ]; then
   echo Use leveled compaction
@@ -166,11 +168,12 @@ else
   exit $EXIT_INVALID_ARGS
 fi
 
-num_threads=${NUM_THREADS:-64}
-mb_written_per_sec=${MB_WRITE_PER_SEC:-0}
+#设置基准测试一些通用参数
+num_threads=${NUM_THREADS:-64} 
+mb_written_per_sec=${MB_WRITE_PER_SEC:-0} 
 # Only for tests that do range scans
-num_nexts_per_seek=${NUM_NEXTS_PER_SEEK:-10}
-cache_size=${CACHE_SIZE:-$(( 16 * $G ))}
+num_nexts_per_seek=${NUM_NEXTS_PER_SEEK:-10}  
+cache_size=${CACHE_SIZE:-$(( 16 * $G ))} 
 cache_numshardbits=${CACHE_NUMSHARDBITS:-6}
 compression_max_dict_bytes=${COMPRESSION_MAX_DICT_BYTES:-0}
 compression_type=${COMPRESSION_TYPE:-zstd}
@@ -413,6 +416,10 @@ params_univ_compact="$const_params \
 
 tsv_header="ops_sec\tmb_sec\tlsm_sz\tblob_sz\tc_wgb\tw_amp\tc_mbps\tc_wsecs\tc_csecs\tb_rgb\tb_wgb\tusec_op\tp50\tp99\tp99.9\tp99.99\tpmax\tuptime\tstall%\tNstall\tu_cpu\ts_cpu\trss\ttest\tdate\tversion\tjob_id\tgithash"
 
+#这个函数的主要作用是生成一个命令，该命令可以用来测量程序的运行时间，并将结果输出到指定的文件中。
+#如果设置了 NUMACTL 环境变量，那么在测量程序运行时间的同时，还会使用 numactl 命令来控制程序的内存分配策略。
+#如果设置了 duration，则会在命令中添加一个超时选项，以防止程序运行时间过长。
+#这个函数在进行性能测试和调试时可能会非常有用。
 function get_cmd() {
   output=$1
 
@@ -450,6 +457,7 @@ function month_to_num() {
     echo $date_str
 }
 
+#定期（每10秒）获取 db_bench 进程的信息  可以帮助我们监控数据库的状态和性能
 function start_stats {
   output=$1
   iostat -y -mx 1  >& $output.io &
@@ -472,6 +480,7 @@ function start_stats {
   szpid=$!
 }
 
+# 收集和保存数据库的状态和性能信息 最终会输出 计算并输出数据库目录中的所有文件、sst 文件、log 文件以及 blob 文件的最大大小（以GB为单位）
 function stop_stats {
   output=$1
   kill $pspid
@@ -489,6 +498,7 @@ function stop_stats {
   echo -e "max sizes (GB): $am all, $sm sst, $lm log, $bm blob" >> $output.sizes
 }
 
+#单位换算成GB
 function units_as_gb {
   size=$1
   units=$2
@@ -508,7 +518,7 @@ function units_as_gb {
       ;;
   esac
 }
-
+#总结结果报告
 function summarize_result {
   test_out=$1
   test_name=$2
@@ -646,6 +656,8 @@ function summarize_result {
 function run_bulkload {
   # This runs with a vector memtable and the WAL disabled to load faster. It is still crash safe and the
   # client can discover where to restart a load after a crash. I think this is a good way to load.
+  # 通过禁用一些特性（如自动压缩和 WAL）来加快数据的加载速度，然后再进行压缩操作。
+  # 尽管禁用了这些特性，但如果发生崩溃，客户端仍然可以找到重新开始加载的位置，因此这种加载方式仍然是崩溃安全的。
   echo "Bulk loading $num_keys random keys"
   log_file_name=$output_dir/benchmark_bulkload_fillrandom.log
   time_cmd=$( get_cmd $log_file_name.time )

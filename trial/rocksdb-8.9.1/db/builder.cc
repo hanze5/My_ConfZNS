@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <deque>
 #include <vector>
+#include <iostream>
 
 #include "db/blob/blob_file_builder.h"
 #include "db/compaction/compaction_iterator.h"
@@ -45,7 +46,7 @@
 namespace ROCKSDB_NAMESPACE {
 
 class TableFactory;
-
+//创建一个新的TableBuilder实例，用于构建SST文件（Sorted String Table，排序字符串表）。
 TableBuilder* NewTableBuilder(const TableBuilderOptions& tboptions,
                               WritableFileWriter* file) {
   assert((tboptions.column_family_id ==
@@ -102,9 +103,15 @@ Status BuildTable(
         range_del_iter->total_tombstone_payload_bytes();
     range_del_agg->AddTombstones(std::move(range_del_iter));
   }
-
+  
+  //dz modified
+  // std::string fname = TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
+  //                                   meta->fd.GetPathId(),tboptions.column_family_name);
   std::string fname = TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
                                     meta->fd.GetPathId());
+  std::cout<<"dz BuildTable:column_family_name is "+tboptions.column_family_name<<" but fname is "<<fname
+           <<" and ioptions.cf_path is "<<ioptions.cf_paths[meta->fd.GetPathId()].path<< std::endl;
+  
   std::vector<std::string> blob_file_paths;
   std::string file_checksum = kUnknownFileChecksum;
   std::string file_checksum_func_name = kUnknownFileChecksumFuncName;

@@ -39,6 +39,7 @@ class InternalStats;
 class BlobFileCompletionCallback;
 
 // Convenience function for NewTableBuilder on the embedded table_factory.
+//用于在嵌入的table_factory上创建一个新的TableBuilder对象。TableBuilder对象用于构建SST文件（排序字符串表文件），它接受TableBuilderOptions和WritableFileWriter作为参数
 TableBuilder* NewTableBuilder(const TableBuilderOptions& tboptions,
                               WritableFileWriter* file);
 
@@ -51,12 +52,12 @@ TableBuilder* NewTableBuilder(const TableBuilderOptions& tboptions,
 // @param column_family_name Name of the column family that is also identified
 //    by column_family_id, or empty string if unknown.
 extern Status BuildTable(
-    const std::string& dbname, VersionSet* versions,
-    const ImmutableDBOptions& db_options, const TableBuilderOptions& tboptions,
-    const FileOptions& file_options, const ReadOptions& read_options,
-    TableCache* table_cache, InternalIterator* iter,
+    const std::string& dbname, VersionSet* versions,  //数据库名称及版本
+    const ImmutableDBOptions& db_options, const TableBuilderOptions& tboptions,//数据库选项 表构建器选项
+    const FileOptions& file_options, const ReadOptions& read_options, //文件选项 读选项
+    TableCache* table_cache, InternalIterator* iter, //表缓存  内部迭代器
     std::vector<std::unique_ptr<FragmentedRangeTombstoneIterator>>
-        range_del_iters,
+        range_del_iters,//范围删除迭代器
     FileMetaData* meta, std::vector<BlobFileAddition>* blob_file_additions,
     std::vector<SequenceNumber> snapshots,
     SequenceNumber earliest_write_conflict_snapshot,

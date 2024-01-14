@@ -67,6 +67,25 @@ static std::string MakeFileName(uint64_t number, const char* suffix) {
            static_cast<unsigned long long>(number), suffix);
   return buf;
 }
+/**
+ * dz added:
+ * 重载MakeFileName函数
+*/
+static std::string MakeFileName(uint64_t number, const std::string& column_family_name, const char* suffix) {
+  char buf[100];
+  snprintf(buf, sizeof(buf), "%06llu_%s.%s",
+           static_cast<unsigned long long>(number),column_family_name.c_str(), suffix);
+  return buf;
+}
+
+/**
+ * dz added:
+ * 重载MakeFileName函数
+*/
+static std::string MakeFileName(const std::string& name, const std::string& column_family_name,uint64_t number,
+                                const char* suffix) {
+  return name + "/" + MakeFileName(number,column_family_name, suffix);
+}
 
 static std::string MakeFileName(const std::string& name, uint64_t number,
                                 const char* suffix) {
@@ -111,10 +130,18 @@ std::string ArchivedLogFileName(const std::string& name, uint64_t number) {
 std::string MakeTableFileName(const std::string& path, uint64_t number) {
   return MakeFileName(path, number, kRocksDbTFileExt.c_str());
 }
+/**
+ * dz added：
+ * 重载MakeTableFileName函数 
+*/
+std::string MakeTableFileName(const std::string& path, uint64_t number,const std::string& column_family_name) {
+  return MakeFileName(path, column_family_name,number,kRocksDbTFileExt.c_str());
+}
 
 std::string MakeTableFileName(uint64_t number) {
   return MakeFileName(number, kRocksDbTFileExt.c_str());
 }
+
 
 std::string Rocks2LevelTableFileName(const std::string& fullname) {
   assert(fullname.size() > kRocksDbTFileExt.size() + 1);
@@ -146,6 +173,21 @@ std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
     path = db_paths[path_id].path;
   }
   return MakeTableFileName(path, number);
+}
+/**
+ * dz added
+ * 重载TableFileName函数 加入 column_family_name信息
+*/
+std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
+                          uint32_t path_id,const std::string& column_family_name) {
+  assert(number > 0);
+  std::string path;
+  if (path_id >= db_paths.size()) {
+    path = db_paths.back().path;
+  } else {
+    path = db_paths[path_id].path;
+  }
+  return MakeTableFileName(path, number ,column_family_name);
 }
 
 void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,

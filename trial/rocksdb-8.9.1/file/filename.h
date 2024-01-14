@@ -74,6 +74,9 @@ extern uint64_t TableFileNameToNumber(const std::string& name);
 // "dbname".
 extern std::string TableFileName(const std::vector<DbPath>& db_paths,
                                  uint64_t number, uint32_t path_id);
+//dz added
+extern std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
+                          uint32_t path_id,const std::string& column_family_name);
 
 // Sufficient buffer size for FormatFileNumber.
 const size_t kFormatFileNumberBufSize = 38;
