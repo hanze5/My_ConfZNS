@@ -74,7 +74,7 @@ echo mq-deadline > /sys/block/nvme0n1/queue/scheduler
 ./plugin/zenfs/util/zenfs df --zbd=nvme0n1 
 ./plugin/zenfs/util/zenfs backup --zbd=nvme0n1 
 
-./db_bench --num_column_families=2 --num_hot_column_families=2 --column_families_name=1st --column_family_distribution=0,100  --fs_uri=zenfs://dev:nvme0n1 --benchmarks=fillrandom --use_direct_io_for_flush_and_compaction
+./db_bench --db=2nd  --fs_uri=zenfs://dev:nvme0n1 --benchmarks=fillrandom --use_direct_io_for_flush_and_compaction
 
 
 ./db_bench \
@@ -252,6 +252,8 @@ void ZonedWritableFile::SetWriteLifeTimeHint
 `DEFINE_string(db, "", "Use the db with the following name.");`
 这样文件名称就会是：
 `rocksdbtest/<db>/*.*`  好无语啊。。。不过离真相更近了
+。。。。。。
+`ZonedBlockDevice::AllocateIOZone` 与 `ZenFS::MigrateFileExtents` 中加上提取db函数
 
 
 # benchmark.sh里面的一些负载：

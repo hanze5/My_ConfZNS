@@ -109,8 +109,8 @@ Status BuildTable(
   //                                   meta->fd.GetPathId(),tboptions.column_family_name);
   std::string fname = TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
                                     meta->fd.GetPathId());
-  std::cout<<"dz BuildTable:column_family_name is "+tboptions.column_family_name<<" but fname is "<<fname
-           <<" and ioptions.cf_path is "<<ioptions.cf_paths[meta->fd.GetPathId()].path<< std::endl;
+  // std::cout<<"dz BuildTable:column_family_name is "+tboptions.column_family_name<<" but fname is "<<fname
+  //          <<" and ioptions.cf_path is "<<ioptions.cf_paths[meta->fd.GetPathId()].path<< std::endl;
   
   std::vector<std::string> blob_file_paths;
   std::string file_checksum = kUnknownFileChecksum;

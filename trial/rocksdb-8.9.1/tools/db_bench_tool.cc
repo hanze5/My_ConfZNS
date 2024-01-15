@@ -4895,16 +4895,16 @@ class Benchmark {
       db->num_hot = num_hot;
       db->cfh_idx_to_prob = std::move(cfh_idx_to_prob);
     } else if (FLAGS_readonly) {
-      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
+ 
       s = DB::OpenForReadOnly(options, db_name, &db->db);
     } else if (FLAGS_optimistic_transaction_db) {
-      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
+ 
       s = OptimisticTransactionDB::Open(options, db_name, &db->opt_txn_db);
       if (s.ok()) {
         db->db = db->opt_txn_db->GetBaseDB();
       }
     } else if (FLAGS_transaction_db) {
-      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
+ 
       TransactionDB* ptr = nullptr;
       TransactionDBOptions txn_db_options;
       if (options.unordered_write) {
@@ -4921,7 +4921,7 @@ class Benchmark {
       }
     } else if (FLAGS_use_blob_db) {
       // Stacked BlobDB
-      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
+ 
       blob_db::BlobDBOptions blob_db_options;
       blob_db_options.enable_garbage_collection = FLAGS_blob_db_enable_gc;
       blob_db_options.garbage_collection_cutoff = FLAGS_blob_db_gc_cutoff;
@@ -4938,7 +4938,7 @@ class Benchmark {
         db->db = ptr;
       }
     } else if (FLAGS_use_secondary_db) {
-      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
+ 
       if (FLAGS_secondary_path.empty()) {
         std::string default_secondary_path;
         FLAGS_env->GetTestDirectory(&default_secondary_path);
@@ -4965,7 +4965,7 @@ class Benchmark {
             FLAGS_secondary_update_interval, db));
       }
     } else {
-      std::cout<<"dz OpenDb: 会在这里吗"<<std::endl;
+ 
       s = DB::Open(options, db_name, &db->db);
     }
     if (FLAGS_report_open_timing) {
