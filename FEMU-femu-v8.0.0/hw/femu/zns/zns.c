@@ -6,7 +6,7 @@
 // #define NVME_DEFAULT_ZONE_SIZE      (128 * MiB)
 #define NVME_DEFAULT_MAX_AZ_SIZE    (128 * KiB)
 #define ZNS_PAGE_SIZE               (16 * KiB)
-#define NVME_DEFAULT_ZONE_SIZE      (64 * MiB) //72 * MiB)
+#define NVME_DEFAULT_ZONE_SIZE      (512 * MiB) //72 * MiB)
 uint64_t lag = 0;
 //union signal sv;
 
