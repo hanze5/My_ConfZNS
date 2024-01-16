@@ -311,7 +311,7 @@ FEMU's NVMe controller logic is based on QEMU/NVMe, LightNVM/QEMU and ZNS/QEMU.
 ### For more detail, please checkout the [Wiki](https://github.com/vtess/femu/wiki)!
 
 
-# 保留ConfZNS的延迟模型 修改zone与物理资源的映射：
+# 保留ConfZNS的延迟模型 channel chip plane三个并行单元 修改zone与物理资源的映射：
 
 femu要维护硬件资源的使用，三种方式：
 - 细粒度，按plane划分，一个zone可能使用一个chip的某些plane，而不使用另一些plane。
@@ -321,13 +321,14 @@ femu要维护硬件资源的使用，三种方式：
 其实不懂为什么在延迟模拟的时候实际上都用不到chip这个并行单元，只用到了chnl和plane，channel用于传输，plane用于读写。ConfZNS使用的就是粗粒度的方式，当用到一个zone的时候就会用到这个zone上的所有plane。
 为使一个zone的不同位置不至于出现性能差异，我们在分配资源时应尽量保证均匀分配。channel->chip->die->plane->block->page(16KB)。总之思路就是，先为zone分配n通道，那么每个通道将会为该zone分配(zone_size/n)的容量。
 
-uint16_t dz_recourse_allocate[num_chnl][num_chip_per_chnl][num_die_per_chip][num_plane_per_die]  初始化就初始化为`zone的个数`，太过分散将会过度占用
-而每个zone所需的dz_recourse 则会被初始化为 `num_chnl×num_chip_per_chnl×num_die_per_chip×num_plane_per_die`
+uint16_t dz_recourse_allocate[num_chnl][num_chip_per_chnl×num_die_per_chip]  初始化就初始化为`zone的个数`，太过分散将会过度占用
+而每个zone所需的dz_recourse 则会被初始化为 `num_chnl×num_chip_per_chnl×num_die_per_chip`
 
 而由于zone ssd 有一个最大打开以及最大活动区域的限制，所以同一时刻内并不是资源分配了就会被使用
 
-uint16_t dz_recourse_using[num_chnl][num_chip_per_chnl][num_die_per_chip][num_plane_per_die]  初始化为0  元素最大值肯定不会超过 最大active 或者最大open 
+舍弃chip时序 增加die时序
 
+uint16_t dz_recourse_using[num_chnl][num_chip_per_chnl×num_die_per_chip]  初始化为0  元素最大值肯定不会超过 最大active 或者最大open 
 
 
 假设是粗粒度，那么决定为分配zone分配几个通道之后 就能够决定为其分配几个芯片 因为
@@ -353,7 +354,36 @@ uint16_t dz_recourse_using[num_chnl][num_chip_per_chnl][num_die_per_chip][num_pl
 
 # 代码编写思路
 
-- `znssd_reset_zones(n->zns,req);`找到对应chip
+- `znssd_reset_zones(n->zns,req);` 找到对应chip 理论是对zone所在的每一个chip都施加一次擦除操作
+
+- `znsssd_write(n->zns, req);` 找到对应   channel 与 plane
+- `znsssd_read(n->zns, req);`  找到对应   plane 与 channel
+
+假设zone的映射依旧是 通过sbla可以得知  所在的zone，以及他在zone上的逻辑偏移量，可以计算所在zone的第几个die上，以此可以找到die的id，便可知道chip id以及channel id   那么zone本身只需要维护，自己的die的id数组就好了。
+`typedef struct zns`增加三个属性：
+```c++
+struct zns_ssd_die *dies; 
+uint16_t ** dz_unit_allocate;
+uint16_t ** dz_unit_using;
+```
+这三个属性在`znsssd_init`和其他参数一起被初始化，已经修改完毕。dz_unit_using记录每一个die上有多少个
+`只要不是empty的zone都可以被读取，而打开的zone才可以被写而open的zone有限制。`
+`typedef struct QEMU_PACKED NvmeZoneDescr`增加两个属性：
+```c++
+  bool is_mapped;
+  uint16_t   *local_dies; 
+```
+如果是静态分配的话，在`zns_init_zoned_state`函数分配就好。
+如果是动态分配的话，就要去分析zone的状态转换，来决定应该何时进行检查zone的资源分配，又该何时进行释放。
+应该是`empty`到`open`状态的转换时才会进行资源费配，因此`is_mapped`主要用来判断，`write`或者`显示open`操作是否是`empty`到`open`的状态转换。释放很简单reset的时候进行释放就好了。
+
+
+
+## 资源损耗
+由于用户的写操作只会操作到内存，只有rocksdb在记录sst文件的时候才会open到zns ssd上。所以在寻找最佳物理资源增加的延迟并不会被用户所感知。
+
+
+
 
 - `znsssd_write(n->zns, req);` 找到对应 channel与plane  
 - `znsssd_read(n->zns, req);`  找到对应的 plane 与channel
