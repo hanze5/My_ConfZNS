@@ -355,5 +355,5 @@ uint16_t dz_recourse_using[num_chnl][num_chip_per_chnl][num_die_per_chip][num_pl
 
 - `znssd_reset_zones(n->zns,req);`找到对应chip
 
-- `znsssd_write(n->zns, req);` 找到对应plane 与  channel
-- `znsssd_read(n->zns, req);`  找到对应的
+- `znsssd_write(n->zns, req);` 找到对应 channel与plane  
+- `znsssd_read(n->zns, req);`  找到对应的 plane 与channel
