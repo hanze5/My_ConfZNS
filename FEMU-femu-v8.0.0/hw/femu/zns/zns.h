@@ -30,6 +30,7 @@ enum {
     ZONE_RESET_LATENCY =  SLC_BLOCK_ERASE_LATENCY_NS,
 };
 
+
 /**
  * @brief 
  * inhoinno: to implement controller-level zone mapping in zns ssd, 
@@ -68,6 +69,16 @@ typedef struct zns_ssd_lun {
 
 /**
  * @brief 
+ * dz modified
+ */
+typedef struct zns_ssd_die {
+    uint64_t next_avail_time; // in nanoseconds
+    pthread_spinlock_t time_lock;
+    bool busy;
+}zns_ssd_die;
+
+/**
+ * @brief 
  * inhoinno: to emulate latency in zns ssd, struct znsssd is needed
  * extends 'struct ssdparams' in ../bbssd/ftl.h:110
  */
@@ -95,6 +106,8 @@ struct zns_ssdparams{
  * inhoinno: latency emulation with zns ssd, struct znsssd is needed
  * extends 'struct ssd' in ../bbssd/ftl.h:197 
  * 从该结构可以看出way应该是逻辑上的概念吧
+ * dz modified
+ * 增加了
  */
 typedef struct zns {
     /*members from struct ssd*/
@@ -102,8 +115,11 @@ typedef struct zns {
     struct zns_ssdparams    sp;                //物理结构参数包括通道数 芯片数 以及分布情况 以及时延情况等
     struct zns_ssd_channel *ch;                //通道
     struct zns_ssd_lun *chips;                 //芯片
-                                               //中间似乎还有一个die 不过这里没写  正常的物理结构是 channel->chip->die->plane->block->page
+    struct zns_ssd_die *dies;                  //中间似乎还有一个die 不过这里没写  正常的物理结构是 channel->chip->die->plane->block->page
     struct zns_ssd_plane *planes;              //平面
+
+    uint16_t ** dz_unit_allocate;
+    uint16_t ** dz_unit_using;
 
     /*new members for znsssd*/
     struct NvmeNamespace    * namespaces;      //FEMU only support 1 namespace For now, 
@@ -112,7 +128,6 @@ typedef struct zns {
     /* lockless ring for communication with NVMe IO thread 这个不知说的是什么似乎并没有实现啊*/
 
     QemuThread          zns_thread;
-
 
 }ZNS;
 
@@ -168,15 +183,26 @@ enum NvmeZoneSendAction {
     NVME_ZONE_ACTION_SET_ZD_EXT      = 0x10,
 };
 
+enum RecourseAllocateType{
+    STATIC_HORIZONTAL_FIRST = 0x00,
+    STATIC_VERTICAL_FIRST   = 0x01,
+    DYNAMIC                 = 0x02,
+
+};
+
 typedef struct QEMU_PACKED NvmeZoneDescr {
     uint8_t     zt;
     uint8_t     zs;
     uint8_t     za;
-    uint8_t     rsvd3[5];
+    uint8_t     rsvd3[4];
+
+    bool is_mapped;
+
     uint64_t    zcap;
     uint64_t    zslba;
     uint64_t    wp;
-    uint8_t     rsvd32[32];
+    uint8_t     rsvd32[24];
+    uint16_t   *local_dies;     
 } NvmeZoneDescr;
 
 typedef enum NvmeZoneState {

@@ -53,6 +53,11 @@ TODO：
 
 一些常用的命令
 ```shell
+blkzone reset /dev/nvme0n1
+fio --direct=1 --zonemode=zbd --name=diff_bs --iodepth=1 --size=1z --filename=/dev/nvme0n1 --ioengine=psync --bs=16k --rw=write --offset=0z
+
+
+
 nvme zns report-zones /dev/nvme0n1
 
 DEBUG_LEVEL=0 ROCKSDB_PLUGINS=zenfs make clean
@@ -64,7 +69,7 @@ rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
 
 cd plugin/zenfs/util
 make
-
+ 
 
 echo mq-deadline > /sys/block/nvme0n1/queue/scheduler
 ./plugin/zenfs/util/zenfs mkfs --zbd=nvme0n1 --aux_path=/home/femu/workspace/My_ConfZNS/trial/rocksdblogs --force
@@ -275,5 +280,20 @@ Slice 是一个重要的数据结构，它代表了一个不可变的字节数�
 
 
 
+通过write_buffer_size参数设置MemTable的大小，这将影响刷新到SST文件的频率和大小
+
+target_file_size_base和target_file_size_multiplier参数用于控制SST文件的目标大小以及随着层级增长的大小变化。这些参数对于优化数据库的性能和存储效率至关重要。
+
+target_file_size_base参数设置了L0层SST文件的目标大小。这是创建SST文件时的基础大小，通常用于控制最初写入的SST文件的大小。
+
+target_file_size_multiplier参数决定了每一层SST文件大小相对于上一层的增长倍数。这意味着，如果target_file_size_multiplier大于1，每向下一层，SST文件的大小就会按照这个倍数增加。
+
+例如，如果target_file_size_base设置为2MB，target_file_size_multiplier设置为10，那么：
+
+L0层的SST文件大小将是2MB。
+L1层的SST文件大小将是2MB * 10 = 20MB。
+L2层的SST文件大小将是20MB * 10 = 200MB。
+以此类推，每一层的SST文件大小都是上一层的10倍。
+这种设置允许RocksDB在不同层级上存储不同大小的SST文件，从而优化读写性能和存储空间的使用。较小的SST文件可以减少读取时的查找范围，而较大的SST文件可以减少层级之间的文件数量，从而减少合并操作的复杂性。
 
 

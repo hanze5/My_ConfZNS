@@ -6,7 +6,7 @@
 // #define NVME_DEFAULT_ZONE_SIZE      (128 * MiB)
 #define NVME_DEFAULT_MAX_AZ_SIZE    (128 * KiB)
 #define ZNS_PAGE_SIZE               (16 * KiB)
-#define NVME_DEFAULT_ZONE_SIZE      (1024 * MiB) //72 * MiB)
+#define NVME_DEFAULT_ZONE_SIZE      (128 * MiB) //72 * MiB)
 uint64_t lag = 0;
 //union signal sv;
 
@@ -403,15 +403,15 @@ void zns_ns_shutdown(NvmeNamespace *ns)
     }
 }
 
-void zns_ns_cleanup(NvmeNamespace *ns)
-{
-    FemuCtrl *n = ns->ctrl;
-    if (n->zoned) {
-        g_free(n->id_ns_zoned);
-        g_free(n->zone_array);
-        g_free(n->zd_extensions);
-    }
-}
+// void zns_ns_cleanup(NvmeNamespace *ns)
+// {
+//     FemuCtrl *n = ns->ctrl;
+//     if (n->zoned) {
+//         g_free(n->id_ns_zoned);
+//         g_free(n->zone_array);
+//         g_free(n->zd_extensions);
+//     }
+// }
 
 static void zns_assign_zone_state(NvmeNamespace *ns, NvmeZone *zone,
                                   NvmeZoneState state)
@@ -1781,7 +1781,7 @@ static uint16_t zns_read(FemuCtrl *n, NvmeNamespace *ns, NvmeCmd *cmd,
             goto err;
         }
     }
-    femu_err("read success?? slba %lu\n",slba);
+    // femu_err("read success?? slba %lu\n",slba);
     data_offset = zns_l2b(ns, slba);
     req->expire_time += zns_advance_status(n,ns,cmd,req);
     /*PCI latency model here*/
@@ -1886,10 +1886,10 @@ static uint16_t zns_io_cmd(FemuCtrl *n, NvmeNamespace *ns, NvmeCmd *cmd,
 {
     switch (cmd->opcode) {
     case NVME_CMD_READ:
-        femu_log("ZNS READ cmd->opcode %d %x\n",cmd->opcode, cmd->opcode);
+        // femu_log("ZNS READ cmd->opcode %d %x\n",cmd->opcode, cmd->opcode);
         return zns_read(n, ns, cmd, req);
     case NVME_CMD_WRITE:
-        femu_log("ZNS WRITE cmd->opcode %d %x\n",cmd->opcode, cmd->opcode);
+        // femu_log("ZNS WRITE cmd->opcode %d %x\n",cmd->opcode, cmd->opcode);
         return zns_write(n, ns, cmd, req);
     case NVME_CMD_ZONE_MGMT_SEND:
         return zns_zone_mgmt_send(n, req);
@@ -2029,12 +2029,45 @@ static void zns_init_chip(struct zns_ssd_lun *ch, struct zns_ssdparams *spp)
     if(ret)
         femu_err("zns.c:1754 znssd_init(): lock alloc failed, to inhoinno \n");
 }
+static void zns_init_die(struct zns_ssd_die *die, struct zns_ssdparams *spp)
+{
+    die->next_avail_time = 0;
+    die->busy = 0;
+    
+    int ret = pthread_spin_init(&(die->time_lock), PTHREAD_PROCESS_SHARED);
+    if(ret)
+        femu_err("zns.c:2032 znssd_init(): lock alloc failed, to inhoinno \n");
+}
 static void zns_init_plane(struct zns_ssd_plane *pl, struct zns_ssdparams *spp){
 
     pl->next_avail_time=0;
     pl->busy=false;
     pl->nregs=spp->register_model;
 }
+
+void test_print(FemuCtrl * n){
+    struct zns *zns = n->zns;
+    struct zns_ssdparams *spp = &zns->sp; 
+
+
+    femu_log("Initial values of dz_unit_allocate:\n");
+    for (int i = 0; i < spp->nchnls; i++) {
+        for (int j = 0; j < spp->ways * spp->dies_per_chip; j++) {
+            femu_log("%d ", zns->dz_unit_allocate[i][j]);
+        }
+        femu_log("\n");
+    }
+
+    femu_log("Initial values of dz_unit_using:\n");
+    for (int i = 0; i < spp->nchnls; i++) {
+        for (int j = 0; j < spp->ways * spp->dies_per_chip; j++) {
+            femu_log("%d ", zns->dz_unit_using[i][j]);
+        }
+        femu_log("\n");
+    }
+
+}
+
 void znsssd_init(FemuCtrl * n){
     struct zns *zns = n->zns = g_malloc0(sizeof(struct zns));
     struct zns_ssdparams *spp = &zns->sp; 
@@ -2051,6 +2084,21 @@ void znsssd_init(FemuCtrl * n){
     zns->planes = g_malloc0(sizeof(struct zns_ssd_plane) * nplanes);
     zns->zone_array = n->zone_array;
     zns->num_zones = spp->zones;
+
+    //dz added
+    zns->dies   = g_malloc0(sizeof(struct zns_ssd_die) * spp->nchnls*spp->ways*spp->dies_per_chip);
+    zns->dz_unit_allocate = g_malloc(spp->nchnls * sizeof(uint16_t*));
+    for(int i = 0; i < spp->nchnls; i++) {
+        zns->dz_unit_allocate[i] = g_malloc(spp->ways*spp->dies_per_chip* sizeof(uint16_t));
+        for(int j =0;j<spp->ways*spp->dies_per_chip;j++){
+            zns->dz_unit_allocate[i][j]=zns->num_zones;
+        }
+    }
+    zns->dz_unit_using = g_malloc(spp->nchnls * sizeof(uint16_t*));
+    for(int i = 0; i < spp->nchnls; i++) {
+       zns->dz_unit_using[i] = g_malloc0(spp->ways*spp->dies_per_chip* sizeof(uint16_t));
+    }
+    test_print(n);
     for(uint32_t i=0 ; i < n->num_zones; i++){
         int ret = pthread_spin_init(&(zns->zone_array[i].w_ptr_lock), PTHREAD_PROCESS_SHARED);
         n->zone_array[i].cnt_reset=0;
@@ -2058,21 +2106,27 @@ void znsssd_init(FemuCtrl * n){
             femu_err("zns.c:1687 znssd_init(): lock alloc failed, to inhoinno \n");
     }
 
+
     for (int i = 0; i < spp->nchnls; i++) {
         zns_init_ch(&zns->ch[i], spp);
     }
     for (int i = 0; i < spp->nchnls * spp->ways; i++) {
         zns_init_chip(&zns->chips[i], spp);
     }
+
+    for (int i = 0; i < spp->nchnls * spp->ways * spp->dies_per_chip; i++) {
+        zns_init_die(&zns->dies[i], spp);
+    }
+
     for (uint64_t i=0; i<nplanes; i++){
         zns_init_plane(&zns->planes[i], spp);
     }
    
     for (uint64_t i =0; i < 1600; i+=16){
-        femu_err("[TEST] zns.c:1767 slba:%lu  ppa:%lu plane:%lu chidx:%lu chnnl:%lu \n",\
+        femu_err("[TEST] zns.c:1767 slba:%lu  ppa:%lu plane:%lu chidx:%lu chnnl:%lu \n",
         i, zns_get_multichnlway_ppn_idx(n->namespaces,i), 
-        zns_advanced_plane_idx(n->namespaces, i), \
-        zns_get_multiway_chip_idx(n->namespaces, i), \
+        zns_advanced_plane_idx(n->namespaces, i), 
+        zns_get_multiway_chip_idx(n->namespaces, i), 
         zns_advanced_chnl_idx(n->namespaces,i));
     }
 }
@@ -2080,7 +2134,34 @@ static void zns_exit(FemuCtrl *n)
 {
     /*
      * Release any extra resource (zones) allocated for ZNS mode
-     */
+     */   
+    if (n->zoned) {
+        g_free(n->id_ns_zoned);
+        g_free(n->zone_array);
+        g_free(n->zd_extensions);
+    }
+
+    struct zns *zns = n->zns;
+    g_free(zns->ch);
+    g_free(zns->chips);
+    g_free(zns->dies);
+    g_free(zns->planes);
+    g_free(zns);
+
+    struct zns_ssdparams *spp = &zns->sp; 
+    // 释放dz_unit_allocate
+    for(int i = 0; i < spp->nchnls; i++) {
+        g_free(zns->dz_unit_allocate[i]);
+    }
+    g_free(zns->dz_unit_allocate);
+
+    // 释放dz_unit_using
+    for(int i = 0; i < spp->nchnls; i++) {
+        g_free(zns->dz_unit_using[i]);
+    }
+    g_free(zns->dz_unit_using);
+
+
 }
 
 int nvme_register_znssd(FemuCtrl *n)
