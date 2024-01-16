@@ -6,7 +6,7 @@
 // #define NVME_DEFAULT_ZONE_SIZE      (128 * MiB)
 #define NVME_DEFAULT_MAX_AZ_SIZE    (128 * KiB)
 #define ZNS_PAGE_SIZE               (16 * KiB)
-#define NVME_DEFAULT_ZONE_SIZE      (64 * MiB) //72 * MiB)
+#define NVME_DEFAULT_ZONE_SIZE      (1024 * MiB) //72 * MiB)
 uint64_t lag = 0;
 //union signal sv;
 
@@ -201,6 +201,7 @@ static inline NvmeZone *zns_get_zone_by_slba(NvmeNamespace *ns, uint64_t slba)
 {
     FemuCtrl *n = ns->ctrl;
     uint32_t zone_idx = zns_zone_idx(ns, slba);
+
 
     assert(zone_idx < n->num_zones);
     return &n->zone_array[zone_idx];

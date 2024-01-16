@@ -310,3 +310,50 @@ FEMU's NVMe controller logic is based on QEMU/NVMe, LightNVM/QEMU and ZNS/QEMU.
 
 ### For more detail, please checkout the [Wiki](https://github.com/vtess/femu/wiki)!
 
+
+# 保留ConfZNS的延迟模型 修改zone与物理资源的映射：
+
+femu要维护硬件资源的使用，三种方式：
+- 细粒度，按plane划分，一个zone可能使用一个chip的某些plane，而不使用另一些plane。
+- 中粒度，按die划分，一个zone可能使用chip上的某一个die，而不适用另一个die。
+- 粗粒度，按chip划分，当一个chip被划分给某个zone的时候，这个zone会默认使用这个芯片上的所有die 所有plane。
+可以看到  有三种层面的粒度  (((通道层面   chip层面)   die层面)  plane层面) 从内到外
+其实不懂为什么在延迟模拟的时候实际上都用不到chip这个并行单元，只用到了chnl和plane，channel用于传输，plane用于读写。ConfZNS使用的就是粗粒度的方式，当用到一个zone的时候就会用到这个zone上的所有plane。
+为使一个zone的不同位置不至于出现性能差异，我们在分配资源时应尽量保证均匀分配。channel->chip->die->plane->block->page(16KB)。总之思路就是，先为zone分配n通道，那么每个通道将会为该zone分配(zone_size/n)的容量。
+
+uint16_t dz_recourse_allocate[num_chnl][num_chip_per_chnl][num_die_per_chip][num_plane_per_die]  初始化就初始化为`zone的个数`，太过分散将会过度占用
+而每个zone所需的dz_recourse 则会被初始化为 `num_chnl×num_chip_per_chnl×num_die_per_chip×num_plane_per_die`
+
+而由于zone ssd 有一个最大打开以及最大活动区域的限制，所以同一时刻内并不是资源分配了就会被使用
+
+uint16_t dz_recourse_using[num_chnl][num_chip_per_chnl][num_die_per_chip][num_plane_per_die]  初始化为0  元素最大值肯定不会超过 最大active 或者最大open 
+
+
+
+假设是粗粒度，那么决定为分配zone分配几个通道之后 就能够决定为其分配几个芯片 因为
+
+# 前提背景假设等
+之前做过性能测验得出结论，满载情况下一个通道可以支持19个plane并行写，2.6个plane 并行读。  可能要做实验 比如某一个工作负载下，保证性能不变的情况下尽量收缩资源的使用。
+
+
+确定硬盘为256GB的前提下，
+- 4×2 的话,每个芯片32GB,
+- 4×4 的话,每个芯片16GB,
+- 8×4 的话,每个芯片8GB,
+
+- zone 1024MB 的话，共256个
+- zone 512MB  的话，共512个
+- zone 128MB  的话，共2048个
+
+
+
+
+因此分不同层次遍历该四维数组 可以获得不同层次的资源占用情况。 recourse的分配信息
+
+
+# 代码编写思路
+
+- `znssd_reset_zones(n->zns,req);`找到对应chip
+
+- `znsssd_write(n->zns, req);` 找到对应plane 与  channel
+- `znsssd_read(n->zns, req);`  找到对应的
