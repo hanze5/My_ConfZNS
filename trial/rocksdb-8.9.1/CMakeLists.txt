@@ -857,6 +857,8 @@ set(SOURCES
         util/data_structure.cc
         util/dynamic_bloom.cc
         util/hash.cc
+        util/flex_latest-generator.cc
+        util/flex_zipf.cc
         util/murmurhash.cc
         util/random.cc
         util/rate_limiter.cc

@@ -78,6 +78,8 @@
 #include "util/compression.h"
 #include "util/crc32c.h"
 #include "util/file_checksum_helper.h"
+#include "util/flex_latest-generator.h"
+#include "util/flex_zipf.h"
 #include "util/gflags_compat.h"
 #include "util/mutexlock.h"
 #include "util/random.h"
@@ -104,6 +106,10 @@ using GFLAGS_NAMESPACE::RegisterFlagValidator;
 using GFLAGS_NAMESPACE::SetUsageMessage;
 using GFLAGS_NAMESPACE::SetVersionString;
 
+#define KiB *1024
+#define MiB *1024*1024
+#define GiB *1024*1024*1024
+
 DEFINE_string(
     benchmarks,
     "fillseq,"
@@ -123,11 +129,19 @@ DEFINE_string(
     "compact,"
     "compactall,"
     "flush,"
+    "ycsb-a,"
+    "ycsb-b,"
+    "ycsb-f,"
     "compact0,"
     "compact1,"
     "waitforcompaction,"
     "multireadrandom,"
     "mixgraph,"
+    "mixgrapha,"
+    "mixgraphb,"
+    "mixgraphc,"
+    "mixgraphd,"
+    "mixgraphtogether,"
     "readseq,"
     "readtorowcache,"
     "readtocache,"
@@ -328,7 +342,7 @@ DEFINE_int64(max_scan_distance, 0,
 
 DEFINE_bool(use_uint64_comparator, false, "use Uint64 user comparator");
 
-DEFINE_int64(batch_size, 1, "Batch size");
+DEFINE_int64(batch_size, 2, "Batch size");
 
 static bool ValidateKeySize(const char* /*flagname*/, int32_t /*value*/) {
   return true;
@@ -348,7 +362,7 @@ DEFINE_int32(key_size, 16, "size of each key");
 DEFINE_int32(user_timestamp_size, 0,
              "number of bytes in a user-defined timestamp");
 
-DEFINE_int32(num_multi_db, 0,
+DEFINE_int32(num_multi_db, 4,
              "Number of DBs used in the benchmark. 0 means single DB.");
 
 DEFINE_double(compression_ratio, 0.5,
@@ -426,11 +440,13 @@ DEFINE_bool(enable_numa, false,
             "other nodes. Reads can be faster when the process is bound to "
             "CPU and memory of same node. Use \"$numactl --hardware\" command "
             "to see NUMA memory architecture.");
-
+//dz modified
 DEFINE_int64(db_write_buffer_size,
              ROCKSDB_NAMESPACE::Options().db_write_buffer_size,
              "Number of bytes to buffer in all memtables before compacting");
-
+// DEFINE_int64(db_write_buffer_size,
+//              0,
+//              "Number of bytes to buffer in all memtables before compacting");
 DEFINE_bool(cost_write_buffer_to_cache, false,
             "The usage of memtable is costed to the block cache");
 
@@ -554,8 +570,11 @@ DEFINE_bool(universal_allow_trivial_move, false,
 DEFINE_bool(universal_incremental, false,
             "Enable incremental compactions in universal compaction.");
 
-DEFINE_int64(cache_size, 32 << 20,  // 32MB
+// DEFINE_int64(cache_size, 32 << 20,  // 32MB
+//              "Number of bytes to use as a cache of uncompressed data");
+DEFINE_int64(cache_size, -1, 
              "Number of bytes to use as a cache of uncompressed data");
+
 
 DEFINE_int32(cache_numshardbits, -1,
              "Number of shards for the block cache"
@@ -809,10 +828,12 @@ DEFINE_int32(checksum_type,
              "ChecksumType as an int");
 
 DEFINE_bool(statistics, false, "Database statistics");
-DEFINE_int32(stats_level, ROCKSDB_NAMESPACE::StatsLevel::kExceptDetailedTimers,
+DEFINE_int32(stats_level, ROCKSDB_NAMESPACE::StatsLevel::kAll,
              "stats level for statistics");
 DEFINE_string(statistics_string, "", "Serialized statistics string");
+
 static class std::shared_ptr<ROCKSDB_NAMESPACE::Statistics> dbstats;
+std::vector<std::shared_ptr<ROCKSDB_NAMESPACE::Statistics>> multi_dbstats(4);
 
 DEFINE_int64(writes, -1,
              "Number of write operations to do. If negative, do --num reads.");
@@ -856,7 +877,7 @@ DEFINE_uint64(max_bytes_for_level_base,
 DEFINE_bool(level_compaction_dynamic_level_bytes, false,
             "Whether level size base is dynamic");
 
-DEFINE_double(max_bytes_for_level_multiplier, 10,
+DEFINE_double(max_bytes_for_level_multiplier, 16,
               "A multiplier to compute max bytes for level-N (N >= 2)");
 
 static std::vector<int> FLAGS_max_bytes_for_level_multiplier_additional_v;
@@ -1179,7 +1200,7 @@ DEFINE_bool(rate_limit_auto_wal_flush, false,
             "limiter for automatic WAL flush (`Options::manual_wal_flush` == "
             "false) after the user write operation.");
 
-DEFINE_bool(async_io, false,
+DEFINE_bool(async_io, true,
             "When set true, RocksDB does asynchronous reads for internal auto "
             "readahead prefetching.");
 
@@ -1688,7 +1709,7 @@ DEFINE_bool(avoid_flush_during_recovery,
             "If true, avoids flushing the recovered WAL data where possible.");
 DEFINE_int64(multiread_stride, 0,
              "Stride length for the keys in a MultiGet batch");
-DEFINE_bool(multiread_batched, false, "Use the new MultiGet API");
+DEFINE_bool(multiread_batched, true, "Use the new MultiGet API");
 
 DEFINE_string(memtablerep, "skip_list", "");
 DEFINE_int64(hash_bucket_count, 1024 * 1024, "hash bucket count");
@@ -1855,7 +1876,7 @@ class NormalDistribution : public BaseDistribution,
         // 99.7% values within the range [min, max].
         std::normal_distribution<double>(
             (double)(_min + _max) / 2.0 /*mean*/,
-            (double)(_max - _min) / 6.0 /*stddev*/),
+            (double)(_max - _min) / 2.0 /*stddev*/),
         gen_(rd_()) {}
 
  private:
@@ -1918,6 +1939,37 @@ class RandomGenerator {
     }
     pos_ = 0;
   }
+
+  RandomGenerator(int32_t min_value_size, int32_t max_value_size, int32_t val_size) {
+    DistributionType distributionType= kNormal;
+    switch (distributionType) {
+      case kUniform:
+        dist_.reset(new UniformDistribution(min_value_size,
+                                            max_value_size));
+        break;
+      case kNormal:
+        dist_.reset(
+            new NormalDistribution(min_value_size, max_value_size));
+        break;
+      case kFixed:
+      default:
+        dist_.reset(new FixedDistribution(value_size));
+        max_value_size = val_size;
+    }
+    // We use a limited amount of data over and over again and ensure
+    // that it is larger than the compression window (32KB), and also
+    // large enough to serve all typical value sizes we want to write.
+    Random rnd(301);
+    std::string piece;
+    while (data_.size() < (unsigned)std::max(1048576, max_value_size)) {
+      // Add a short fragment that is as compressible as specified
+      // by FLAGS_compression_ratio.
+      test::CompressibleString(&rnd, FLAGS_compression_ratio, 100, &piece);
+      data_.append(piece);
+    }
+    pos_ = 0;
+  }
+
 
   Slice Generate(unsigned int len) {
     assert(len <= data_.size());
@@ -3428,7 +3480,7 @@ class Benchmark {
       int num_warmup = 0;//预热阶段？
       if (!name.empty() && *name.rbegin() == ']') {
         auto it = name.find('[');
-        if (it == std::string::npos) {
+        if (it == std::string::npos && name!="mixgraph_together") {
           fprintf(stderr, "unknown benchmark arguments '%s'\n", name.c_str());
           ErrorExit();
         }
@@ -3453,7 +3505,6 @@ class Benchmark {
           }
         }
       }
-
       // Both fillseqdeterministic and filluniquerandomdeterministic
       // fill the levels except the max level with UNIQUE_RANDOM
       // and fill the max level with fillseq and filluniquerandom, respectively
@@ -3552,6 +3603,16 @@ class Benchmark {
         method = &Benchmark::ApproximateSizeRandom;
       } else if (name == "mixgraph") {
         method = &Benchmark::MixGraph;
+      } else if (name == "mixgrapha") {
+        method = &Benchmark::MixGraphA;
+      } else if (name == "mixgraphb") {
+        method = &Benchmark::MixGraphB;
+      } else if (name == "mixgraphc") {
+        method = &Benchmark::MixGraphC;
+      } else if (name == "mixgraphd") {
+        method = &Benchmark::MixGraphD;
+      } else if (name == "mixgraph_together") {
+        method = &Benchmark::MixGraph;
       } else if (name == "readmissing") {
         ++key_size_;
         method = &Benchmark::ReadRandom;
@@ -3614,6 +3675,12 @@ class Benchmark {
         method = &Benchmark::Compact;
       } else if (name == "compactall") {
         CompactAll();
+      } else if (name == "ycsb-a") {
+        method = &Benchmark::YCSBWorkloadA;
+      } else if (name == "ycsb-b") {
+        method = &Benchmark::YCSBWorkloadB;
+      } else if (name == "ycsb-f") {
+        method = &Benchmark::YCSBWorkloadF;
       } else if (name == "compact0") {
         CompactLevel(0);
       } else if (name == "compact1") {
@@ -3704,6 +3771,7 @@ class Benchmark {
         ErrorExit();
       }
 
+      //在这里打开
       if (fresh_db) {
         if (FLAGS_use_existing_db) {
           fprintf(stdout, "%-12s : skipped (--use_existing_db is true)\n",
@@ -3800,23 +3868,44 @@ class Benchmark {
           fprintf(stdout, "Tracing block cache accesses to: [%s]\n",
                   FLAGS_block_cache_trace_file.c_str());
         }
-
+        num_warmup = 1;
         if (num_warmup > 0) {
           printf("Warming up benchmark by running %d times\n", num_warmup);
+
         }
         //调用RunBenchmark来运行  预热几次就运行几次
+        
         for (int i = 0; i < num_warmup; i++) {
-          RunBenchmark(num_threads, name, method);
+          std::cout<<"开始预热"<<i<<"次"<<std::endl;
+          std::this_thread::sleep_for(std::chrono::seconds(5));
+          if(name == "mixgraph_together"||name == "mixgrapha"||name == "mixgraphb"||name == "mixgraphd"||name == "mixgraphc"){
+            RunBenchmark(name,true);
+          }else{
+            RunBenchmark(num_threads, name, method);           
+          }
         }
-
+        std::cout<<"结束预热"<<std::endl;
         if (num_repeat > 1) {
           printf("Running benchmark for %d times\n", num_repeat);
         }
 
         //真正运行的部分
+        //唯独统计部分要在这里重新统计
+        for(int i =0;i<4;i++)
+        {
+          multi_dbstats[i]->Reset();
+        }
+
         CombinedStats combined_stats;
         for (int i = 0; i < num_repeat; i++) {
-          Stats stats = RunBenchmark(num_threads, name, method);
+          Stats stats;
+          std::cout<<"开始"<<std::endl;
+          if(name == "mixgraph_together"){
+            stats = RunBenchmark(name,false);
+          }else{
+            stats = RunBenchmark(num_threads, name, method);
+          }
+          std::cout<<"结束"<<std::endl;
           combined_stats.AddStats(stats);
           if (FLAGS_confidence_interval_only) {
             combined_stats.ReportWithConfidenceIntervals(name);
@@ -3856,7 +3945,11 @@ class Benchmark {
     }
 
     if (FLAGS_statistics) {
-      fprintf(stdout, "STATISTICS:\n%s\n", dbstats->ToString().c_str());
+      // fprintf(stdout, "STATISTICS:\n%s\n", dbstats->ToString().c_str());
+      for(int i = 0;i<FLAGS_num_multi_db;i++ ){
+        std::cout<<"<===================================前"<<i<<"个线程报告===================================>"<<std::endl;
+        fprintf(stdout, "STATISTICS:\n%s\n", multi_dbstats[i]->ToString().c_str());
+      }
     }
     if (FLAGS_simcache_size >= 0) {
       fprintf(
@@ -3916,7 +4009,7 @@ class Benchmark {
       }
     }
   }
-
+  //
   Stats RunBenchmark(int n, Slice name,
                      void (Benchmark::*method)(ThreadState*)) {
     SharedState shared;
@@ -3965,12 +4058,13 @@ class Benchmark {
       arg[i].shared = &shared;
       total_thread_count_++;
       arg[i].thread = new ThreadState(i, total_thread_count_);
+      std::cout<<"随机数种子为"<<*seed_base+total_thread_count_<<std::endl;
       arg[i].thread->stats.SetReporterAgent(reporter_agent.get());
       arg[i].thread->shared = &shared;
       //在这里运行
       FLAGS_env->StartThread(ThreadBody, &arg[i]);
     }
-
+    total_thread_count_=0;
     shared.mu.Lock();
     while (shared.num_initialized < n) {
       shared.cv.Wait();
@@ -3987,8 +4081,10 @@ class Benchmark {
     Stats merge_stats;
     for (int i = 0; i < n; i++) {
       merge_stats.Merge(arg[i].thread->stats);
+      std::cout<<"<===================================前"<<i<<"个线程报告===================================>"<<std::endl;
+      merge_stats.Report(name);
     }
-    merge_stats.Report(name);
+    // merge_stats.Report(name);
 
     for (int i = 0; i < n; i++) {
       delete arg[i].thread;
@@ -3997,6 +4093,95 @@ class Benchmark {
 
     return merge_stats;
   }
+
+  //RunBenchmark重载
+  Stats RunBenchmark(Slice name,bool iswarmup) {
+    SharedState shared;
+    shared.total = 4;
+    shared.num_initialized = 0;
+    shared.num_done = 0;
+    shared.start = false;
+    if (FLAGS_benchmark_write_rate_limit > 0) {
+      shared.write_rate_limiter.reset(
+          NewGenericRateLimiter(FLAGS_benchmark_write_rate_limit));
+    }
+    if (FLAGS_benchmark_read_rate_limit > 0) {
+      shared.read_rate_limiter.reset(NewGenericRateLimiter(
+          FLAGS_benchmark_read_rate_limit, 100000 /* refill_period_us */,
+          10 /* fairness */, RateLimiter::Mode::kReadsOnly));
+    }
+
+    std::unique_ptr<ReporterAgent> reporter_agent;
+    if (FLAGS_report_interval_seconds > 0) {
+      reporter_agent.reset(new ReporterAgent(FLAGS_env, FLAGS_report_file,
+                                             FLAGS_report_interval_seconds));
+    }
+
+    ThreadArg* arg = new ThreadArg[4];
+
+    void (Benchmark::*methods[4])(ThreadState*) = {&Benchmark::MixGraphA,&Benchmark::MixGraphB,&Benchmark::MixGraphC,&Benchmark::MixGraphD};
+    void (Benchmark::*warmup_methods[4])(ThreadState*) = {&Benchmark::MixGraphAWarmup,&Benchmark::MixGraphBWarmup,&Benchmark::MixGraphCWarmup,&Benchmark::MixGraphDWarmup};
+    for (int i = 0; i < 4; i++) {
+#ifdef NUMA
+      if (FLAGS_enable_numa) {
+        // Performs a local allocation of memory to threads in numa node.
+        int n_nodes = numa_num_task_nodes();  // Number of nodes in NUMA.
+        numa_exit_on_error = 1;
+        int numa_node = i % n_nodes;
+        bitmask* nodes = numa_allocate_nodemask();
+        numa_bitmask_clearall(nodes);
+        numa_bitmask_setbit(nodes, numa_node);
+        // numa_bind() call binds the process to the node and these
+        // properties are passed on to the thread that is created in
+        // StartThread method called later in the loop.
+        numa_bind(nodes);
+        numa_set_strict(1);
+        numa_free_nodemask(nodes);
+      }
+#endif
+      arg[i].bm = this;
+      if(iswarmup){
+        arg[i].method = warmup_methods[i];
+      }else{
+        arg[i].method = methods[i];
+      }
+      arg[i].shared = &shared;
+      total_thread_count_++;
+      arg[i].thread = new ThreadState(i, total_thread_count_);
+      std::cout<<"随机数种子为"<<*seed_base+total_thread_count_<<std::endl;
+      arg[i].thread->stats.SetReporterAgent(reporter_agent.get());
+      arg[i].thread->shared = &shared;
+      //在这里运行
+      FLAGS_env->StartThread(ThreadBody, &arg[i]);
+    }
+    total_thread_count_=0;
+    shared.mu.Lock();
+    while (shared.num_initialized < 4) {
+      shared.cv.Wait();
+    }
+
+    shared.start = true;
+    shared.cv.SignalAll();
+    while (shared.num_done < 4) {
+      shared.cv.Wait();
+    }
+    shared.mu.Unlock();
+
+    // Stats for some threads can be excluded.
+    Stats merge_stats;
+    for (int i = 0; i < 4; i++) {
+      merge_stats.Merge(arg[i].thread->stats);
+    }
+    merge_stats.Report(name);
+
+    for (int i = 0; i < 4; i++) {
+      delete arg[i].thread;
+    }
+    delete[] arg;
+
+    return merge_stats;
+  }
+
   //执行校验和计算的性能测试。
   template <OperationType kOpType, typename FnType, typename... Args>
   static inline void ChecksumBenchmark(FnType fn, ThreadState* thread,
@@ -4354,6 +4539,8 @@ class Benchmark {
       if (cache_ == nullptr) {
         block_based_options.no_block_cache = true;
       }
+      // block_based_options.block_cache = cache_;
+
       block_based_options.cache_index_and_filter_blocks =
           FLAGS_cache_index_and_filter_blocks;
       block_based_options.pin_l0_filter_and_index_blocks_in_cache =
@@ -4370,7 +4557,7 @@ class Benchmark {
                 "Sum of high_pri_pool_ratio and low_pri_pool_ratio "
                 "cannot exceed 1.0.\n");
       }
-      block_based_options.block_cache = cache_;
+      
       block_based_options.cache_usage_options.options_overrides.insert(
           {CacheEntryRole::kCompressionDictionaryBuildingBuffer,
            {/*.charged = */ FLAGS_charge_compression_dictionary_building_buffer
@@ -4691,7 +4878,6 @@ class Benchmark {
     // were not configured already, settings that require dynamically invoking
     // APIs, and settings for the benchmark itself.
     Options& options = *opts;
-
     // Always set these since they are harmless when not needed and prevent
     // a guaranteed failure when they are needed.
     options.create_missing_column_families = true;
@@ -4774,7 +4960,6 @@ class Benchmark {
             new FileChecksumGenCrc32cFactory());
       }
     }
-
     if (FLAGS_num_multi_db <= 1) {
       OpenDb(options, FLAGS_db, &db_);
     } else {
@@ -4786,6 +4971,7 @@ class Benchmark {
           options.wal_dir = GetPathForMultiple(wal_dir, i);
         }
         OpenDb(options, GetPathForMultiple(FLAGS_db, i), &multi_dbs_[i]);
+        std::cout<<"成功打开DB:"<<GetPathForMultiple(FLAGS_db, i)<<std::endl;
       }
       options.wal_dir = wal_dir;
     }
@@ -4835,9 +5021,10 @@ class Benchmark {
       }
       //直接就创建一定数量的列族么
       std::vector<ColumnFamilyDescriptor> column_families;
+
       /**
        * dz modified： 
-       * db中的cf名称
+       * db中的cf名称   在这可以修改各自db的配置
       */
       for (size_t i = 0; i < num_hot; i++) {
         column_families.push_back(ColumnFamilyDescriptor(ColumnFamilyName(FLAGS_column_families_name,i),
@@ -4965,7 +5152,12 @@ class Benchmark {
             FLAGS_secondary_update_interval, db));
       }
     } else {
- 
+      //在这里修改  
+      std::size_t last_slash = db_name.find_last_of("/");  // 找到最后一个斜杠的位置
+      std::string number_str = db_name.substr(last_slash + 1);  // 从最后一个斜杠之后开始提取子字符串
+      int number = std::stoi(number_str);  // 将字符串转换为整数
+      options.statistics = multi_dbstats[number];
+      std::cout<<"同时打开了dbstats"<<number<<std::endl;
       s = DB::Open(options, db_name, &db->db);
     }
     if (FLAGS_report_open_timing) {
@@ -6293,6 +6485,12 @@ class Benchmark {
   }
 
   // The inverse function of Pareto distribution
+  /**
+   * u 越大 函数值越小
+   * 
+   * theta是基础值 直接决定函数值的大小  成正比例
+   * 
+  */
   int64_t ParetoCdfInversion(double u, double theta, double k, double sigma) {
     double ret;
     if (k == 0.0) {
@@ -6510,6 +6708,7 @@ class Benchmark {
   // needs to decide the ratio between Get, Put, Iterator queries before
   // starting the benchmark.
   void MixGraph(ThreadState* thread) {
+    std::cout<<"运行 MixGraph"<<std::endl;
     int64_t gets = 0;
     int64_t puts = 0;
     int64_t get_found = 0;
@@ -6625,7 +6824,7 @@ class Benchmark {
                                    db_with_cfh->db->DefaultColumnFamily(), key,
                                    &pinnable_val);
         }
-
+        std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
@@ -6644,13 +6843,15 @@ class Benchmark {
         puts++;
         int64_t val_size = ParetoCdfInversion(u, FLAGS_value_theta,
                                               FLAGS_value_k, FLAGS_value_sigma);
-        if (val_size < 10) {
-          val_size = 10;
+        if (val_size < 16) {
+          val_size = 16;
         } else if (val_size > value_max) {
           val_size = val_size % value_max;
         }
-        total_val_size += val_size;
 
+        total_val_size += val_size;
+        std::cout<<"put 到了"<<val_size<<std::endl;
+      
         s = db_with_cfh->db->Put(
             write_options_, key,
             gen.Generate(static_cast<unsigned int>(val_size)));
@@ -6707,6 +6908,1662 @@ class Benchmark {
     thread->stats.AddMessage(msg);
   }
 
+    // The social graph workload mixed with Get, Put, Iterator queries.社交图谱工作负载
+  // The value size and iterator length follow Pareto distribution.
+  // The overall key access follow power distribution. If user models the
+  // workload based on different key-ranges (or different prefixes), user
+  // can use two-term-exponential distribution to fit the workload. User
+  // needs to decide the ratio between Get, Put, Iterator queries before
+  // starting the benchmark.
+  void MixGraphA(ThreadState* thread) {
+    std::cout<<"运行 MixGraphA"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0.5, 0.5,0};
+RandomGenerator gen(8 ,256 ,128 );
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[0];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
+
+
+  void MixGraphAWarmup(ThreadState* thread) {
+    std::cout<<"运行 MixGraphAWarmup"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0, 1,0};
+RandomGenerator gen(8 ,256 ,128 );
+    
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[0];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
+  // The social graph workload mixed with Get, Put, Iterator queries.社交图谱工作负载
+  // The value size and iterator length follow Pareto distribution.
+  // The overall key access follow power distribution. If user models the
+  // workload based on different key-ranges (or different prefixes), user
+  // can use two-term-exponential distribution to fit the workload. User
+  // needs to decide the ratio between Get, Put, Iterator queries before
+  // starting the benchmark.
+  void MixGraphB(ThreadState* thread) {
+    std::cout<<"运行 MixGraphB"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0.5, 0.5,0};
+RandomGenerator gen(8 ,256 ,128 );
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[1];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
+
+
+  void MixGraphBWarmup(ThreadState* thread) {
+    std::cout<<"运行 MixGraphBWarmup"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0, 1,0};
+RandomGenerator gen(8 ,256 ,128 );
+    
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[1];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
+  // The social graph workload mixed with Get, Put, Iterator queries.社交图谱工作负载
+  // The value size and iterator length follow Pareto distribution.
+  // The overall key access follow power distribution. If user models the
+  // workload based on different key-ranges (or different prefixes), user
+  // can use two-term-exponential distribution to fit the workload. User
+  // needs to decide the ratio between Get, Put, Iterator queries before
+  // starting the benchmark.
+  void MixGraphC(ThreadState* thread) {
+    std::cout<<"运行 MixGraphC"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0.5, 0.5,0};
+RandomGenerator gen(8 ,256 ,128 );
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[2];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
+
+
+  void MixGraphCWarmup(ThreadState* thread) {
+    std::cout<<"运行 MixGraphCWarmup"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0, 1,0};
+RandomGenerator gen(8 ,256 ,128 );
+
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[2];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
+    // The social graph workload mixed with Get, Put, Iterator queries.社交图谱工作负载
+  // The value size and iterator length follow Pareto distribution.
+  // The overall key access follow power distribution. If user models the
+  // workload based on different key-ranges (or different prefixes), user
+  // can use two-term-exponential distribution to fit the workload. User
+  // needs to decide the ratio between Get, Put, Iterator queries before
+  // starting the benchmark.
+  void MixGraphD(ThreadState* thread) {
+    std::cout<<"运行 MixGraphD"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0.5, 0.5,0};
+RandomGenerator gen(8 ,256 ,128 );
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[3];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
+
+
+  void MixGraphDWarmup(ThreadState* thread) {
+    std::cout<<"运行 MixGraphDWarmup"<<std::endl;
+    int64_t gets = 0;
+    int64_t puts = 0;
+    int64_t get_found = 0;
+    int64_t seek = 0;
+    int64_t seek_found = 0;
+    int64_t bytes = 0;
+    double total_scan_length = 0;
+    double total_val_size = 0;
+    const int64_t default_value_max = 1 MiB;
+    // int64_t value_max = default_value_max;
+    int64_t scan_len_max = FLAGS_mix_max_scan_len;
+
+    bool use_prefix_modeling = false;
+    bool use_random_modeling = false;
+
+    GenerateTwoTermExpKeys gen_exp;
+    char value_buffer[default_value_max];
+    QueryDecider query;
+
+    double write_rate = 1000000.0;
+    double read_rate = 1000000.0;
+    std::vector<double> ratio{0, 1, 0};
+RandomGenerator gen(8 ,256 ,128 );
+    
+    Status s;
+    // if (value_max > FLAGS_mix_max_value_size) {
+    //   value_max = FLAGS_mix_max_value_size;
+    // }
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+    PinnableSlice pinnable_val;
+    query.Initiate(ratio);
+
+    // the limit of qps initiation
+    if (FLAGS_sine_mix_rate) {
+      thread->shared->read_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+      thread->shared->write_rate_limiter.reset(
+          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
+    }
+
+    // Decide if user wants to use prefix based key generation
+    if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
+        FLAGS_keyrange_dist_c != 0.0 || FLAGS_keyrange_dist_d != 0.0) {
+      use_prefix_modeling = true;
+      gen_exp.InitiateExpDistribution(
+          FLAGS_num, FLAGS_keyrange_dist_a, FLAGS_keyrange_dist_b,
+          FLAGS_keyrange_dist_c, FLAGS_keyrange_dist_d);
+    }
+    if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
+      use_random_modeling = true;
+    }
+
+    Duration duration(FLAGS_duration, reads_);
+    while (!duration.Done(1)) {
+
+      DBWithColumnFamilies* db_with_cfh;      
+      if(FLAGS_num_multi_db==4){
+        db_with_cfh = &multi_dbs_[3];
+      }else{
+        db_with_cfh = SelectDBWithCfh(thread);
+      }
+    
+      int64_t ini_rand, rand_v, key_rand, key_seed;
+      ini_rand = GetRandomKey(&thread->rand);
+      // ini_rand = (&thread->rand)->Next()% FLAGS_num;
+      rand_v = ini_rand % FLAGS_num;
+      double u = static_cast<double>(rand_v) / FLAGS_num;
+
+      // Generate the keyID based on the key hotness and prefix hotness
+      if (use_random_modeling) {
+        key_rand = ini_rand;
+      } else if (use_prefix_modeling) {
+        key_rand =
+            gen_exp.DistGetKeyID(ini_rand, FLAGS_key_dist_a, FLAGS_key_dist_b);
+      } else {
+        key_seed = PowerCdfInversion(u, FLAGS_key_dist_a, FLAGS_key_dist_b);
+        Random64 rand(key_seed);
+        key_rand = static_cast<int64_t>(rand.Next()) % FLAGS_num;
+      }
+      GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+      // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
+      int query_type = query.GetType(rand_v);
+
+      // change the qps
+      uint64_t now = FLAGS_env->NowMicros();
+      uint64_t usecs_since_last;
+      if (now > thread->stats.GetSineInterval()) {
+        usecs_since_last = now - thread->stats.GetSineInterval();
+      } else {
+        usecs_since_last = 0;
+      }
+
+      if (FLAGS_sine_mix_rate &&
+          usecs_since_last >
+              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
+        double usecs_since_start =
+            static_cast<double>(now - thread->stats.GetStart());
+        thread->stats.ResetSineInterval();
+        double mix_rate_with_noise = AddNoise(
+            SineRate(usecs_since_start / 1000000.0), FLAGS_sine_mix_rate_noise);
+        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
+        write_rate = mix_rate_with_noise * query.ratio_[1];
+
+        if (read_rate > 0) {
+          thread->shared->read_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(read_rate));
+        }
+        if (write_rate > 0) {
+          thread->shared->write_rate_limiter->SetBytesPerSecond(
+              static_cast<int64_t>(write_rate));
+        }
+      }
+      // Start the query
+      if (query_type == 0) {
+        // the Get query
+        gets++;
+        if (FLAGS_num_column_families > 1) {
+          s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+                                   key, &pinnable_val);
+        } else {
+          pinnable_val.Reset();
+          s = db_with_cfh->db->Get(read_options_,
+                                   db_with_cfh->db->DefaultColumnFamily(), key,
+                                   &pinnable_val);
+        }
+        if (s.ok()) {
+          get_found++;
+          bytes += key.size() + pinnable_val.size();
+        } else if (!s.IsNotFound()) {
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          abort();
+        }
+
+        if (thread->shared->read_rate_limiter && (gets + seek) % 100 == 0) {
+          thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
+                                                     nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      } else if (query_type == 1) {
+        // the Put query
+        puts++;
+
+        Slice v = gen.Generate();
+        int64_t val_size = v.size();
+        s = db_with_cfh->db->Put(write_options_, key, v);  
+        total_val_size += val_size;
+        bytes+=key.size()+val_size;
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+
+        if (thread->shared->write_rate_limiter && puts % 100 == 0) {
+          thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
+                                                      nullptr /*stats*/);
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+      } else if (query_type == 2) {
+        // Seek query
+        if (db_with_cfh->db != nullptr) {
+          Iterator* single_iter = nullptr;
+          single_iter = db_with_cfh->db->NewIterator(read_options_);
+          if (single_iter != nullptr) {
+            single_iter->Seek(key);
+            seek++;
+            if (single_iter->Valid() && single_iter->key().compare(key) == 0) {
+              seek_found++;
+            }
+            int64_t scan_length =
+                ParetoCdfInversion(u, FLAGS_iter_theta, FLAGS_iter_k,
+                                   FLAGS_iter_sigma) %
+                scan_len_max;
+            for (int64_t j = 0; j < scan_length && single_iter->Valid(); j++) {
+              Slice value = single_iter->value();
+              memcpy(value_buffer, value.data(),
+                     std::min(value.size(), sizeof(value_buffer)));
+              bytes += single_iter->key().size() + single_iter->value().size();
+              single_iter->Next();
+              assert(single_iter->status().ok());
+              total_scan_length++;
+            }
+          }
+          delete single_iter;
+        }
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+      }
+    }
+    char msg[256];
+    snprintf(msg, sizeof(msg),
+             "( Gets:%" PRIu64 " Puts:%" PRIu64 " Seek:%" PRIu64
+             ", reads %" PRIu64 " in %" PRIu64
+             " found, "
+             "avg size: %.1f value, %.1f scan)\n",
+             gets, puts, seek, get_found + seek_found, gets + seek,
+             total_val_size / puts, total_scan_length / seek);
+    thread->stats.AddBytes(bytes);
+    thread->stats.AddMessage(msg);
+  }
   void IteratorCreation(ThreadState* thread) {
     Duration duration(FLAGS_duration, reads_);
     ReadOptions options = read_options_;
@@ -8193,6 +10050,217 @@ class Benchmark {
     db->CompactRange(cro, nullptr, nullptr);
   }
 
+  // Workload A: Update heavy workload
+  // This workload has a mix of 50/50 reads and writes.
+  // An application example is a session store recording recent actions.
+
+  // Read/update ratio: 50/50
+  // Default data size: 1 KB records
+  // Request distribution: zipfian
+  void YCSBWorkloadA(ThreadState* thread) {
+    ReadOptions options(FLAGS_verify_checksum, true);
+    RandomGenerator gen;
+    std::string value;
+    int64_t found = 0;
+    int64_t reads_done = 0;
+    int64_t writes_done = 0;
+    int64_t bytes = 0;
+    Duration duration(FLAGS_duration, 0);
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+
+    init_zipf_generator(0, FLAGS_num);
+
+    // the number of iterations is the larger of read_ or write_
+    while (!duration.Done(1)) {
+      DB* db = SelectDB(thread);
+      // zipf
+      GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
+
+      int next_op = thread->rand.Next() % 100;
+      if (next_op < 50) {
+        // read
+        Status s = db->Get(options, key, &value);
+        if (!s.ok() && !s.IsNotFound()) {
+          fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+          // we continue after error rather than exiting so that we can
+          // find more errors if any
+        } else if (!s.IsNotFound()) {
+          found++;
+        }
+        reads_done++;
+        bytes+=value.size();
+        thread->stats.FinishedOps(nullptr, db, 1, kRead);
+      } else {
+        // write
+        Slice v = gen.Generate();
+        Status s = db->Put(write_options_, key, v);
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+        writes_done++;
+        bytes+=key.size()+v.size();
+        thread->stats.FinishedOps(nullptr, db, 1, kWrite);
+      }
+      
+    }
+    if (FLAGS_threads > 1) {
+      printf("( reads:%" PRIu64 " writes:%" PRIu64 " found:%" PRIu64 ")",
+             reads_done, writes_done, found);
+    } else {
+      char msg[100];
+      snprintf(msg, sizeof(msg),
+               "( reads:%" PRIu64 " writes:%" PRIu64 " found:%" PRIu64 ")",
+               reads_done, writes_done, found);
+      thread->stats.AddBytes(bytes);
+      thread->stats.AddMessage(msg);
+    }
+  }
+
+  // Workload B: Read mostly workload
+  // This workload has a 95/5 reads/write mix.
+  // Application example: photo tagging; add a tag is an update,
+  // but most operations are to read tags.
+
+  // Read/update ratio: 95/5
+  // Default data size: 1 KB records
+  // Request distribution: zipfian
+  void YCSBWorkloadB(ThreadState* thread) {
+    ReadOptions options(FLAGS_verify_checksum, true);
+    RandomGenerator gen;
+    std::string value;
+    int64_t found = 0;
+    int64_t reads_done = 0;
+    int64_t writes_done = 0;
+    int64_t bytes = 0;
+    Duration duration(FLAGS_duration, 0);
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+
+    init_zipf_generator(0, FLAGS_num);
+
+    // the number of iterations is the larger of read_ or write_
+    while (!duration.Done(1)) {
+      DB* db = SelectDB(thread);
+
+      // zipf
+      GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
+
+      int next_op = thread->rand.Next() % 100;
+      if (next_op < 95) {
+        // read
+        Status s = db->Get(options, key, &value);
+        if (!s.ok() && !s.IsNotFound()) {
+          fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+          // we continue after error rather than exiting so that we can
+          // find more errors if any
+        } else if (!s.IsNotFound()) {
+          found++;
+        }
+        reads_done++;
+        bytes+=value.size();
+        thread->stats.FinishedOps(nullptr, db, 1, kRead);
+      } else {
+        // write
+        Slice v = gen.Generate();
+        Status s = db->Put(write_options_, key, v);
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+        writes_done++;
+        thread->stats.FinishedOps(nullptr, db, 1, kWrite);
+        bytes+=key.size()+v.size();
+      }
+      
+    }
+    if (FLAGS_threads > 1) {
+      printf("( reads:%" PRIu64 " writes:%" PRIu64 " found:%" PRIu64 ")",
+             reads_done, writes_done, found);
+    } else {
+      char msg[100];
+      snprintf(msg, sizeof(msg),
+               "( reads:%" PRIu64 " writes:%" PRIu64 " found:%" PRIu64 ")",
+               reads_done, writes_done, found);
+      thread->stats.AddBytes(bytes);
+      thread->stats.AddMessage(msg);
+    }
+  }
+
+  // Workload F: Read-modify-write workload
+  // In this workload, the client will read a record,
+  // modify it, and write back the changes. Application
+  // example: user database, where user records are read
+  // and modified by the user or to record user activity.
+
+  // Read/read-modify-write ratio: 50/50
+  // Default data size: 1 KB records
+  // Request distribution: zipfian
+  void YCSBWorkloadF(ThreadState* thread) {
+    ReadOptions options(FLAGS_verify_checksum, true);
+    RandomGenerator gen;
+    std::string value;
+    int64_t found = 0;
+    int64_t reads_done = 0;
+    int64_t updates_done = 0;
+    int64_t bytes = 0;
+    Duration duration(FLAGS_duration, 0);
+
+    std::unique_ptr<const char[]> key_guard;
+    Slice key = AllocateKey(&key_guard);
+
+    init_zipf_generator(0, FLAGS_num);
+
+    // the number of iterations is the larger of read_ or write_
+    while (!duration.Done(1)) {
+      DB* db = SelectDB(thread);
+      // zipf
+      GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
+
+      int next_op = thread->rand.Next() % 100;
+      if (next_op < 50) {
+        // read
+        Status s = db->Get(options, key, &value);
+        if (!s.ok() && !s.IsNotFound()) {
+          fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+          // we continue after error rather than exiting so that we can
+          // find more errors if any
+        } else if (!s.IsNotFound()) {
+          found++;
+        }
+        reads_done++;
+        thread->stats.FinishedOps(nullptr, db, 1, kRead);
+      } else {
+        // read-modify-write
+        Status s = db->Get(options, key, &value);
+        Slice v=gen.Generate();
+        s = db->Put(write_options_, key, v);
+        if (!s.ok()) {
+          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          ErrorExit();
+        }
+        updates_done++;
+        bytes+=key.size()+value.size()+v.size();
+        thread->stats.FinishedOps(nullptr, db, 1, kUpdate);
+      }
+    }
+    if (FLAGS_threads > 1) {
+      printf("( reads:%" PRIu64 " updates:%" PRIu64 " found:%" PRIu64 ")",
+             reads_done, updates_done, found);
+    } else {
+      char msg[100];
+      snprintf(msg, sizeof(msg),
+               "( reads:%" PRIu64 " updates:%" PRIu64 " found:%" PRIu64 ")",
+               reads_done, updates_done, found);
+      thread->stats.AddBytes(bytes);
+      thread->stats.AddMessage(msg);
+    }
+  }
+//flex modified end
+
   void CompactAll() {
     CompactRangeOptions cro;
     cro.max_subcompactions = static_cast<uint32_t>(FLAGS_subcompactions);
@@ -8544,8 +10612,21 @@ int db_bench_tool(int argc, char** argv) {
     exit(1);
   }
   if (!FLAGS_statistics_string.empty()) {
+    std::cout<<"FLAGS_statistics_string.empty()"<<std::endl;
+    for(int i = 0;i<4;i++){
+      Status s = Statistics::CreateFromString(config_options,
+                                          FLAGS_statistics_string+std::to_string(i), &multi_dbstats[i]);
+      if (multi_dbstats[i] == nullptr) {
+        std::string temp = FLAGS_statistics_string.c_str() + std::to_string(i);
+        fprintf(stderr,
+                "No Statistics registered matching string: %s status=%s\n",
+                temp.c_str(), s.ToString().c_str());
+        exit(1);
+      }
+    }
+
     Status s = Statistics::CreateFromString(config_options,
-                                            FLAGS_statistics_string, &dbstats);
+                                          FLAGS_statistics_string, &dbstats);
     if (dbstats == nullptr) {
       fprintf(stderr,
               "No Statistics registered matching string: %s status=%s\n",
@@ -8553,11 +10634,19 @@ int db_bench_tool(int argc, char** argv) {
       exit(1);
     }
   }
+
   if (FLAGS_statistics) {
     dbstats = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    for(auto& item : multi_dbstats){
+      item = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    }
   }
   if (dbstats) {
     dbstats->set_stats_level(static_cast<StatsLevel>(FLAGS_stats_level));
+
+    for(auto& item : multi_dbstats){
+      item->set_stats_level(static_cast<StatsLevel>(FLAGS_stats_level));
+    }
   }
   FLAGS_compaction_pri_e =
       (ROCKSDB_NAMESPACE::CompactionPri)FLAGS_compaction_pri;
@@ -8667,7 +10756,7 @@ int db_bench_tool(int argc, char** argv) {
   if (FLAGS_db.empty()) {
     std::string default_db_path;
     FLAGS_env->GetTestDirectory(&default_db_path);
-    default_db_path += "/dbbench2";
+    default_db_path += "/dbbench";
     FLAGS_db = default_db_path;
   }
 
@@ -8689,7 +10778,10 @@ int db_bench_tool(int argc, char** argv) {
     fprintf(stderr, "prefix_size > 8 required by --seek_missing_prefix\n");
     exit(1);
   }
-
+  // Initialize the zipf distribution for YCSB
+  init_zipf_generator(0, FLAGS_num);
+  init_latestgen(FLAGS_num);
+  
   ROCKSDB_NAMESPACE::Benchmark benchmark;
   benchmark.Run();
 

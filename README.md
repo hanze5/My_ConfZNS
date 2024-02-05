@@ -54,37 +54,116 @@ TODO：
 一些常用的命令
 ```shell
 blkzone reset /dev/nvme0n1
+blkzone report /dev/nvme0n1
 fio --direct=1 --zonemode=zbd --name=diff_bs --iodepth=1 --size=1z --filename=/dev/nvme0n1 --ioengine=psync --bs=16k --rw=write --offset=0z
 
 
 
 nvme zns report-zones /dev/nvme0n1
+cat /sys/block/nvme0n1/queue/max_open_zones
 
 DEBUG_LEVEL=0 ROCKSDB_PLUGINS=zenfs make clean
 export CXXFLAGS="-I/usr/include -L/usr/lib/x86_64-linux-gnu"
 DEBUG_LEVEL=0 ROCKSDB_PLUGINS=zenfs make -j2 db_bench install
 
-rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
-
-
 cd plugin/zenfs/util
 make
- 
 
 echo mq-deadline > /sys/block/nvme0n1/queue/scheduler
+
+rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
+
 ./plugin/zenfs/util/zenfs mkfs --zbd=nvme0n1 --aux_path=/home/femu/workspace/My_ConfZNS/trial/rocksdblogs --force
+
+  # -num_multi_db=4 \
+  # --duration=60 \
+  # -reads=100000 \
+
+  --benchmarks="mixgraph_together" \
+
+
+./db_bench \
+  --fs_uri=zenfs://dev:nvme0n1 \
+  --benchmarks="mixgraph_together" \
+  --statistics \
+  --disable_wal \
+  -use_direct_io_for_flush_and_compaction=true \
+  -use_direct_reads=true \
+  -keyrange_dist_a=14.18 \
+  -keyrange_dist_b=-2.917 \
+  -keyrange_dist_c=0.0164 \
+  -keyrange_dist_d=-0.08082 \
+  -keyrange_num=30 \
+  -iter_k=2.517 \
+  -iter_sigma=14.236 \
+  -sine_mix_rate_interval_milliseconds=5000 \
+  -sine_a=1000 \
+  -sine_b=0.000073 \
+  -sine_d=4500 \
+  -reads=2000000 \
+  -num=10000000 \
+  -key_size=48 > output.txt
+
+./db_bench \
+  --fs_uri=zenfs://dev:nvme0n1 \
+  --benchmarks="mixgraph_together" \
+  --statistics \
+  --disable_wal \
+  -use_direct_io_for_flush_and_compaction=true \
+  -use_direct_reads=true \
+  -keyrange_dist_a=14.18 \
+  -keyrange_dist_b=-2.917 \
+  -keyrange_dist_c=0.0164 \
+  -keyrange_dist_d=-0.08082 \
+  -keyrange_num=30 \
+  -iter_k=2.517 \
+  -iter_sigma=14.236 \
+  -sine_mix_rate_interval_milliseconds=5000 \
+  -sine_a=1000 \
+  -sine_b=0.000073 \
+  -sine_d=4500 \
+  -reads=20000 \
+  -num=100000 \
+  -key_size=48 
+
+
+
+
 ./plugin/zenfs/util/zenfs ls-uuid
 ./plugin/zenfs/util/zenfs list --zbd=nvme0n1
 ./plugin/zenfs/util/zenfs fs-info --zbd=nvme0n1
 ./plugin/zenfs/util/zenfs df --zbd=nvme0n1 
 ./plugin/zenfs/util/zenfs backup --zbd=nvme0n1 
+ 
 
-./db_bench --db=2nd  --fs_uri=zenfs://dev:nvme0n1 --benchmarks=fillrandom --use_direct_io_for_flush_and_compaction
+./db_bench \
+  --fs_uri=zenfs://dev:nvme0n1 \
+  --db=1st \
+  --statistics \
+  --disable_wal \
+  --benchmarks=fillrandom \
+  --use_direct_io_for_flush_and_compaction \
+  --num=20000000
+
+
+
+
+#YCSB 
+./db_bench \
+  --fs_uri=zenfs://dev:nvme0n1 \
+  --db=1st \
+  --statistics \
+  --disable_wal \
+  --benchmarks=ycsb-a \
+  --use_direct_io_for_flush_and_compaction \
+  --value_size_distribution_type=normal \
+  --value_size_min=8 \
+  --value_size_max=256 \
+  --sine_write_rate=true \
+  --duration=600
 
 
 ./db_bench \
-  --fs_uri=zenfs://dev:nvme0n1\
-  --statistics\
   --benchmarks="mixgraph" \
   -use_direct_io_for_flush_and_compaction=true \
   -use_direct_reads=true \
@@ -106,11 +185,40 @@ echo mq-deadline > /sys/block/nvme0n1/queue/scheduler
   -sine_b=0.000073 \
   -sine_d=4500 \
   --perf_level=2 \
-  -reads=42000000 \
-  -num=5000000 \
+  -reads=4200000 \
+  -num=500000 \
   -key_size=48
-```
 
+./db_bench \
+  --benchmarks="mixgraph_together" \
+  -num_multi_db=4 \
+  -use_direct_io_for_flush_and_compaction=true \
+  -use_direct_reads=true \
+  -cache_size=268435456 \
+  -keyrange_dist_a=14.18 \
+  -keyrange_dist_b=-2.917 \
+  -keyrange_dist_c=0.0164 \
+  -keyrange_dist_d=-0.08082 \
+  -keyrange_num=30 \
+  -value_k=0.2615 \
+  -value_sigma=25.45 \
+  -iter_k=2.517 \
+  -iter_sigma=14.236 \
+  -mix_get_ratio=0.85 \
+  -mix_put_ratio=0.14 \
+  -mix_seek_ratio=0.01 \
+  -sine_mix_rate_interval_milliseconds=5000 \
+  -sine_a=1000 \
+  -sine_b=0.000073 \
+  -sine_d=4500 \
+  --perf_level=2 \
+  -reads=4200000 \
+  -num=500000 \
+  -key_size=48
+
+
+
+```
 
 zenfs 是基于libzbd实现的。
 先读 zbd_zenfs.h 里面定义了最基础最主要的类的功能：
@@ -177,7 +285,7 @@ IOType::kWAL是一个枚举值，通常在数据库系统中使用，特别是�
 
 因此，虽然理论上多个ZoneFile对象的active_zone_可能指向同一个Zone，但在ZenFS的实现中，这种情况似乎不太可能发生。这是因为每个ZoneFile都管理自己的active_zone_，并且这个active_zone_在使用完毕后会被释放。这种设计可以简化管理并避免并发问题。这个可能需要看一下zenfs是如何实现的
 
-
+ 
 # 如何实现呢？
 zbd的open是可以独占或者非独占的，**BUT**
 ZenFS是一个为RocksDB设计的文件系统插件，它使用RocksDB的文件系统接口将文件放置在原始的分区块设备（ZBD）上的区域中12。以下是ZenFS需要一个独立的ZBD设备的主要原因：
@@ -297,3 +405,208 @@ L2层的SST文件大小将是20MB * 10 = 200MB。
 这种设置允许RocksDB在不同层级上存储不同大小的SST文件，从而优化读写性能和存储空间的使用。较小的SST文件可以减少读取时的查找范围，而较大的SST文件可以减少层级之间的文件数量，从而减少合并操作的复杂性。
 
 
+
+
+TATISTICS:
+rocksdb.memtable.hit COUNT : 1584
+rocksdb.memtable.miss COUNT : 998622
+rocksdb.l0.hit COUNT : 66157
+rocksdb.l1.hit COUNT : 932465
+rocksdb.l2andup.hit COUNT : 0
+rocksdb.number.keys.written COUNT : 999794
+rocksdb.number.keys.read COUNT : 1000206
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 230334553
+rocksdb.bytes.read COUNT : 166897410
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 142486367
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 348.360388 P95 : 570.535803 P99 : 799.750790 P100 : 23619.000000 COUNT : 1000206 SUM : 357943671
+rocksdb.db.write.micros P50 : 4.996809 P95 : 13.169486 P99 : 21.005648 P100 : 12874.000000 COUNT : 999794 SUM : 6154183
+rocksdb.table.sync.micros P50 : 2900.000000 P95 : 6082.000000 P99 : 6082.000000 P100 : 6082.000000 COUNT : 4 SUM : 15185
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 132.871388 P95 : 167.479253 P99 : 211.073102 P100 : 23575.000000 COUNT : 2633256 SUM : 320612520
+rocksdb.file.read.flush.micros P50 : 480.000000 P95 : 535.000000 P99 : 535.000000 P100 : 535.000000 COUNT : 4 SUM : 2014
+rocksdb.file.read.get.micros P50 : 132.869519 P95 : 167.475701 P99 : 210.799460 P100 : 23575.000000 COUNT : 2633128 SUM : 320175922
+rocksdb.db.flush.micros P50 : 613498.000000 P95 : 613498.000000 P99 : 613498.000000 P100 : 613498.000000 COUNT : 4 SUM : 2395689
+
+
+
+STATISTICS:
+rocksdb.memtable.hit COUNT : 1608
+rocksdb.memtable.miss COUNT : 998989
+rocksdb.l0.hit COUNT : 61719
+rocksdb.l1.hit COUNT : 937270
+rocksdb.l2andup.hit COUNT : 0
+rocksdb.number.keys.written COUNT : 999403
+rocksdb.number.keys.read COUNT : 1000597
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 230249576
+rocksdb.bytes.read COUNT : 166900961
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 106590346
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 394.252779 P95 : 781.481897 P99 : 943.819015 P100 : 30937.000000 COUNT : 1000597 SUM : 401473002
+rocksdb.db.write.micros P50 : 5.435824 P95 : 14.995345 P99 : 27.116073 P100 : 17037.000000 COUNT : 999403 SUM : 7596556
+rocksdb.table.sync.micros P50 : 5500.000000 P95 : 6692.000000 P99 : 6692.000000 P100 : 6692.000000 COUNT : 3 SUM : 13401
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 140.295053 P95 : 214.703980 P99 : 338.329774 P100 : 30609.000000 COUNT : 2616922 SUM : 360677285
+rocksdb.file.read.flush.micros P50 : 480.000000 P95 : 527.000000 P99 : 527.000000 P100 : 527.000000 COUNT : 3 SUM : 1466
+rocksdb.file.read.get.micros P50 : 140.293307 P95 : 214.648407 P99 : 337.935962 P100 : 30609.000000 COUNT : 2616795 SUM : 360254049
+rocksdb.db.flush.micros P50 : 613794.000000 P95 : 613794.000000 P99 : 613794.000000 P100 : 613794.000000 COUNT : 3 SUM : 1818778
+
+
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 9997
+rocksdb.l0.hit COUNT : 327
+rocksdb.l1.hit COUNT : 6205
+rocksdb.l2andup.hit COUNT : 3465
+rocksdb.number.keys.written COUNT : 10003
+rocksdb.number.keys.read COUNT : 9997
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 1711106377
+rocksdb.bytes.read COUNT : 1705036240
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 25524659
+rocksdb.flush.write.bytes COUNT : 965933360
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 5768.524748 P95 : 14213.387424 P99 : 20702.312373 P100 : 38221.000000 COUNT : 9997 SUM : 64888829
+rocksdb.db.write.micros P50 : 53.975621 P95 : 20164.912281 P99 : 65332.386364 P100 : 119910.000000 COUNT : 10003 SUM : 26160517
+rocksdb.table.sync.micros P50 : 4950.000000 P95 : 7670.000000 P99 : 7670.000000 P100 : 7670.000000 COUNT : 28 SUM : 126855
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 27269.461078 P95 : 91112.068966 P99 : 111050.000000 P100 : 119828.000000 COUNT : 786 SUM : 25524659
+rocksdb.sst.read.micros P50 : 292.498000 P95 : 786.242593 P99 : 3603.078740 P100 : 12980.000000 COUNT : 148909 SUM : 57991273
+rocksdb.file.read.flush.micros P50 : 154.210526 P95 : 246.000000 P99 : 581.000000 P100 : 581.000000 COUNT : 28 SUM : 5192
+rocksdb.file.read.get.micros P50 : 291.157401 P95 : 706.075529 P99 : 2281.368209 P100 : 12980.000000 COUNT : 147292 SUM : 52653197
+rocksdb.db.flush.micros P50 : 475000.000000 P95 : 479154.000000 P99 : 479154.000000 P100 : 479154.000000 COUNT : 28 SUM : 12136964
+
+STATISTICS:
+rocksdb.memtable.hit COUNT : 1
+rocksdb.memtable.miss COUNT : 10061
+rocksdb.l0.hit COUNT : 282
+rocksdb.l1.hit COUNT : 9474
+rocksdb.l2andup.hit COUNT : 305
+rocksdb.number.keys.written COUNT : 9938
+rocksdb.number.keys.read COUNT : 10062
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 1715506466
+rocksdb.bytes.read COUNT : 1740280045
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 46150532
+rocksdb.flush.write.bytes COUNT : 965076784
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 6862.857143 P95 : 18789.463019 P99 : 22708.888889 P100 : 38556.000000 COUNT : 10062 SUM : 76261566
+rocksdb.db.write.micros P50 : 57.917905 P95 : 31969.058296 P99 : 110372.000000 P100 : 154882.000000 COUNT : 9938 SUM : 46929335
+rocksdb.table.sync.micros P50 : 5342.857143 P95 : 8217.000000 P99 : 8217.000000 P100 : 8217.000000 COUNT : 28 SUM : 140833
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 29963.800905 P95 : 137780.000000 P99 : 154460.000000 P100 : 154460.000000 COUNT : 1074 SUM : 46150532
+rocksdb.sst.read.micros P50 : 316.666226 P95 : 1153.148065 P99 : 4087.920832 P100 : 19114.000000 COUNT : 149134 SUM : 69066202
+rocksdb.file.read.flush.micros P50 : 166.000000 P95 : 553.333333 P99 : 1520.000000 P100 : 1520.000000 COUNT : 28 SUM : 7322
+rocksdb.file.read.get.micros P50 : 315.354106 P95 : 966.351081 P99 : 3677.115385 P100 : 19114.000000 COUNT : 147632 SUM : 64024652
+rocksdb.db.flush.micros P50 : 478518.518519 P95 : 567185.185185 P99 : 621520.000000 P100 : 621520.000000 COUNT : 28 SUM : 12855889
+
+===========================================================
+
+STATISTICS:
+rocksdb.memtable.hit COUNT : 1708
+rocksdb.memtable.miss COUNT : 998458
+rocksdb.l0.hit COUNT : 63107
+rocksdb.l1.hit COUNT : 935351
+rocksdb.l2andup.hit COUNT : 0
+rocksdb.number.keys.written COUNT : 999834
+rocksdb.number.keys.read COUNT : 1000166
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 230348606
+rocksdb.bytes.read COUNT : 166913558
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 142487391
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 398.043281 P95 : 636.756170 P99 : 862.023156 P100 : 37009.000000 COUNT : 1000166 SUM : 388788966
+rocksdb.db.write.micros P50 : 4.913389 P95 : 13.587592 P99 : 21.357197 P100 : 8704.000000 COUNT : 999834 SUM : 6338537
+rocksdb.table.sync.micros P50 : 870.000000 P95 : 1436.000000 P99 : 1436.000000 P100 : 1436.000000 COUNT : 4 SUM : 4255
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 139.685178 P95 : 169.088712 P99 : 248.704517 P100 : 30684.000000 COUNT : 2627686 SUM : 344717337
+rocksdb.file.read.flush.micros P50 : 315.000000 P95 : 315.000000 P99 : 315.000000 P100 : 315.000000 COUNT : 4 SUM : 1215
+rocksdb.file.read.get.micros P50 : 139.683587 P95 : 169.085688 P99 : 248.559963 P100 : 30684.000000 COUNT : 2627558 SUM : 344493250
+rocksdb.db.flush.micros P50 : 320006.000000 P95 : 363666.000000 P99 : 363666.000000 P100 : 363666.000000 COUNT : 4 SUM : 1369759
+
+STATISTICS:
+rocksdb.memtable.hit COUNT : 1665
+rocksdb.memtable.miss COUNT : 998291
+rocksdb.l0.hit COUNT : 60094
+rocksdb.l1.hit COUNT : 938197
+rocksdb.l2andup.hit COUNT : 0
+rocksdb.number.keys.written COUNT : 1000044
+rocksdb.number.keys.read COUNT : 999956
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 230535540
+rocksdb.bytes.read COUNT : 166800996
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 106534538
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 387.650262 P95 : 758.408319 P99 : 867.614932 P100 : 32395.000000 COUNT : 999956 SUM : 389024610
+rocksdb.db.write.micros P50 : 4.664938 P95 : 12.827385 P99 : 21.263094 P100 : 15476.000000 COUNT : 1000044 SUM : 6012279
+rocksdb.table.sync.micros P50 : 1600.000000 P95 : 2007.000000 P99 : 2007.000000 P100 : 2007.000000 COUNT : 3 SUM : 4239
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 139.015351 P95 : 204.801817 P99 : 322.983756 P100 : 32082.000000 COUNT : 2619857 SUM : 351056784
+rocksdb.file.read.flush.micros P50 : 347.500000 P95 : 502.000000 P99 : 502.000000 P100 : 502.000000 COUNT : 3 SUM : 1139
+rocksdb.file.read.get.micros P50 : 139.013583 P95 : 204.738322 P99 : 322.516462 P100 : 32082.000000 COUNT : 2619730 SUM : 350816161
+rocksdb.db.flush.micros P50 : 350571.000000 P95 : 363767.000000 P99 : 363767.000000 P100 : 363767.000000 COUNT : 3 SUM : 1066421
+
+
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 10085
+rocksdb.l0.hit COUNT : 145
+rocksdb.l1.hit COUNT : 7037
+rocksdb.l2andup.hit COUNT : 2903
+rocksdb.number.keys.written COUNT : 9915
+rocksdb.number.keys.read COUNT : 10085
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 1691601351
+rocksdb.bytes.read COUNT : 1741057255
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 3174979
+rocksdb.flush.write.bytes COUNT : 929956956
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 3960.540234 P95 : 9686.284599 P99 : 13494.985955 P100 : 31033.000000 COUNT : 10085 SUM : 45071730
+rocksdb.db.write.micros P50 : 46.843066 P95 : 160.964215 P99 : 15573.333333 P100 : 32271.000000 COUNT : 9915 SUM : 3720084
+rocksdb.table.sync.micros P50 : 1415.384615 P95 : 2725.000000 P99 : 3263.000000 P100 : 3263.000000 COUNT : 27 SUM : 34383
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 17911.111111 P95 : 31498.412698 P99 : 32246.000000 P100 : 32246.000000 COUNT : 172 SUM : 3174979
+rocksdb.sst.read.micros P50 : 207.972209 P95 : 930.310345 P99 : 1736.997179 P100 : 27581.000000 COUNT : 132046 SUM : 40230783
+rocksdb.file.read.flush.micros P50 : 155.000000 P95 : 836.166667 P99 : 924.000000 P100 : 924.000000 COUNT : 27 SUM : 6782
+rocksdb.file.read.get.micros P50 : 206.988572 P95 : 823.930477 P99 : 1429.818620 P100 : 27581.000000 COUNT : 130141 SUM : 36857364
+rocksdb.db.flush.micros P50 : 203043.478261 P95 : 233997.000000 P99 : 233997.000000 P100 : 233997.000000 COUNT : 27 SUM : 5141130
+
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 10105
+rocksdb.l0.hit COUNT : 209
+rocksdb.l1.hit COUNT : 8841
+rocksdb.l2andup.hit COUNT : 1055
+rocksdb.number.keys.written COUNT : 9895
+rocksdb.number.keys.read COUNT : 10105
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 1703535400
+rocksdb.bytes.read COUNT : 1733310760
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 9009187
+rocksdb.flush.write.bytes COUNT : 968389424
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.db.get.micros P50 : 5939.894636 P95 : 13590.158546 P99 : 20127.019499 P100 : 44644.000000 COUNT : 10105 SUM : 63526510
+rocksdb.db.write.micros P50 : 49.258667 P95 : 475.000000 P99 : 28114.705882 P100 : 49684.000000 COUNT : 9895 SUM : 9631941
+rocksdb.table.sync.micros P50 : 1400.000000 P95 : 2850.000000 P99 : 3253.000000 P100 : 3253.000000 COUNT : 28 SUM : 41379
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 18403.669725 P95 : 37222.580645 P99 : 47444.516129 P100 : 49590.000000 COUNT : 466 SUM : 9009187
+rocksdb.sst.read.micros P50 : 243.526015 P95 : 1134.105259 P99 : 1913.884220 P100 : 20957.000000 COUNT : 151813 SUM : 56515329
+rocksdb.file.read.flush.micros P50 : 204.285714 P95 : 1620.000000 P99 : 1776.000000 P100 : 1776.000000 COUNT : 28 SUM : 10641
+rocksdb.file.read.get.micros P50 : 242.391868 P95 : 1001.620684 P99 : 1759.560900 P100 : 20957.000000 COUNT : 149842 SUM : 52869053
+rocksdb.db.flush.micros P50 : 211481.481481 P95 : 248814.814815 P99 : 255417.000000 P100 : 255417.000000 COUNT : 28 SUM : 6200826

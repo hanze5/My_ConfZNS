@@ -186,11 +186,12 @@ std::string HistogramStat::ToString() const {
            "Min: %" PRIu64 "  Median: %.4f  Max: %" PRIu64 "\n",
            (cur_num == 0 ? 0 : min()), Median(), (cur_num == 0 ? 0 : max()));
   r.append(buf);
+  //flex modified
   snprintf(buf, sizeof(buf),
            "Percentiles: "
-           "P50: %.2f P75: %.2f P99: %.2f P99.9: %.2f P99.99: %.2f\n",
-           Percentile(50), Percentile(75), Percentile(99), Percentile(99.9),
-           Percentile(99.99));
+           "P50: %.2f P75: %.2f P90: %.2f P99: %.2f P99.9: %.2f P99.99: %.2f\n",
+           Percentile(50), Percentile(75), Percentile(90), Percentile(99),
+           Percentile(99.9), Percentile(99.99));
   r.append(buf);
   r.append("------------------------------------------------------\n");
   if (cur_num == 0) return r;  // all buckets are empty
