@@ -6,7 +6,7 @@
 // #define NVME_DEFAULT_ZONE_SIZE      (128 * MiB)
 #define NVME_DEFAULT_MAX_AZ_SIZE    (128 * KiB)
 #define ZNS_PAGE_SIZE               (16 * KiB)
-#define NVME_DEFAULT_ZONE_SIZE      (128 * MiB) //72 * MiB)
+#define NVME_DEFAULT_ZONE_SIZE      (512 * MiB) //72 * MiB
 uint64_t lag = 0;
 //union signal sv;
 
@@ -1385,6 +1385,9 @@ static uint16_t zns_do_write(FemuCtrl *n, NvmeRequest *req, bool append,
     NvmeZone *zone;
     NvmeZonedResult *res = (NvmeZonedResult *)&req->cqe;
     uint16_t status;
+    uint64_t zidx = zns_zone_idx(ns, slba);
+
+    femu_log("zns_do_write: zone%lu 上%lu \n",zidx, nlb);
 
     assert(n->zoned);
     req->is_write = true;
@@ -1579,6 +1582,7 @@ static uint64_t  znsssd_read(ZNS *zns, NvmeRequest *req){
     struct NvmeNamespace *ns = req->ns;
     struct zns_ssdparams * spp = &zns->sp; 
 
+
     //初始化一系列时延时间参数
     //zns_ssd_lun *chip = NULL;
     zns_ssd_plane *plane = NULL;
@@ -1737,6 +1741,9 @@ static uint16_t zns_read(FemuCtrl *n, NvmeNamespace *ns, NvmeCmd *cmd,
     uint64_t data_size = zns_l2b(ns, nlb);
     uint64_t data_offset;
     uint16_t status;
+
+    uint32_t zone_idx = zns_zone_idx(ns,slba);
+    femu_log("zns_read: zone %lu上 %lu \n",zone_idx,nlb);
 #if PCIe_TIME_SIMULATION
     uint64_t nk = nlb/2;
     uint64_t delta_time = (uint64_t)nk*pow(10,9);   //n KB > 4096*1KB*2^10:10^9ns = 1KB : (10^9 / 2^10 / 4096)ns
@@ -1829,6 +1836,8 @@ static uint16_t zns_write(FemuCtrl *n, NvmeNamespace *ns, NvmeCmd *cmd,
     uint16_t status;
     uint64_t zidx = zns_zone_idx(ns, slba);
     uint64_t err_zidx = 0;
+
+    femu_log("zns_write: zone%lu 上%lu \n",zidx,nlb);
 
     assert(n->zoned);
     req->is_write = true;
@@ -1976,11 +1985,11 @@ static void znsssd_init_params(FemuCtrl * n, struct zns_ssdparams *spp){
     /**
      * 1. SSD size  2. zone size 3. # of chnls 4. # of chnls per zone
     */
-    spp->nchnls         = 8;   //default : 8                                                   /* FIXME : = ZNS_MAX_CHANNEL channel configuration like this */
-    spp->chnls_per_zone = 1;   
+    spp->nchnls         = 4;   //default : 8                                                   /* FIXME : = ZNS_MAX_CHANNEL channel configuration like this */
+    spp->chnls_per_zone = 2;   
     spp->zones          = n->num_zones;     
-    spp->ways           = 2;    //default : 2
-    spp->ways_per_zone  = 1;    //default :==spp->ways
+    spp->ways           = 4;    //default : 2
+    spp->ways_per_zone  = 2;    //default :==spp->ways
 
     spp->dies_per_chip  = 1;    //default : 1
     spp->planes_per_die = 4;    //default : 4
@@ -2051,21 +2060,29 @@ void test_print(FemuCtrl * n){
 
 
     femu_log("Initial values of dz_unit_allocate:\n");
-    for (int i = 0; i < spp->nchnls; i++) {
-        for (int j = 0; j < spp->ways * spp->dies_per_chip; j++) {
-            femu_log("%d ", zns->dz_unit_allocate[i][j]);
+    for (int j = 0; j < spp->ways * spp->dies_per_chip; j++) {
+        for (int i = 0; i < spp->nchnls; i++) {
+            printf("%d ", zns->dz_unit_allocate[i][j]);
         }
-        femu_log("\n");
+        printf("\n");
     }
 
-    femu_log("Initial values of dz_unit_using:\n");
-    for (int i = 0; i < spp->nchnls; i++) {
-        for (int j = 0; j < spp->ways * spp->dies_per_chip; j++) {
-            femu_log("%d ", zns->dz_unit_using[i][j]);
+    femu_log("Initial values of dz_unit_using:\n"); 
+    for (int j = 0; j < spp->ways * spp->dies_per_chip; j++) {
+        for (int i = 0; i < spp->nchnls; i++) {
+            printf("%d ", zns->dz_unit_using[i][j]);
         }
-        femu_log("\n");
+        printf("\n");
     }
 
+    femu_log("Initial values of every zone:\n"); 
+    for(int i = 0;i<zns->num_zones;i++){
+        printf("zone %d :",i);
+        for(int j = 0;j<spp->nchnls*spp->ways*spp->dies_per_chip;j++){
+            printf(" %u ", zns->zone_array[i].d.local_mapping[j]);
+        }
+        printf("\n");
+    }
 }
 
 void znsssd_init(FemuCtrl * n){
@@ -2085,7 +2102,8 @@ void znsssd_init(FemuCtrl * n){
     zns->zone_array = n->zone_array;
     zns->num_zones = spp->zones;
 
-    //dz added
+    /*=================================dz added===============================*/
+    zns->allocateType=STATIC_VERTICAL_FIRST;
     zns->dies   = g_malloc0(sizeof(struct zns_ssd_die) * spp->nchnls*spp->ways*spp->dies_per_chip);
     zns->dz_unit_allocate = g_malloc(spp->nchnls * sizeof(uint16_t*));
     for(int i = 0; i < spp->nchnls; i++) {
@@ -2098,14 +2116,90 @@ void znsssd_init(FemuCtrl * n){
     for(int i = 0; i < spp->nchnls; i++) {
        zns->dz_unit_using[i] = g_malloc0(spp->ways*spp->dies_per_chip* sizeof(uint16_t));
     }
+    for(int i = 0;i<zns->num_zones;i++)
+    {
+        zns->zone_array[i].d.local_mapping = g_malloc0(sizeof(uint16_t) * spp->nchnls*spp->ways*spp->dies_per_chip);
+    }
+    switch (zns->allocateType) {
+        case STATIC_HORIZONTAL_FIRST:
+        {
+            // 当type为STATIC_HORIZONTAL_FIRST时执行的代码
+            int zone_idx = 0;
+            for(int j = 0 ;j < spp->ways;  j += spp->ways_per_zone){
+                for(int i = 0 ;i < spp->nchnls;i += spp->chnls_per_zone){
+                    printf("asda\n"); 
+                    while(zns->dz_unit_allocate[i][j]!=0){
+                        test_print(n);
+                        uint16_t* dies_arr = malloc(spp->chnls_per_zone * spp->ways_per_zone * sizeof(uint16_t));
+                        int cnt = 0;
+                        for(int m = 0;m< spp->ways_per_zone;m++){
+                            for(int n = 0;n< spp->chnls_per_zone;n++){
+                                dies_arr[cnt++]=(i+n)*spp->nchnls+m+j;
+                                zns->dz_unit_allocate[i+n][m+j]-=(spp->nchnls*spp->ways*spp->dies_per_chip)/(spp->chnls_per_zone * spp->ways_per_zone*spp->dies_per_chip);
+                                zns->dz_unit_using[i+n][m+j]+=(spp->nchnls*spp->ways*spp->dies_per_chip)/(spp->chnls_per_zone * spp->ways_per_zone*spp->dies_per_chip);
+                            }
+                        }
+                        struct NvmeZone* zone = &zns->zone_array[zone_idx++];
+                        for(int m = 0;m<spp->nchnls*spp->ways*spp->dies_per_chip;m++){
+                            zone->d.local_mapping[m] = dies_arr[m%cnt];
+                        }
+                        zone->d.is_mapped = true;
+
+                        free(dies_arr);
+                        printf("asdaa\n"); 
+                    } 
+                    printf("asd\n");              
+                }
+            }
+            break;
+        }
+        case STATIC_VERTICAL_FIRST:
+        {
+            // 当type为STATIC_HORIZONTAL_FIRST时执行的代码
+            int zone_idx = 0;
+            for(int i = 0     ;i < spp->nchnls;i += spp->chnls_per_zone){
+                for(int j = 0 ;j < spp->ways;  j += spp->ways_per_zone){
+                    printf("asda\n"); 
+                    while(zns->dz_unit_allocate[i][j]!=0){
+                        test_print(n);
+                        uint16_t* dies_arr = malloc(spp->chnls_per_zone * spp->ways_per_zone * sizeof(uint16_t));
+                        int cnt = 0;
+                        for(int n = 0;n< spp->chnls_per_zone;n++){
+                            for(int m = 0;m< spp->ways_per_zone;m++){                           
+                                dies_arr[cnt++]=(i+n)*spp->nchnls+m+j;
+                                zns->dz_unit_allocate[i+n][m+j]-=(spp->nchnls*spp->ways*spp->dies_per_chip)/(spp->chnls_per_zone * spp->ways_per_zone*spp->dies_per_chip);
+                                zns->dz_unit_using[i+n][m+j]+=(spp->nchnls*spp->ways*spp->dies_per_chip)/(spp->chnls_per_zone * spp->ways_per_zone*spp->dies_per_chip);
+                            }
+                        }
+                        struct NvmeZone* zone = &zns->zone_array[zone_idx++];
+                        for(int m = 0;m<spp->nchnls*spp->ways*spp->dies_per_chip;m++){
+                            zone->d.local_mapping[m] = dies_arr[m%cnt];
+                        }
+                        zone->d.is_mapped = true;
+
+                        free(dies_arr);
+                        printf("asdaa\n"); 
+                    } 
+                    printf("asd\n");              
+                }
+            }
+            break; 
+        }
+        case DYNAMIC:
+        case CONFZNS:
+        default:
+            
+            break;
+    }
+
     test_print(n);
+    /*=================================++++++++===============================*/
     for(uint32_t i=0 ; i < n->num_zones; i++){
         int ret = pthread_spin_init(&(zns->zone_array[i].w_ptr_lock), PTHREAD_PROCESS_SHARED);
         n->zone_array[i].cnt_reset=0;
         if(ret)
             femu_err("zns.c:1687 znssd_init(): lock alloc failed, to inhoinno \n");
     }
-
 
     for (int i = 0; i < spp->nchnls; i++) {
         zns_init_ch(&zns->ch[i], spp);
@@ -2135,11 +2229,6 @@ static void zns_exit(FemuCtrl *n)
     /*
      * Release any extra resource (zones) allocated for ZNS mode
      */   
-    if (n->zoned) {
-        g_free(n->id_ns_zoned);
-        g_free(n->zone_array);
-        g_free(n->zd_extensions);
-    }
 
     struct zns *zns = n->zns;
     g_free(zns->ch);
@@ -2161,6 +2250,14 @@ static void zns_exit(FemuCtrl *n)
     }
     g_free(zns->dz_unit_using);
 
+    for(int i = 0;i<zns->num_zones;i++)
+    {
+        g_free(zns->zone_array[i].d.local_mapping);
+    }
+
+    g_free(n->id_ns_zoned);
+    g_free(n->zone_array);
+    g_free(n->zd_extensions);
 
 }
 

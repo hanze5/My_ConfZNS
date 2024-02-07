@@ -101,6 +101,17 @@ struct zns_ssdparams{
     uint64_t zone_reset_lat;    /* ZNS SSD ZONE reset latency in nanoseconds 把一个zonereset的时延*/
     uint64_t ch_xfer_lat;       /* channel transfer latency for one page in nanoseconds 在通道上传输的时延*/
 };
+
+//dz added
+enum RecourseAllocateType{
+    
+    STATIC_HORIZONTAL_FIRST = 0x00,
+    STATIC_VERTICAL_FIRST   = 0x01,
+
+    DYNAMIC                 = 0x02,
+    CONFZNS                 = 0x03,
+
+};
 /**
  * @brief 
  * inhoinno: latency emulation with zns ssd, struct znsssd is needed
@@ -120,6 +131,10 @@ typedef struct zns {
 
     uint16_t ** dz_unit_allocate;
     uint16_t ** dz_unit_using;
+
+    enum RecourseAllocateType allocateType;
+
+    uint64_t dz_unit_size;                     //暂时没想好以什么作为单位 应该以逻辑块为单位 也就是512B
 
     /*new members for znsssd*/
     struct NvmeNamespace    * namespaces;      //FEMU only support 1 namespace For now, 
@@ -183,12 +198,7 @@ enum NvmeZoneSendAction {
     NVME_ZONE_ACTION_SET_ZD_EXT      = 0x10,
 };
 
-enum RecourseAllocateType{
-    STATIC_HORIZONTAL_FIRST = 0x00,
-    STATIC_VERTICAL_FIRST   = 0x01,
-    DYNAMIC                 = 0x02,
 
-};
 
 typedef struct QEMU_PACKED NvmeZoneDescr {
     uint8_t     zt;
@@ -202,7 +212,7 @@ typedef struct QEMU_PACKED NvmeZoneDescr {
     uint64_t    zslba;
     uint64_t    wp;
     uint8_t     rsvd32[24];
-    uint16_t   *local_dies;     
+    uint16_t   *local_mapping;      
 } NvmeZoneDescr;
 
 typedef enum NvmeZoneState {

@@ -1,22 +1,14 @@
 {
-    "C_Cpp.dimInactiveRegions": false,
     "files.associations": {
-        "*.inc": "cpp",
-        "*.tcc": "cpp",
-        "optional": "cpp",
-        "ratio": "cpp",
-        "system_error": "cpp",
         "array": "cpp",
+        "chrono": "cpp",
         "functional": "cpp",
-        "regex": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "variant": "cpp",
-        "bitset": "cpp",
-        "string_view": "cpp",
-        "initializer_list": "cpp",
-        "*.idef": "cpp",
-        "*.def": "cpp"
+        "vector": "cpp"
     }
 }

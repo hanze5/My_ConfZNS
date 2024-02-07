@@ -610,3 +610,8 @@ rocksdb.sst.read.micros P50 : 243.526015 P95 : 1134.105259 P99 : 1913.884220 P10
 rocksdb.file.read.flush.micros P50 : 204.285714 P95 : 1620.000000 P99 : 1776.000000 P100 : 1776.000000 COUNT : 28 SUM : 10641
 rocksdb.file.read.get.micros P50 : 242.391868 P95 : 1001.620684 P99 : 1759.560900 P100 : 20957.000000 COUNT : 149842 SUM : 52869053
 rocksdb.db.flush.micros P50 : 211481.481481 P95 : 248814.814815 P99 : 255417.000000 P100 : 255417.000000 COUNT : 28 SUM : 6200826
+
+
+
+zone的容量除以 die的总数量   就是划分资源的最小单元   假如 4个 channel 一个channel 4个die  那么总共16个die  那么一个zone 256 MB的话  那么  相当于划分资源的最小单位就是16MB
+
