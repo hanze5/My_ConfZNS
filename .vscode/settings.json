@@ -9,6 +9,9 @@
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "*.code": "c",
+        "*.idef": "cpp",
+        "*.def": "cpp"
     }
 }

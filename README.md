@@ -49,7 +49,7 @@ TODO：
 读延迟 65000  写延迟450000 传输延迟25000
 
 读延迟模拟 写延迟模拟
-
+ 
 
 一些常用的命令
 ```shell
@@ -89,8 +89,8 @@ rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
   --disable_wal \
   -use_direct_io_for_flush_and_compaction=true \
   -use_direct_reads=true \
-  -keyrange_dist_a=14.18 \
-  -keyrange_dist_b=-2.917 \
+  -keyrange_dist_a=24.18 \
+  -keyrange_dist_b=-8.917 \
   -keyrange_dist_c=0.0164 \
   -keyrange_dist_d=-0.08082 \
   -keyrange_num=30 \
