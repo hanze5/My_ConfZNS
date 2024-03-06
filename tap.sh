@@ -13,3 +13,7 @@ sudo ip link set br0 up
 sudo ip link set tap0 master br0
 
 sudo ip tuntap del dev tap0 mode tap
+
+
+
+export MPLCONFIGDIR=/home/nsq/dzworkspace/My_ConfZNS/tempfolder

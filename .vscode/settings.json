@@ -13,5 +13,6 @@
         "*.code": "c",
         "*.idef": "cpp",
         "*.def": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
