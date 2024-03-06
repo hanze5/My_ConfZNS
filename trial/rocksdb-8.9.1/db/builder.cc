@@ -103,12 +103,16 @@ Status BuildTable(
         range_del_iter->total_tombstone_payload_bytes();
     range_del_agg->AddTombstones(std::move(range_del_iter));
   }
-  
-  //dz modified
+
   // std::string fname = TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
-  //                                   meta->fd.GetPathId(),tboptions.column_family_name);
+  //                                   meta->fd.GetPathId());
+  // meta->fd.packed_number_and_path_id = meta->fd.packed_number_and_path_id*10;
+  //dz modified
   std::string fname = TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
                                     meta->fd.GetPathId());
+  std::cout<<"builder.cc:"<<meta->fd.packed_number_and_path_id<<std::endl;                                
+
+
   // std::cout<<"dz BuildTable:column_family_name is "+tboptions.column_family_name<<" but fname is "<<fname
   //          <<" and ioptions.cf_path is "<<ioptions.cf_paths[meta->fd.GetPathId()].path<< std::endl;
   
@@ -172,7 +176,9 @@ Status BuildTable(
       table_file_created = true;
       FileTypeSet tmp_set = ioptions.checksum_handoff_file_types;
       file->SetIOPriority(io_priority);
+      write_hint = Env::LEVEL_0;
       file->SetWriteLifeTimeHint(write_hint);
+      
       file_writer.reset(new WritableFileWriter(
           std::move(file), fname, file_options, ioptions.clock, io_tracer,
           ioptions.stats, ioptions.listeners,

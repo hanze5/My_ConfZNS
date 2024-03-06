@@ -31,6 +31,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
+#include <iostream>
 
 #include <algorithm>
 // Get nano time includes
@@ -228,11 +229,13 @@ class PosixFileSystem : public FileSystem {
     do {
       IOSTATS_TIMER_GUARD(open_nanos);
       fd = open(fname.c_str(), flags, GetDBFileMode(allow_non_owner_access_));
+      std::cout<<"本应该是:"<<fname<<std::endl;
     } while (fd < 0 && errno == EINTR);
     if (fd < 0) {
       s = IOError("While open a file for random read", fname, errno);
       return s;
     }
+    
     SetFD_CLOEXEC(fd, &options);
 
     if (options.use_mmap_reads) {

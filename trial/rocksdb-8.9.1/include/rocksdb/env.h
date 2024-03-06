@@ -246,7 +246,16 @@ class Env : public Customizable {
     WLTH_MEDIUM,       // Data written has a medium life time
     WLTH_LONG,         // Data written has a long life time
     WLTH_EXTREME,      // Data written has an extremely long life time
+
+    LEVEL_0,
+    LEVEL_1,
+    LEVEL_2,
+    LEVEL_3,
+    LEVEL_4,
+    LEVEL_5UP,
+
   };
+
 
   // Create an object that writes to a new file with the specified
   // name.  Deletes any existing file with the same name and creates a

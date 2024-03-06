@@ -6532,8 +6532,8 @@ class Benchmark {
     const int64_t default_value_max = 1 * 1024 * 1024;
     int64_t value_max = default_value_max;
     int64_t scan_len_max = FLAGS_mix_max_scan_len;
-    double write_rate = 1000000.0;
-    double read_rate = 1000000.0;
+    double write_rate = 10000.0;
+    double read_rate = 10000.0;
     bool use_prefix_modeling = false;
     bool use_random_modeling = false;
     GenerateTwoTermExpKeys gen_exp;
@@ -8851,7 +8851,7 @@ int db_bench_tool(int argc, char** argv) {
   } else {
     seed_base = FLAGS_seed;
   }
-
+  std::cout<<"哪里除了问题呢"<<std::endl;
   if (FLAGS_use_existing_keys && !FLAGS_use_existing_db) {
     fprintf(stderr,
             "`-use_existing_db` must be true for `-use_existing_keys` to be "
