@@ -1,0 +1,258 @@
+希望以 非只读  独占 的方式打开dbd设备
+Zone block device nr zones: 512 max active: 512 max open: 512
+dz ZonedBlockDevice::AllocateMetaZone :元数据区域共有4
+Set seed to 1707727489807403 because --seed was 0
+Initializing RocksDB Options from the specified file
+Initializing RocksDB Options from command-line flags
+Integrated BlobDB: blob cache disabled
+同时打开了dbstats0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/MANIFEST-000124
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/MANIFEST-000124
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000124.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000124.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/OPTIONS-000125.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/OPTIONS-000125.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+成功打开DB:rocksdbtest/dbbench/0
+同时打开了dbstats1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/MANIFEST-000099
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/MANIFEST-000099
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000099.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000099.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000127.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000127.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/OPTIONS-000100.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/OPTIONS-000100.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+成功打开DB:rocksdbtest/dbbench/1
+同时打开了dbstats2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/MANIFEST-000099
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/MANIFEST-000099
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000099.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000099.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/OPTIONS-000100.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/OPTIONS-000100.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+成功打开DB:rocksdbtest/dbbench/2
+同时打开了dbstats3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/MANIFEST-000099
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/MANIFEST-000099
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000099.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000099.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/OPTIONS-000100.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/OPTIONS-000100.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+成功打开DB:rocksdbtest/dbbench/3
+Keys:       48 bytes each (+ 0 bytes user-defined timestamp)
+Values:     100 bytes each (50 bytes after compression)
+Entries:    655360
+Prefix:    0 bytes
+Keys per prefix:    0
+RawSize:    92.5 MB (estimated)
+FileSize:   61.2 MB (estimated)
+Write rate: 0 bytes/second
+Read rate: 0 ops/second
+Compression: Snappy
+Compression sampling rate: 0
+Memtablerep: SkipListFactory
+Perf Level: 1
+------------------------------------------------
+DB path: [rocksdbtest/dbbench]
+开始
+随机数种子为1707727489807404
+运行 MixGraphB
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000128.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000128.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000102.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000102.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000103.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000103.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000104.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000104.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000105.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000105.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000106.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000106.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000107.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000107.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000108.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000108.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000109.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000109.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000110.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000110.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000111.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000111.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000112.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000112.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000113.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000113.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000114.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000114.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000115.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000115.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000116.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000116.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000117.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000117.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000118.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000118.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000119.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000119.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000120.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000120.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000121.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000121.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000122.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000122.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000123.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000123.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000124.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000124.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+<===================================前0个线程报告===================================>
+mixgraphb    :     146.663 micros/op 6818 ops/sec 600.146 seconds 4091999 operations;  113.4 MB/s ( Gets:2046840 Puts:2045159 Seek:0, reads 2046840 in 2046840 found, avg size: 2048.0 value, -nan scan)
+
+<===================================前0个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 0
+rocksdb.l0.hit COUNT : 0
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 0
+rocksdb.number.keys.written COUNT : 0
+rocksdb.number.keys.read COUNT : 0
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 0
+rocksdb.bytes.read COUNT : 0
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 0
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.table.sync.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 1641.666667 P95 : 2782.608696 P99 : 3973.076923 P100 : 5182.000000 COUNT : 570 SUM : 979290
+rocksdb.file.read.flush.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.file.read.get.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.flush.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+
+<===================================前1个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 2046840
+rocksdb.l0.hit COUNT : 4375
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 2042465
+rocksdb.number.keys.written COUNT : 2045159
+rocksdb.number.keys.read COUNT : 2046840
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 4319375808
+rocksdb.bytes.read COUNT : 66972604800
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 1982246755
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 215.045420 P95 : 711.638323 P99 : 1052.880699 P100 : 29189.000000 COUNT : 2046840 SUM : 580203293
+rocksdb.db.write.micros P50 : 5.059601 P95 : 14.596533 P99 : 22.421235 P100 : 5865.000000 COUNT : 2045159 SUM : 13512496
+rocksdb.table.sync.micros P50 : 870.000000 P95 : 2180.000000 P99 : 2180.000000 P100 : 2180.000000 COUNT : 16 SUM : 17850
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 136.334986 P95 : 167.267778 P99 : 174.384858 P100 : 28793.000000 COUNT : 3829781 SUM : 499634592
+rocksdb.file.read.flush.micros P50 : 734.666667 P95 : 2100.000000 P99 : 2740.000000 P100 : 2780.000000 COUNT : 16 SUM : 13320
+rocksdb.file.read.get.micros P50 : 136.318823 P95 : 167.237069 P99 : 169.985357 P100 : 28793.000000 COUNT : 3827980 SUM : 496374224
+rocksdb.db.flush.micros P50 : 740866.000000 P95 : 928000.000000 P99 : 968032.000000 P100 : 968032.000000 COUNT : 16 SUM : 12448912
+
+<===================================前2个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 0
+rocksdb.l0.hit COUNT : 0
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 0
+rocksdb.number.keys.written COUNT : 0
+rocksdb.number.keys.read COUNT : 0
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 0
+rocksdb.bytes.read COUNT : 0
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 0
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.table.sync.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 452.727273 P95 : 2125.000000 P99 : 7194.000000 P100 : 8072.000000 COUNT : 82 SUM : 61671
+rocksdb.file.read.flush.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.file.read.get.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.flush.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+
+<===================================前3个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 0
+rocksdb.l0.hit COUNT : 0
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 0
+rocksdb.number.keys.written COUNT : 0
+rocksdb.number.keys.read COUNT : 0
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 0
+rocksdb.bytes.read COUNT : 0
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 0
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.table.sync.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 370.370370 P95 : 2080.000000 P99 : 2325.000000 P100 : 2325.000000 COUNT : 82 SUM : 53342
+rocksdb.file.read.flush.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.file.read.get.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.flush.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000125.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000125.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1

@@ -179,7 +179,7 @@ std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
  * 重载TableFileName函数 加入 column_family_name信息
 */
 std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
-                          uint32_t path_id,const std::string& column_family_name) {
+                          uint32_t path_id,const std::string& level) {
   assert(number > 0);
   std::string path;
   if (path_id >= db_paths.size()) {
@@ -187,7 +187,7 @@ std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
   } else {
     path = db_paths[path_id].path;
   }
-  return MakeTableFileName(path, number ,column_family_name);
+  return MakeTableFileName(path+level, number);
 }
 
 void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,

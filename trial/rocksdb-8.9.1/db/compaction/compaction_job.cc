@@ -16,6 +16,7 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "db/blob/blob_counting_iterator.h"
 #include "db/blob/blob_file_addition.h"
@@ -1820,6 +1821,22 @@ void CompactionJob::RecordCompactionIOStats() {
   IOSTATS_RESET(bytes_written);
 }
 
+Env::WriteLifeTimeHint levelToLifeTimeHint(int level) {
+    switch (level) {
+        case 0:
+            return Env::LEVEL_1;
+        case 1:
+            return Env::LEVEL_2;
+        case 2:
+            return Env::LEVEL_3;
+        case 3:
+            return Env::LEVEL_4;
+        default:
+            return Env::LEVEL_5UP;
+
+    }
+}
+ 
 Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
                                                CompactionOutputs& outputs) {
   assert(sub_compact != nullptr);
@@ -1827,6 +1844,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
   // no need to lock because VersionSet::next_file_number_ is atomic
   uint64_t file_number = versions_->NewFileNumber();
   std::string fname = GetTableFileName(file_number);
+  std::cout<<"compaction.cc:"<<fname<<std::endl;    
   // Fire events.
   ColumnFamilyData* cfd = sub_compact->compaction->column_family_data();
   EventHelpers::NotifyTableFileCreationStarted(
@@ -1854,7 +1872,12 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
   fo_copy.temperature = temperature;
 
   Status s;
+  // std::string level = "l" sub_compact->compaction->level();
   IOStatus io_s = NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
+  
+
+  int level = sub_compact->compaction->level();
+
   s = io_s;
   if (sub_compact->io_status.ok()) {
     sub_compact->io_status = io_s;
@@ -1936,6 +1959,9 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
 
   writable_file->SetIOPriority(GetRateLimiterPriority());
   writable_file->SetWriteLifeTimeHint(write_hint_);
+  Env::WriteLifeTimeHint hint = levelToLifeTimeHint(level);
+  std::cout<<"合并！！！："<<level<<std::endl;
+  writable_file->SetWriteLifeTimeHint(hint);
   FileTypeSet tmp_set = db_options_.checksum_handoff_file_types;
   writable_file->SetPreallocationBlockSize(static_cast<size_t>(
       sub_compact->compaction->OutputFilePreallocationSize()));
@@ -2124,6 +2150,8 @@ void CompactionJob::LogCompaction() {
 }
 
 std::string CompactionJob::GetTableFileName(uint64_t file_number) {
+  // std::string level = "l"+std::to_string(compact_->compaction->level())+"_";
+  // std::cout<<"compaction_jiob.cc:"<<compact_->compaction->immutable_options()->cf_paths[0].path<<"_"<<file_number<<std::endl;  
   return TableFileName(compact_->compaction->immutable_options()->cf_paths,
                        file_number, compact_->compaction->output_path_id());
 }

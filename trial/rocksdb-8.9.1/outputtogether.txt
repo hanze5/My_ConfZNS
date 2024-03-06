@@ -1,0 +1,1852 @@
+希望以 非只读  独占 的方式打开dbd设备
+Zone block device nr zones: 512 max active: 512 max open: 512
+dz ZonedBlockDevice::AllocateMetaZone :元数据区域共有4
+Set seed to 1707664477909955 because --seed was 0
+Initializing RocksDB Options from the specified file
+Initializing RocksDB Options from command-line flags
+Integrated BlobDB: blob cache disabled
+同时打开了dbstats0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/MANIFEST-000094
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/MANIFEST-000094
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000094.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000094.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/OPTIONS-000095.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/OPTIONS-000095.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+成功打开DB:rocksdbtest/dbbench/0
+同时打开了dbstats1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/MANIFEST-000093
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/MANIFEST-000093
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000093.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000093.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/OPTIONS-000094.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/OPTIONS-000094.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+成功打开DB:rocksdbtest/dbbench/1
+同时打开了dbstats2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/MANIFEST-000093
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/MANIFEST-000093
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000093.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000093.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/OPTIONS-000094.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/OPTIONS-000094.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+成功打开DB:rocksdbtest/dbbench/2
+同时打开了dbstats3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/MANIFEST-000093
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/MANIFEST-000093
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000093.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000093.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/OPTIONS-000094.dbtmp
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/OPTIONS-000094.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+成功打开DB:rocksdbtest/dbbench/3
+Keys:       48 bytes each (+ 0 bytes user-defined timestamp)
+Values:     100 bytes each (50 bytes after compression)
+Entries:    655360
+Prefix:    0 bytes
+Keys per prefix:    0
+RawSize:    92.5 MB (estimated)
+FileSize:   61.2 MB (estimated)
+Write rate: 0 bytes/second
+Read rate: 0 ops/second
+Compression: Snappy
+Compression sampling rate: 0
+Memtablerep: SkipListFactory
+Perf Level: 1
+------------------------------------------------
+DB path: [rocksdbtest/dbbench]
+开始
+随机数种子为1707664477909956
+随机数种子为1707664477909957
+随机数种子为1707664477909958
+随机数种子为1707664477909959
+运行 MixGraphC
+运行 MixGraphA
+运行 MixGraphB
+运行 MixGraphD
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000096.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000096.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000096.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000096.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000097.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000097.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000097.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000097.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000096.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000096.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000097.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000097.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000097.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000097.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000098.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000098.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000098.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000098.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000098.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000098.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000099.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000099.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000100.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000100.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000099.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000099.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000098.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000098.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000101.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000101.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000099.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000099.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000100.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000100.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000099.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000099.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000102.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000102.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000101.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000101.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000100.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000100.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000100.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000100.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000103.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000103.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000102.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000102.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000101.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000101.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000101.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000101.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000102.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000102.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000102.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000102.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000103.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000103.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000104.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000104.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000102.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000102.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000103.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000103.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000104.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000104.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000102.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000102.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000103.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000103.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000105.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000105.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000104.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000104.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000105.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000105.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000105.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000105.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000106.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000106.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000107.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000107.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000104.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000104.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000105.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000105.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000108.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000108.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000105.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000105.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000104.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000104.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000106.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000106.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000106.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000106.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000107.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000107.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000109.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000109.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000110.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000110.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000106.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000106.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000111.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000111.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000112.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000112.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000113.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000113.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000108.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000108.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000109.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000109.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000110.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000110.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000114.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000114.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000111.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000111.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000107.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000107.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000108.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000108.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000108.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000108.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000107.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000107.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000109.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000109.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000112.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000112.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000110.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000110.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000115.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000115.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000108.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000108.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000111.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000111.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000108.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000108.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000109.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000109.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000110.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000110.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000113.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000113.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000112.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000112.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000111.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000111.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000116.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000116.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000117.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000117.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000117.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000117.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000118.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000118.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000119.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000119.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000119.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000119.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000120.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000120.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000119.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000119.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000112.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000112.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000114.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000114.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000114.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000114.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000113.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000113.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000115.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000115.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000115.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000115.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000116.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000116.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000116.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000116.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000117.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000117.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000121.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000121.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000121.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000121.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000113.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000113.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000114.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000114.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000115.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000115.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000116.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000116.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000118.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000118.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000117.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000117.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000122.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000122.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000114.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000114.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000115.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000115.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000118.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000118.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000116.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000116.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000117.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000117.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000119.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000119.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000118.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000118.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000119.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000119.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000123.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000123.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000124.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000124.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000125.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000125.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000126.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000126.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000119.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000119.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000127.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000127.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000120.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000120.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000121.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000121.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000120.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000120.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000122.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000122.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000128.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000128.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000123.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000123.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000124.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000124.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000129.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000129.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000120.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000120.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000125.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000125.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000130.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000130.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000131.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000131.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000131.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000131.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000132.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000132.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000133.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000133.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000121.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000121.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000134.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000134.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000135.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000135.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000126.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000126.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000127.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000127.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000128.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000128.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000129.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000129.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000121.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000121.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000130.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000130.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000131.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000131.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000122.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000122.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000123.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000123.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000132.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000132.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000124.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000124.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000125.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000125.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000122.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000122.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000137.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000137.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000123.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000123.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000124.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000124.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000125.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000125.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000126.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000126.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000138.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000138.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000138.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000138.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000133.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000133.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000138.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000138.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000139.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000139.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000139.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000139.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000139.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000139.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000140.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000140.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000126.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000126.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000140.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000140.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000141.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000141.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000142.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000142.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000127.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000127.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000128.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000128.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000129.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000129.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000130.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000130.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000131.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000131.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000132.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000132.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000134.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000134.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000135.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000135.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000134.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000134.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000127.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000127.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000143.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000143.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000137.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000137.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000133.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000133.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000137.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000137.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000138.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000138.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000128.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000128.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000129.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000129.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000130.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000130.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000144.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000144.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000139.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000139.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000131.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000131.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000134.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000134.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000132.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000132.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000134.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000134.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000135.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000135.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000135.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000135.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000135.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000135.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000137.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000137.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000145.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000145.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000138.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000138.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000138.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000138.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000146.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000146.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000140.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000140.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000147.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000147.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000148.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000148.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000133.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000133.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000133.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000133.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000133.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000133.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000134.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000134.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000135.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000135.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000134.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000134.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000139.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000139.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000136.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000136.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000137.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000137.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000141.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000141.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000142.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000142.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000143.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000143.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000144.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000144.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000138.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000138.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000150.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000150.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000151.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000151.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000151.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000151.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000140.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000140.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000152.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000152.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000152.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000152.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000153.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000153.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000141.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000141.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000142.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000142.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000143.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000143.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000139.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000139.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000144.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000144.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000154.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000154.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000145.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000145.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000146.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000146.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000147.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000147.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000145.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000145.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000148.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000148.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000150.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000150.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000151.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000151.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000155.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000155.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000156.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000156.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000157.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000157.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000140.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000140.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000158.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000158.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000141.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000141.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000142.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000142.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000146.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000146.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000143.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000143.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000152.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000152.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000152.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000152.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000144.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000144.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000147.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000147.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000147.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000147.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000148.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000148.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000148.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000148.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000159.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000159.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000150.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000150.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000145.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000145.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000151.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000151.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000153.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000153.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000154.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000154.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000154.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000154.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000152.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000152.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000154.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000154.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000155.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000155.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000156.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000156.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000156.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000156.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000156.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000156.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000157.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000157.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000158.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000158.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000158.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000158.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000160.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000160.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000161.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000161.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000162.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000162.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000153.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000153.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000163.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000163.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000164.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000164.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000165.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000165.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000146.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000146.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000147.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000147.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000159.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000159.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000159.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000159.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000148.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000148.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000148.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000148.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000148.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000148.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000154.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000154.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000149.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000149.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000150.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000150.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000151.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000151.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000155.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000155.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000160.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000160.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000166.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000166.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000160.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000160.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000166.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000166.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000161.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000161.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000162.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000162.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000161.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000161.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000163.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000163.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000167.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000167.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000152.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000152.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000167.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000167.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000168.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000168.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000168.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000168.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000156.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000156.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000168.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000168.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000169.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000169.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000169.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000169.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000170.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000170.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000171.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000171.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000171.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000171.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000172.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000172.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000153.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000153.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000164.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000164.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000157.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000157.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000154.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000154.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000158.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000158.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000173.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000173.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000173.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000173.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000165.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000165.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000166.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000166.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000167.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000167.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000168.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000168.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000169.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000169.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000155.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000155.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000159.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000159.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000156.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000156.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000174.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000174.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000160.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000160.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000161.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000161.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000161.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000161.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000162.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000162.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000162.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000162.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000157.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000157.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000162.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000162.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000170.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000170.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000163.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000163.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000163.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000163.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000164.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000164.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000171.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000171.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000171.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000171.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000172.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000172.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000175.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000175.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000175.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000175.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000173.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000173.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000165.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000165.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000173.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000173.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000173.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000173.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000174.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000174.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000174.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000174.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000175.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000175.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000175.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000175.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000176.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000176.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000158.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000158.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000176.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000176.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000177.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000177.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000177.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000177.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000177.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000177.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000166.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000166.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000178.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000178.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000179.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000179.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000180.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000180.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000181.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000181.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000159.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000159.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000159.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000159.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000160.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000160.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000160.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000160.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000178.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000178.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000161.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000161.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000161.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000161.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000167.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000167.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000162.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000162.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000162.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000162.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000163.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000163.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000164.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000164.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000168.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000168.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000182.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000182.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000179.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000179.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000169.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000169.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000170.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000170.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000171.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000171.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000183.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000183.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000172.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000172.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000165.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000165.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000185.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000185.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000185.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000185.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000186.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000186.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000186.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000186.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000187.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000187.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000188.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000188.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000188.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000188.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000180.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000180.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000189.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000189.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000166.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000166.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000190.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000190.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000190.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000190.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000167.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000167.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000168.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000168.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000169.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000169.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000170.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000170.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000173.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000173.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000174.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000174.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000175.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000175.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000191.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000191.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000176.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000176.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000177.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000177.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000181.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000181.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000192.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000192.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000182.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000182.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000193.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000193.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000171.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000171.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000194.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000194.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000195.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000195.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000196.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000196.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000172.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000172.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000173.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000173.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000174.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000174.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000178.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000178.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000178.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000178.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000175.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000175.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000179.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000179.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000180.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000180.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000180.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000180.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000181.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000181.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000181.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000181.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000182.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000182.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000182.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000182.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000176.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000176.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000197.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000197.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000183.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000183.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000182.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000182.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000183.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000183.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000183.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000183.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000185.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000185.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000185.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000185.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000186.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000186.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000186.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000186.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000186.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000186.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000186.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000186.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000187.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000187.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000198.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000198.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000188.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000188.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000187.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000187.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000189.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000189.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000177.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000177.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000190.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000190.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000177.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000177.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000199.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000199.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000199.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000199.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000191.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000191.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000200.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000200.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000200.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000200.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000200.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000200.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000201.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000201.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000201.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000201.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000202.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000202.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000203.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000203.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000204.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000204.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000192.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000192.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000205.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000205.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000188.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000188.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000206.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000206.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000178.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000178.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000178.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000178.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000207.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000207.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000179.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000179.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000179.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000179.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000180.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000180.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000181.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000181.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000181.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000181.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000181.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000181.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000182.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000182.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000183.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000183.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000182.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000182.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000193.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000193.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000184.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000184.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000208.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000208.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000185.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000185.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000189.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000189.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000190.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000190.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000194.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000194.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000195.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000195.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000196.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000196.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000197.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000197.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000186.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000186.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000198.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000198.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000187.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000187.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000191.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000191.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000209.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000209.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000192.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000192.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000199.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000199.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000200.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000200.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000201.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000201.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000202.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000202.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000193.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000193.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000203.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000203.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000210.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000210.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000188.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000188.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000189.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000189.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000190.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000190.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000194.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000194.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000211.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000211.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000194.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000194.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000195.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000195.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000195.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000195.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000196.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000196.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000204.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000204.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000197.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000197.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000197.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000197.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000198.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000198.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000199.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000199.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000191.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000191.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000200.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000200.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000201.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000201.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000202.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000202.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000205.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000205.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000205.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000205.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000206.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000206.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000206.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000206.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000207.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000207.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000212.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000212.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000207.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000207.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000208.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000208.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000208.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000208.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000209.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000209.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000203.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000203.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000210.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000210.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000211.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000211.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+mixgraph_together :     873.674 micros/op 1144 ops/sec 600.213 seconds 686999 operations;   35.8 MB/s ( Gets:344279 Puts:342720 Seek:0, reads 344279 in 344279 found, avg size: 32768.0 value, -nan scan)
+
+mixgraph_together :     859.824 micros/op 1163 ops/sec 600.156 seconds 697999 operations;   36.4 MB/s ( Gets:349099 Puts:348900 Seek:0, reads 349099 in 349099 found, avg size: 32768.0 value, -nan scan)
+
+mixgraph_together :     906.465 micros/op 1103 ops/sec 600.986 seconds 662999 operations;   34.5 MB/s ( Gets:331871 Puts:331128 Seek:0, reads 331871 in 331871 found, avg size: 32768.0 value, -nan scan)
+
+mixgraph_together :     924.832 micros/op 1081 ops/sec 601.140 seconds 649999 operations;   33.8 MB/s ( Gets:324655 Puts:325344 Seek:0, reads 324655 in 324655 found, avg size: 32768.0 value, -nan scan)
+
+mixgraph_together :     890.474 micros/op 4488 ops/sec 601.140 seconds 2697996 operations;  140.4 MB/s ( Gets:344279 Puts:342720 Seek:0, reads 344279 in 344279 found, avg size: 32768.0 value, -nan scan)
+
+<===================================前0个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 344279
+rocksdb.l0.hit COUNT : 735
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 343544
+rocksdb.number.keys.written COUNT : 342720
+rocksdb.number.keys.read COUNT : 344279
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 11252525760
+rocksdb.bytes.read COUNT : 11264808880
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 6096325157
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 1280.871041 P95 : 4294.618036 P99 : 6374.430823 P100 : 404180.000000 COUNT : 344279 SUM : 590021716
+rocksdb.db.write.micros P50 : 13.806373 P95 : 35.841677 P99 : 60.011927 P100 : 5574.000000 COUNT : 342720 SUM : 5922618
+rocksdb.table.sync.micros P50 : 1085.000000 P95 : 2875.000000 P99 : 4911.000000 P100 : 4911.000000 COUNT : 43 SUM : 59658
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 162.389654 P95 : 1096.220397 P99 : 2031.192883 P100 : 19874.000000 COUNT : 1938486 SUM : 552768830
+rocksdb.file.read.flush.micros P50 : 238.800000 P95 : 570.000000 P99 : 1115.100000 P100 : 1221.000000 COUNT : 43 SUM : 12550
+rocksdb.file.read.get.micros P50 : 162.113918 P95 : 1028.087790 P99 : 1848.773739 P100 : 19874.000000 COUNT : 1928318 SUM : 532135516
+rocksdb.db.flush.micros P50 : 1012564.102564 P95 : 1099724.000000 P99 : 1099724.000000 P100 : 1099724.000000 COUNT : 43 SUM : 41303012
+
+<===================================前1个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 349099
+rocksdb.l0.hit COUNT : 457
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 348642
+rocksdb.number.keys.written COUNT : 348900
+rocksdb.number.keys.read COUNT : 349099
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 11455433700
+rocksdb.bytes.read COUNT : 11422519280
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 6238789863
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 1259.690380 P95 : 4292.251219 P99 : 6400.485733 P100 : 404419.000000 COUNT : 349099 SUM : 589847440
+rocksdb.db.write.micros P50 : 13.744630 P95 : 34.410560 P99 : 57.816215 P100 : 16001.000000 COUNT : 348900 SUM : 5953242
+rocksdb.table.sync.micros P50 : 977.500000 P95 : 2533.333333 P99 : 2826.666667 P100 : 2849.000000 COUNT : 44 SUM : 52582
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 162.686574 P95 : 1109.668493 P99 : 2045.072902 P100 : 403160.000000 COUNT : 1922878 SUM : 553391696
+rocksdb.file.read.flush.micros P50 : 315.000000 P95 : 1271.333333 P99 : 1401.000000 P100 : 1401.000000 COUNT : 44 SUM : 20310
+rocksdb.file.read.get.micros P50 : 162.409112 P95 : 1042.180863 P99 : 1852.873363 P100 : 403160.000000 COUNT : 1912785 SUM : 532359940
+rocksdb.db.flush.micros P50 : 1003157.894737 P95 : 1145288.000000 P99 : 1145288.000000 P100 : 1145288.000000 COUNT : 44 SUM : 41850631
+
+<===================================前2个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 331871
+rocksdb.l0.hit COUNT : 594
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 331277
+rocksdb.number.keys.written COUNT : 331128
+rocksdb.number.keys.read COUNT : 331871
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 10871925624
+rocksdb.bytes.read COUNT : 10858819120
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 5811459678
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 1345.612407 P95 : 4375.527892 P99 : 6495.437752 P100 : 410178.000000 COUNT : 331871 SUM : 590996347
+rocksdb.db.write.micros P50 : 14.017341 P95 : 37.804098 P99 : 61.919959 P100 : 7737.000000 COUNT : 331128 SUM : 5849073
+rocksdb.table.sync.micros P50 : 850.227273 P95 : 2558.333333 P99 : 2831.000000 P100 : 2831.000000 COUNT : 41 SUM : 48486
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 163.144081 P95 : 1097.863761 P99 : 1987.732584 P100 : 407868.000000 COUNT : 1927109 SUM : 551448722
+rocksdb.file.read.flush.micros P50 : 228.571429 P95 : 575.000000 P99 : 1426.000000 P100 : 1426.000000 COUNT : 41 SUM : 12590
+rocksdb.file.read.get.micros P50 : 162.895419 P95 : 1037.930711 P99 : 1849.776010 P100 : 407868.000000 COUNT : 1918126 SUM : 533754136
+rocksdb.db.flush.micros P50 : 1011621.621622 P95 : 1122085.000000 P99 : 1122085.000000 P100 : 1122085.000000 COUNT : 41 SUM : 38885804
+
+<===================================前3个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 324655
+rocksdb.l0.hit COUNT : 865
+rocksdb.l1.hit COUNT : 0
+rocksdb.l2andup.hit COUNT : 323790
+rocksdb.number.keys.written COUNT : 325344
+rocksdb.number.keys.read COUNT : 324655
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 10682019552
+rocksdb.bytes.read COUNT : 10622711600
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 0
+rocksdb.flush.write.bytes COUNT : 5669155737
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 1400.290228 P95 : 4444.494113 P99 : 6521.077918 P100 : 403379.000000 COUNT : 324655 SUM : 590988822
+rocksdb.db.write.micros P50 : 14.229395 P95 : 41.019108 P99 : 66.092812 P100 : 16607.000000 COUNT : 325344 SUM : 6027728
+rocksdb.table.sync.micros P50 : 987.272727 P95 : 3361.000000 P99 : 3361.000000 P100 : 3361.000000 COUNT : 40 SUM : 54345
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.sst.read.micros P50 : 163.745122 P95 : 1118.059048 P99 : 2036.673254 P100 : 402845.000000 COUNT : 1917491 SUM : 554856235
+rocksdb.file.read.flush.micros P50 : 234.000000 P95 : 1085.000000 P99 : 1943.000000 P100 : 1943.000000 COUNT : 40 SUM : 13091
+rocksdb.file.read.get.micros P50 : 163.439823 P95 : 1046.435308 P99 : 1852.643522 P100 : 402845.000000 COUNT : 1906641 SUM : 533726601
+rocksdb.db.flush.micros P50 : 1025641.025641 P95 : 1069718.000000 P99 : 1069718.000000 P100 : 1069718.000000 COUNT : 40 SUM : 38444454
+
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000210.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000210.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000213.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000213.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000213.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000213.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000214.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/0/000214.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::Append: /rocksdbtest/dbbench/1/000204.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/1/000204.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000192.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000192.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/2/000193.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/2/000193.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000212.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000212.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::Append: /rocksdbtest/dbbench/3/000213.sst
+dz ZoneFile::AllocateNewZone:需要分配zone的文件是/rocksdbtest/dbbench/3/000213.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3

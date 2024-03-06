@@ -427,7 +427,7 @@ class MockWritableFile : public FSWritableFile {
     if (rate_limiter_ && io_priority_ < Env::IO_TOTAL) {
       bytes = std::min(
           bytes, static_cast<size_t>(rate_limiter_->GetSingleBurstBytes()));
-      rate_limiter_->Request(bytes, io_priority_);
+      rate_limiter_->Request(1, io_priority_);
     }
     return bytes;
   }
