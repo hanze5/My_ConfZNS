@@ -80,9 +80,9 @@ typedef struct zns_ssd_lun {
  * dz modified
  */
 typedef struct zns_ssd_die {
-    uint64_t next_avail_time; // in nanoseconds
-    pthread_spinlock_t time_lock;
-
+    // uint64_t next_avail_time; // in nanoseconds
+    // pthread_spinlock_t time_lock;
+    uint32_t int_test;
     uint32_t *blkgrps_in_die; //die用于维护自身blkgrp idx
 
 }zns_ssd_die;
@@ -128,70 +128,35 @@ struct zns_ssdparams{
     uint64_t ch_xfer_lat;       /* channel transfer latency for one page in nanoseconds 在通道上传输的时延*/
 };
 
-
-
-// 用于保存单个重置记录的结构体
-typedef struct {
-    int zone;
-    int count;
-} ResetRecord;
+int print_count;
 
 typedef struct {
+    uint16_t reset_records[MAX_RESET_RECORDS];
+    // 用于跟踪重置记录的起始和结束索引
+    int reset_start_index;
+    int reset_end_index;
+    // 用于跟踪重置次数是否达到了MAX_RESET_RECORDS
+    int reset_count;
+
+    uint16_t stolen;
+
+    uint16_t *zone_reset_count;
+
     uint16_t *local_dies_for_workload;
     double pressure;
 } Workload;
 
 Workload workloads[MAX_WORKLOADS];
 
-
 // 全局的重置记录数组
-ResetRecord reset_records[MAX_RESET_RECORDS];
-// 用于跟踪重置记录的起始和结束索引
-int reset_start_index = 0;
-int reset_end_index = 0;
-// 用于跟踪实际的重置记录数量
-int reset_count = 0;
-
 uint64_t add_count[MAX_WORKLOADS];
 
 
-// 重置区的函数
-void reset_zone(int zone) {
-    // ... 其他重置逻辑 ...
+typedef struct {
+    int zone_index;
+    uint16_t reset_count;
+} ZoneReset;
 
-    // 更新重置记录
-    if (reset_count < MAX_RESET_RECORDS) {
-        // 如果还没有达到最大记录数，直接添加新记录
-        reset_records[reset_end_index].zone = zone;
-        reset_records[reset_end_index].count++;
-        reset_end_index = (reset_end_index + 1) % MAX_RESET_RECORDS;
-        reset_count++;
-    } else {
-        // 如果已经达到最大记录数，需要删除最早的记录，然后添加新记录
-        reset_records[reset_start_index].zone = zone;
-        reset_records[reset_start_index].count++;
-        reset_start_index = (reset_start_index + 1) % MAX_RESET_RECORDS;
-    }
-}
-
-// 比较函数，用于按照重置次数进行降序排序
-int compare(const void* a, const void* b) {
-    ResetRecord* record_a = (ResetRecord*)a;
-    ResetRecord* record_b = (ResetRecord*)b;
-    return record_b->count - record_a->count;
-}
-
-// 打印每个区的重置次数
-void print_zone_reset_counts() {
-    // 对数组进行排序
-    qsort(reset_records, MAX_RESET_RECORDS, sizeof(ResetRecord), compare);
-
-    // 打印排序后的结果
-    printf("Zone reset 次数\n");
-    for (int i = 0; i < MAX_RESET_RECORDS; i++) {
-        printf("Zone %d: %d resets\n", reset_records[i].zone, reset_records[i].count);
-    }
-}
 
 
 enum RecourseAllocateType{
@@ -305,7 +270,9 @@ typedef struct QEMU_PACKED NvmeZoneDescr {
     uint8_t     zt;
     uint8_t     zs;
     uint8_t     za;
-    uint8_t     rsvd3[4];
+    uint8_t     rsvd3[3];
+
+    uint8_t stealing;
 
     bool is_mapped;
 

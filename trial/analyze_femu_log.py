@@ -32,8 +32,9 @@ for line in lines:
             if 'Workload' in data:
                 pressures[i].append(float(data.split(':')[-1].strip()))
 
-begin = 2050  # 你可以根据需要设置这个值
+begin = 22000  # 你可以根据需要设置这个值
 end = None
+end = begin+10000
 
 # 保留 begin 之后的记录
 records = [record[begin:end] for record in records]
