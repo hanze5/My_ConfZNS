@@ -1,2 +1,451 @@
 希望以 非只读  独占 的方式打开dbd设备
-Zone block device nr zones: 1024 max active: 1024 max open: 1024
+Zone block device nr zones: 2048 max active: 2048 max open: 2048
+dz ZonedBlockDevice::AllocateMetaZone :元数据区域共有4
+Initializing RocksDB Options from the specified file
+Initializing RocksDB Options from command-line flags
+Integrated BlobDB: blob cache disabled
+同时打开了dbstats0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 8 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 8 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 8 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 9 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/0
+同时打开了dbstats1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 519 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 519 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 519 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 520 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/1
+同时打开了dbstats2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1030 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1030 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1030 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1031 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/2
+同时打开了dbstats3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1541 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1541 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1541 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1542 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/3
+Keys:       48 bytes each (+ 0 bytes user-defined timestamp)
+Values:     65488 bytes each (65488 bytes after compression)
+Entries:    327680
+Prefix:    0 bytes
+Keys per prefix:    0
+RawSize:    20480.0 MB (estimated)
+FileSize:   20480.0 MB (estimated)
+Write rate: 0 bytes/second
+Read rate: 0 ops/second
+Compression: NoCompression
+Compression sampling rate: 0
+Memtablerep: SkipListFactory
+Perf Level: 1
+------------------------------------------------
+Initializing RocksDB Options from the specified file
+Initializing RocksDB Options from command-line flags
+Integrated BlobDB: blob cache disabled
+同时打开了dbstats0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 8 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 8 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 8 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/0/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 9 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/0
+同时打开了dbstats1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 519 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 519 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 519 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/1/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 1
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 520 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/1
+同时打开了dbstats2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1030 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1030 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1030 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/2/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 2
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1031 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/2
+同时打开了dbstats3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000000.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/MANIFEST-000001
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1541 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000001.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1541 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/MANIFEST-000005
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1541 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/000005.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZoneFile::BufferedAppend 且 没有active_zone_  : /rocksdbtest/dbbench/3/OPTIONS-000006.dbtmp
+dz ZonedBlockDevice::AllocateIOZone: db_name is 3
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1542 的生命周期是 WLTH_NOT_SET file的生命周期是WLTH_NOT_SET 差异是0
+成功打开DB:rocksdbtest/dbbench/3
+DB path: [rocksdbtest/dbbench]
+Warming up benchmark by running 1 times
+开始预热0次
+随机数种子为2
+builder.cc:8
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000008.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:9
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000009.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:10
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000010.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:11
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000011.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:12
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000012.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:13
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000013.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:14
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000014.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:15
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000015.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:16
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000016.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:17
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000017.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:18
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000018.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:19
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000019.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:20
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000020.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:21
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000021.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:22
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000022.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 0 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:23
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000023.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000022.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:24
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000024.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:25
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000025.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:26
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000026.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 1 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:27
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000027.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000026.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:28
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000028.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:29
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000029.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:30
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000030.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:31
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000031.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:32
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000032.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:33
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000033.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:34
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000034.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:35
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000035.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:36
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000036.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:37
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000037.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:38
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000038.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:39
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000039.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:40
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000040.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:41
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000041.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 2 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:42
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000042.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000041.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:43
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000043.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 3 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:44
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000044.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000043.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:45
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000045.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:46
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000046.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:47
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000047.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:48
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000048.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:49
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000049.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:50
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000050.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:51
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000051.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:52
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000052.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:53
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000053.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:54
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000054.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:55
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000055.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:56
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000056.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:57
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000057.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 4 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000057.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:58
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000058.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:59
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000059.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:60
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000060.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 5 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:61
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000061.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000060.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+builder.cc:62
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000062.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:63
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000063.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 7 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:64
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000064.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:65
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000065.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 7 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:66
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000066.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:67
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000067.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 7 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:68
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000068.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:69
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000069.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 7 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:70
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000070.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:71
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000071.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:72
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000072.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 7 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:73
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000073.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 6 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+builder.cc:74
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000074.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0
+dz ZonedBlockDevice::GetBestOpenZoneMatch : zone 7 的生命周期是 LEVEL_0 file的生命周期是LEVEL_0 差异是0
+dz ZoneFile::Append: /rocksdbtest/dbbench/0/000073.sst
+dz ZonedBlockDevice::AllocateIOZone: db_name is 0

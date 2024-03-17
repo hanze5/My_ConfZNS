@@ -304,7 +304,7 @@ DEFINE_int64(deletes, -1,
 
 DEFINE_int32(bloom_locality, 0, "Control bloom filter probes locality");
 
-DEFINE_int64(seed, 0,
+DEFINE_int64(seed, 1,
              "Seed base for random number generators. "
              "When 0 it is derived from the current time.");
 static std::optional<int64_t> seed_base;
@@ -362,7 +362,9 @@ DEFINE_int32(key_size, 16, "size of each key");
 DEFINE_int32(user_timestamp_size, 0,
              "number of bytes in a user-defined timestamp");
 
-DEFINE_int32(num_multi_db, 4,
+int n_per_thread=10;
+
+DEFINE_int32(num_multi_db, 4*n_per_thread,
              "Number of DBs used in the benchmark. 0 means single DB.");
 
 DEFINE_double(compression_ratio, 1.0,
@@ -508,20 +510,20 @@ DEFINE_int32(max_background_jobs,
              "The maximum number of concurrent background jobs that can occur "
              "in parallel.");
 // DEFINE_int32(max_background_jobs,
-//              8,
+//              2,
 //              "The maximum number of concurrent background jobs that can occur "
 //              "in parallel.");
 
 
-DEFINE_int32(num_bottom_pri_threads, 4,
+DEFINE_int32(num_bottom_pri_threads, 0,
              "The number of threads in the bottom-priority thread pool (used "
              "by universal compaction only).");
 
-DEFINE_int32(num_high_pri_threads, 4,
+DEFINE_int32(num_high_pri_threads, 0,
              "The maximum number of concurrent background compactions"
              " that can occur in parallel.");
 
-DEFINE_int32(num_low_pri_threads, 4,
+DEFINE_int32(num_low_pri_threads, 0,
              "The maximum number of concurrent background compactions"
              " that can occur in parallel.");
 
@@ -533,6 +535,7 @@ DEFINE_int32(max_background_compactions,
 //              8,
 //              "The maximum number of concurrent background compactions"
 //              " that can occur in parallel.");
+
 
 
 DEFINE_uint64(subcompactions, 1,
@@ -895,7 +898,7 @@ DEFINE_int32(target_file_size_multiplier,
 //               "Max bytes for level-1");
 
 DEFINE_uint64(max_bytes_for_level_base,
-              128 MiB,
+              256 MiB,
               "Max bytes for level-1");
 
 DEFINE_bool(level_compaction_dynamic_level_bytes, false,
@@ -910,7 +913,7 @@ DEFINE_string(max_bytes_for_level_multiplier_additional, "",
 
 
 DEFINE_int32(level0_file_num_compaction_trigger,
-             2,
+             4,
              "Number of files in level-0 when compactions start.");
 DEFINE_int32(level0_slowdown_writes_trigger,
              20,
@@ -1632,12 +1635,19 @@ DEFINE_bool(mmap_read, ROCKSDB_NAMESPACE::Options().allow_mmap_reads,
 DEFINE_bool(mmap_write, ROCKSDB_NAMESPACE::Options().allow_mmap_writes,
             "Allow writes to occur via mmap-ing files");
 
-DEFINE_bool(use_direct_reads, ROCKSDB_NAMESPACE::Options().use_direct_reads,
+DEFINE_bool(use_direct_reads, true,
             "Use O_DIRECT for reading data");
 
 DEFINE_bool(use_direct_io_for_flush_and_compaction,
-            ROCKSDB_NAMESPACE::Options().use_direct_io_for_flush_and_compaction,
+            true,
             "Use O_DIRECT for background flush and compaction writes");
+
+// DEFINE_bool(use_direct_reads, ROCKSDB_NAMESPACE::Options().use_direct_reads,
+//             "Use O_DIRECT for reading data");
+
+// DEFINE_bool(use_direct_io_for_flush_and_compaction,
+//             ROCKSDB_NAMESPACE::Options().use_direct_io_for_flush_and_compaction,
+//             "Use O_DIRECT for background flush and compaction writes");
 
 DEFINE_bool(advise_random_on_open,
             ROCKSDB_NAMESPACE::Options().advise_random_on_open,
@@ -2294,7 +2304,8 @@ class Stats {//可能用于性能监控系统，其中收集和报告关键性�
     bytes_ += other.bytes_;
     seconds_ += other.seconds_;
     if (other.start_ < start_) start_ = other.start_;
-    if (other.finish_ > finish_) finish_ = other.finish_;
+    //dz_added
+    if (other.finish_ < finish_) finish_ = other.finish_;
 
     // Just keep the messages from one thread.
     if (message_.empty()) message_ = other.message_;
@@ -2732,6 +2743,7 @@ struct ThreadState {
   Random64 rand;  // Has different seeds for different threads
   Stats stats;
   SharedState* shared;
+
 
   std::shared_ptr<RateLimiter> write_rate_limiter;
   std::shared_ptr<RateLimiter> read_rate_limiter;
@@ -3922,8 +3934,8 @@ class Benchmark {
             RunBenchmark(num_threads, name, method);           
           }
         }
-        std::cout<<"等待60s......"<<std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(60));
+        std::cout<<"等待10s......"<<std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
 
 
         if (num_repeat > 1) {
@@ -3983,14 +3995,16 @@ class Benchmark {
                 s.ToString().c_str());
       }
     }
+    std::cout<<"过来了吗"<<std::endl;
 
     if (FLAGS_statistics) {
       // fprintf(stdout, "STATISTICS:\n%s\n", dbstats->ToString().c_str());
-      for(int i = 0;i<FLAGS_num_multi_db;i++ ){
+      for(int i = 0;i<FLAGS_num_multi_db/n_per_thread;i++ ){
         std::cout<<"<===================================前"<<i<<"个线程报告===================================>"<<std::endl;
         fprintf(stdout, "STATISTICS:\n%s\n", multi_dbstats[i]->ToString().c_str());
       }
     }
+    std::cout<<"不太对"<<std::endl;
     if (FLAGS_simcache_size >= 0) {
       fprintf(
           stdout, "SIMULATOR CACHE STATISTICS:\n%s\n",
@@ -4098,7 +4112,6 @@ class Benchmark {
       arg[i].shared = &shared;
       total_thread_count_++;
       arg[i].thread = new ThreadState(i, total_thread_count_);
-      std::cout<<"随机数种子为"<<*seed_base+total_thread_count_<<std::endl;
       arg[i].thread->stats.SetReporterAgent(reporter_agent.get());
       arg[i].thread->shared = &shared;
       //在这里运行
@@ -4121,7 +4134,6 @@ class Benchmark {
     Stats merge_stats;
     for (int i = 0; i < n; i++) {
       merge_stats.Merge(arg[i].thread->stats);
-      std::cout<<"<===================================前"<<i<<"个线程报告===================================>"<<std::endl;
       merge_stats.Report(name);
     }
     // merge_stats.Report(name);
@@ -4137,7 +4149,7 @@ class Benchmark {
   //RunBenchmark重载
   Stats RunBenchmark(Slice name,bool iswarmup) {
     SharedState shared;
-    shared.total = 4;
+    shared.total = 4*n_per_thread;
     shared.num_initialized = 0;
     shared.num_done = 0;
     shared.start = false;
@@ -4157,11 +4169,14 @@ class Benchmark {
                                              FLAGS_report_interval_seconds));
     }
 
-    ThreadArg* arg = new ThreadArg[4];
+
+    ThreadArg* arg = new ThreadArg[4*n_per_thread];
 
     void (Benchmark::*methods[4])(ThreadState*) = {&Benchmark::MixGraphA,&Benchmark::MixGraphB,&Benchmark::MixGraphC,&Benchmark::MixGraphD};
     void (Benchmark::*warmup_methods[4])(ThreadState*) = {&Benchmark::MixGraphAWarmup,&Benchmark::MixGraphBWarmup,&Benchmark::MixGraphCWarmup,&Benchmark::MixGraphDWarmup};
-    for (int i = 0; i < 4; i++) {
+    std::string names[4] = {"mixgrapha","mixgraphb","mixgraphc","mixgraphd"};
+
+    for (int i = 0; i < 4*n_per_thread; i++) {
 #ifdef NUMA
       if (FLAGS_enable_numa) {
         // Performs a local allocation of memory to threads in numa node.
@@ -4181,9 +4196,9 @@ class Benchmark {
 #endif
       arg[i].bm = this;
       if(iswarmup){
-        arg[i].method = warmup_methods[i];
+        arg[i].method = warmup_methods[i%4];
       }else{
-        arg[i].method = methods[i];
+        arg[i].method = methods[i%4];
       }
       arg[i].shared = &shared;
       total_thread_count_++;
@@ -4196,31 +4211,39 @@ class Benchmark {
     }
     total_thread_count_=0;
     shared.mu.Lock();
-    while (shared.num_initialized < 4) {
+    while (shared.num_initialized < 4*n_per_thread) {
       shared.cv.Wait();
     }
 
     shared.start = true;
     shared.cv.SignalAll();
-    while (shared.num_done < 4) {
+    while (shared.num_done < 4*n_per_thread) {
       shared.cv.Wait();
     }
     shared.mu.Unlock();
 
     // Stats for some threads can be excluded.
-    Stats merge_stats;
-    for (int i = 0; i < 4; i++) {
-      merge_stats.Merge(arg[i].thread->stats);
-      arg[i].thread->stats.Report(name);
+    Stats merge_stats[4];
+    Stats total_stats;
+    for (int i = 0; i < n_per_thread*4; i++) {
+      merge_stats[i%4].Merge(arg[i].thread->stats);
+      total_stats.Merge(arg[i].thread->stats);
+      arg[i].thread->stats.Report(names[i%4]);
     }
-    merge_stats.Report(name);
+    std::cout<<"====================================="<<std::endl;
+    for(int i = 0; i < 4; i++){
+      merge_stats[i].Report(names[i]);
+    }
 
-    for (int i = 0; i < 4; i++) {
+
+    total_stats.Report(name);
+
+    for (int i = 0; i < n_per_thread*4; i++) {
       delete arg[i].thread;
     }
     delete[] arg;
 
-    return merge_stats;
+    return total_stats;
   }
 
   //执行校验和计算的性能测试。
@@ -5197,8 +5220,8 @@ class Benchmark {
       std::size_t last_slash = db_name.find_last_of("/");  // 找到最后一个斜杠的位置
       std::string number_str = db_name.substr(last_slash + 1);  // 从最后一个斜杠之后开始提取子字符串
       int number = std::stoi(number_str);  // 将字符串转换为整数
-      options.statistics = multi_dbstats[number];
-      std::cout<<"同时打开了dbstats"<<number<<std::endl;
+      options.statistics = multi_dbstats[number%4];
+      std::cout<<"数据库 "<<number<<" 使用dbstats "<<number%4<<std::endl;
       s = DB::Open(options, db_name, &db->db);
     }
     if (FLAGS_report_open_timing) {
@@ -6978,11 +7001,13 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 400.0; 
+    double qps = 505.0;
+    qps = qps/n_per_thread;  
     double write_rate = qps;
     double read_rate = qps;
     std::vector<double> ratio{0.5, 0.5,0};
-    RandomGenerator gen(512 KiB ,512 KiB, 512 KiB );
+    int32_t diy_valsz = 512 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -6994,12 +7019,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -7013,16 +7036,16 @@ class Benchmark {
       use_random_modeling = true;
     }
 
-    Duration duration(FLAGS_duration, reads_);
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }
+
+    Duration duration(FLAGS_duration, 0);
     while (!duration.Done(1)) {
 
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[0];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
-    
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
       // ini_rand = (&thread->rand)->Next()% FLAGS_num;
@@ -7048,35 +7071,6 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
-
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -7099,8 +7093,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -7110,7 +7104,9 @@ class Benchmark {
 
         Slice v = gen.Generate();
         int64_t val_size = v.size();
+        
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -7118,8 +7114,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -7187,12 +7183,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 400.0; 
+    double qps = 101.0;
+    qps = qps/n_per_thread;  
     double write_rate = qps;
     double read_rate = qps;
 
     std::vector<double> ratio{0.5, 0.5,0};
-    RandomGenerator gen(128 KiB ,128 KiB, 128 KiB );
+    int32_t diy_valsz = 64 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7204,12 +7202,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -7223,16 +7219,16 @@ class Benchmark {
       use_random_modeling = true;
     }
 
-    Duration duration(FLAGS_duration, reads_);
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }
+
+    Duration duration(FLAGS_duration, 0);
     while (!duration.Done(1)) {
 
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[1];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
-    
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
       // ini_rand = (&thread->rand)->Next()% FLAGS_num;
@@ -7258,35 +7254,6 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
-
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -7309,8 +7276,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -7320,7 +7287,10 @@ class Benchmark {
 
         Slice v = gen.Generate();
         int64_t val_size = v.size();
+
+        
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -7328,8 +7298,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -7397,11 +7367,13 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 400.0; 
+    double qps = 101.0;
+    qps = qps/n_per_thread;  
     double write_rate = qps;
     double read_rate = qps;
     std::vector<double> ratio{0.5, 0.5,0};
-    RandomGenerator gen(32 KiB ,32 KiB, 32 KiB );
+    int32_t diy_valsz = 32 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7413,12 +7385,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -7432,15 +7402,15 @@ class Benchmark {
       use_random_modeling = true;
     }
 
-    Duration duration(FLAGS_duration, reads_);
-    while (!duration.Done(1)) {
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }
 
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[2];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
+    Duration duration(FLAGS_duration, 0);
+    while (!duration.Done(1)) {
     
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
@@ -7467,35 +7437,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
 
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -7518,8 +7460,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -7529,7 +7471,10 @@ class Benchmark {
 
         Slice v = gen.Generate();
         int64_t val_size = v.size();
+
+        
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -7537,8 +7482,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -7606,12 +7551,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 400.0; 
+    double qps = 101.0;
+    qps = qps/n_per_thread;  
     double write_rate = qps;
     double read_rate = qps;
 
     std::vector<double> ratio{0.5, 0.5,0};
-    RandomGenerator gen(8 KiB ,8 KiB, 8 KiB );
+    int32_t diy_valsz = 16 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7623,12 +7570,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -7642,15 +7587,15 @@ class Benchmark {
       use_random_modeling = true;
     }
 
-    Duration duration(FLAGS_duration, reads_);
-    while (!duration.Done(1)) {
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }    
 
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[3];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
+    Duration duration(FLAGS_duration, 0);
+    while (!duration.Done(1)) {
     
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
@@ -7677,35 +7622,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
 
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -7728,8 +7645,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -7740,6 +7657,7 @@ class Benchmark {
         Slice v = gen.Generate();
         int64_t val_size = v.size();
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -7747,8 +7665,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -7821,11 +7739,13 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 125.0; 
+    double qps = 125.0;
+    qps = qps/n_per_thread;  
     double write_rate = qps;
     double read_rate = qps;
     std::vector<double> ratio{0, 1,0};
-    RandomGenerator gen(512 KiB ,512 KiB, 512 KiB );
+    int32_t diy_valsz = 512 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7837,12 +7757,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -7856,16 +7774,15 @@ class Benchmark {
       use_random_modeling = true;
     }
 
-    Duration duration(FLAGS_duration, reads_);
+    Duration duration(1.1*FLAGS_duration, reads_);
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }
     while (!duration.Done(1)) {
 
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[0];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
-    
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
       // ini_rand = (&thread->rand)->Next()% FLAGS_num;
@@ -7891,35 +7808,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
 
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -7942,8 +7831,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -7953,7 +7842,10 @@ class Benchmark {
 
         Slice v = gen.Generate();
         int64_t val_size = v.size();
+
+        
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -7961,8 +7853,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -8030,12 +7922,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 500.0; 
+    double qps = 1000.0;
+    qps = qps/n_per_thread; 
     double write_rate = qps;
     double read_rate = qps;
 
     std::vector<double> ratio{0, 1,0};
-    RandomGenerator gen(128 KiB ,128 KiB, 128 KiB );
+    int32_t diy_valsz = 64 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -8047,12 +7941,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -8065,17 +7957,15 @@ class Benchmark {
     if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
       use_random_modeling = true;
     }
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }
 
-    Duration duration(FLAGS_duration, reads_);
+    Duration duration(1.1*FLAGS_duration, reads_);
     while (!duration.Done(1)) {
-
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[1];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
-    
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
       // ini_rand = (&thread->rand)->Next()% FLAGS_num;
@@ -8101,35 +7991,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
 
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -8152,8 +8014,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -8163,7 +8025,10 @@ class Benchmark {
 
         Slice v = gen.Generate();
         int64_t val_size = v.size();
+
+        
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -8171,8 +8036,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -8240,11 +8105,13 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 2000.0; 
+    double qps = 2000.0;
+    qps = qps/n_per_thread; 
     double write_rate = qps;
     double read_rate = qps;
     std::vector<double> ratio{0, 1,0};
-    RandomGenerator gen(32 KiB ,32 KiB, 32 KiB );
+    int32_t diy_valsz = 32 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -8256,12 +8123,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -8274,17 +8139,18 @@ class Benchmark {
     if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
       use_random_modeling = true;
     }
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
 
-    Duration duration(FLAGS_duration, reads_);
+
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }
+    
+    Duration duration(1.1*FLAGS_duration, reads_);
     while (!duration.Done(1)) {
 
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[2];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
-    
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
       // ini_rand = (&thread->rand)->Next()% FLAGS_num;
@@ -8310,35 +8176,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
 
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -8361,8 +8199,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -8372,7 +8210,10 @@ class Benchmark {
 
         Slice v = gen.Generate();
         int64_t val_size = v.size();
+
+        
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -8380,8 +8221,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -8449,12 +8290,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 8000.0; 
+    double qps = 4000.0;
+    qps = qps/n_per_thread; 
     double write_rate = qps;
     double read_rate = qps;
 
     std::vector<double> ratio{0, 1,0};
-    RandomGenerator gen(8 KiB ,8 KiB, 8 KiB );
+    int32_t diy_valsz = 16 KiB;
+    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -8466,12 +8309,10 @@ class Benchmark {
     query.Initiate(ratio);
 
     // the limit of qps initiation
-    if (FLAGS_sine_mix_rate) {
-      thread->read_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
-      thread->write_rate_limiter.reset(
-          NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
-    }
+    thread->read_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(read_rate)));
+    thread->write_rate_limiter.reset(
+        NewGenericRateLimiter(static_cast<int64_t>(write_rate)));
 
     // Decide if user wants to use prefix based key generation
     if (FLAGS_keyrange_dist_a != 0.0 || FLAGS_keyrange_dist_b != 0.0 ||
@@ -8484,17 +8325,16 @@ class Benchmark {
     if (FLAGS_key_dist_a == 0 || FLAGS_key_dist_b == 0) {
       use_random_modeling = true;
     }
-
-    Duration duration(FLAGS_duration, reads_);
+    DBWithColumnFamilies* db_with_cfh;      
+    if(FLAGS_num_multi_db==4*n_per_thread){
+      db_with_cfh = &multi_dbs_[thread->tid];
+    }else{
+      db_with_cfh = SelectDBWithCfh(thread);
+    }
+    
+    Duration duration(1.1*FLAGS_duration, reads_);
     while (!duration.Done(1)) {
 
-      DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
-        db_with_cfh = &multi_dbs_[3];
-      }else{
-        db_with_cfh = SelectDBWithCfh(thread);
-      }
-    
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
       // ini_rand = (&thread->rand)->Next()% FLAGS_num;
@@ -8520,35 +8360,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
-      // change the qps
-      uint64_t now = FLAGS_env->NowMicros();
-      uint64_t usecs_since_last;
-      if (now > thread->stats.GetSineInterval()) {
-        usecs_since_last = now - thread->stats.GetSineInterval();
-      } else {
-        usecs_since_last = 0;
-      }
 
-      if (FLAGS_sine_mix_rate &&
-          usecs_since_last >
-              (FLAGS_sine_mix_rate_interval_milliseconds * uint64_t{1000})) {
-        double usecs_since_start =
-            static_cast<double>(now - thread->stats.GetStart());
-        thread->stats.ResetSineInterval();
-        double mix_rate_with_noise = AddNoise(
-            SineRate(usecs_since_start / 1000000.0,0,0,0,0), FLAGS_sine_mix_rate_noise);
-        read_rate = mix_rate_with_noise * (query.ratio_[0] + query.ratio_[2]);
-        write_rate = mix_rate_with_noise * query.ratio_[1];
-
-        if (read_rate > 0) {
-          thread->read_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(read_rate));
-        }
-        if (write_rate > 0) {
-          thread->write_rate_limiter->SetBytesPerSecond(
-              static_cast<int64_t>(write_rate));
-        }
-      }
       // Start the query
       if (query_type == 0) {
         // the Get query
@@ -8571,8 +8383,8 @@ class Benchmark {
           abort();
         }
 
-        if (thread->read_rate_limiter) {
-          thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->read_rate_limiter && gets%100 == 0) {
+          thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
@@ -8582,7 +8394,10 @@ class Benchmark {
 
         Slice v = gen.Generate();
         int64_t val_size = v.size();
+
+        
         s = db_with_cfh->db->Put(write_options_, key, v);  
+ 
         total_val_size += val_size;
         bytes+=key.size()+val_size;
         if (!s.ok()) {
@@ -8590,8 +8405,8 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter) {
-          thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        if (thread->write_rate_limiter && puts%100 == 0) {
+          thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
@@ -10166,7 +9981,7 @@ class Benchmark {
     Duration duration(FLAGS_duration,0);
     while (!duration.Done(1)) {
       DBWithColumnFamilies* db_with_cfh;      
-      if(FLAGS_num_multi_db==4){
+      if(FLAGS_num_multi_db==4*n_per_thread){
         db_with_cfh = &multi_dbs_[0];
       }else{
         db_with_cfh = SelectDBWithCfh(thread);

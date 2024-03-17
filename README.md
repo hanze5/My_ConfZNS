@@ -75,7 +75,7 @@ rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
 
 ./plugin/zenfs/util/zenfs mkfs --zbd=nvme0n1 --aux_path=/home/femu/workspace/My_ConfZNS/trial/rocksdblogs --force
 
-./db_bench --fs_uri=zenfs://dev:nvme0n1 -use_direct_io_for_flush_and_compaction=true --disable_wal  -benchmarks=fillseq -num=327680 -key_size=48 -value_size=65488 >  output.txt
+
 
 
   # -num_multi_db=4 \
@@ -101,15 +101,16 @@ rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
   -keyrange_num=30 \
   -iter_k=2.517 \
   -iter_sigma=14.236 \
+  --duration=120 \
+  -num=1000000 \
+  -key_size=48 > outputa.txt
+
+
   -sine_mix_rate \
   -sine_mix_rate_interval_milliseconds=5000 \
   -sine_a=100 \
   -sine_b=0.000073 \
   -sine_d=450 \
-  --duration=180 \
-  -num=1000000 \
-  -key_size=48 > outputa.txt
-
 
 
 ./plugin/zenfs/util/zenfs ls-uuid
@@ -129,19 +130,8 @@ rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
   --num=20000000
 
 
-mixgraph_together :    1543.369 micros/op 647 ops/sec 60.190 seconds 38999 operations;   40.8 MB/s ( Gets:19375 Puts:19624 Seek:0, reads 0 in 19375 found, avg size: 131072.0 value, -nan scan)
 
-mixgraph_together :    1876.106 micros/op 533 ops/sec 61.910 seconds 32999 operations;   33.5 MB/s ( Gets:16390 Puts:16609 Seek:0, reads 0 in 16390 found, avg size: 131072.0 value, -nan scan)
-
-mixgraph_together :    2619.180 micros/op 381 ops/sec 60.239 seconds 22999 operations;   23.9 MB/s ( Gets:11504 Puts:11495 Seek:0, reads 0 in 11504 found, avg size: 131072.0 value, -nan scan)
-
-mixgraph_together :    2522.561 micros/op 396 ops/sec 60.539 seconds 23999 operations;   24.7 MB/s ( Gets:12036 Puts:11963 Seek:0, reads 0 in 12036 found, avg size: 131072.0 value, -nan scan)
-
-
-43.7
-35.4
-24.0
-12.7 
+./db_bench --fs_uri=zenfs://dev:nvme0n1 -use_direct_io_for_flush_and_compaction=true --disable_wal  -benchmarks=fillseq -num=327680 -key_size=48 -value_size=65488 >  output.txt
 
 ```
 
@@ -341,21 +331,81 @@ static enum ROCKSDB_NAMESPACE::CompressionType FLAGS_compression_type_e =
 
 compression_ratio 设置为 1.0
 
-DEFINE_int32(num_bottom_pri_threads, 4,
+max_background_jobs 设置为 2
+max_background_compactions 设置为 默认     low
+max_background_flushes 设置为 默认         high
+
+DEFINE_int32(num_bottom_pri_threads, 2,
              "The number of threads in the bottom-priority thread pool (used "
              "by universal compaction only).");
 
-DEFINE_int32(num_high_pri_threads, 4,
+DEFINE_int32(num_high_pri_threads, 2,
              "The maximum number of concurrent background compactions"
              " that can occur in parallel.");
 
-DEFINE_int32(num_low_pri_threads, 4,
+DEFINE_int32(num_low_pri_threads, 2,
              "The maximum number of concurrent background compactions"
              " that can occur in parallel.");
 
 
-max_background_jobs 设置为 默认
-max_background_compactions 设置为 16
-max_background_flushes 设置为 16
 
 
+
+**max_background_jobs** ：Maximum number of concurrent background jobs (compactions and flushes)
+
+
+**max_background_compactions**：这个参数控制着后台压缩（compaction）任务的并发数量。压缩是一种优化技术，用于合并和清理数据库中的数据文件，以减少磁盘空间占用。默认情况下，后台压缩任务会提交到低优先级线程池。
+为什么要使用线程池：使用线程池可以有效地管理并发任务。如果同一个 Env 被多个数据库实例共享，使用两个线程池非常重要。如果没有单独的线程池，长时间运行的压缩任务可能会阻塞其他数据库实例的压缩任务，导致不必要的性能下降。
+调整建议：如果你增加了 max_background_compactions，还应该考虑增加低优先级线程池中的线程数。具体信息请参阅 Env::SetBackgroundThreads。
+
+**max_background_flushes**：这个参数控制着后台内存表刷新（memtable flush）的并发数量。内存表刷新是将内存中的数据写入磁盘的过程。默认情况下，**内存表刷新任务会提交到高优先级线程池**。如果高优先级线程池配置为零个线程，那么内存表刷新任务将与压缩任务共享低优先级线程池。
+**为什么要使用两个线程池**：如果同一个Env被多个数据库实例共享，使用两个线程池非常重要。如果没有单独的线程池，长时间运行的压缩任务可能会阻塞其他数据库实例的内存表刷新任务，导致不必要的Put操作延迟。
+调整建议：如果你增加了max_background_flushes，还应该考虑增加高优先级线程池中的线程数。具体信息请参阅Env::SetBackgroundThreads。
+
+
+
+单负载多数据库逻辑：
+```c++
+  int n_per_thread=4;
+  DEFINE_int32(num_multi_db, 4*n_per_thread,
+              "Number of DBs used in the benchmark. 0 means single DB.");
+
+  //.............
+
+  if (FLAGS_num_multi_db <= 1) {
+        OpenDb(options, FLAGS_db, &db_);
+  } else {
+    multi_dbs_.clear();
+    multi_dbs_.resize(FLAGS_num_multi_db);
+    auto wal_dir = options.wal_dir;
+    for (int i = 0; i < FLAGS_num_multi_db; i++) {
+      if (!wal_dir.empty()) {
+        options.wal_dir = GetPathForMultiple(wal_dir, i);
+      }
+      OpenDb(options, GetPathForMultiple(FLAGS_db, i), &multi_dbs_[i]); 
+      std::cout<<"成功打开DB:"<<GetPathForMultiple(FLAGS_db, i)<<std::endl;
+    }
+    options.wal_dir = wal_dir;
+  }            
+
+  //.............
+  DBWithColumnFamilies* db_with_cfh;      
+  if(FLAGS_num_multi_db==4*n_per_thread){
+    db_with_cfh = &multi_dbs_[thread->tid];
+  }else{
+    db_with_cfh = SelectDBWithCfh(thread);
+  } 
+
+  //..............
+
+
+  //在这里修改  
+  std::size_t last_slash = db_name.find_last_of("/");  // 找到最后一个斜杠的位置
+  std::string number_str = db_name.substr(last_slash + 1);  // 从最后一个斜杠之后开始提取子字符串
+  int number = std::stoi(number_str);  // 将字符串转换为整数
+  options.statistics = multi_dbstats[number%4];
+  std::cout<<"数据库 "<<number<<" 使用dbstats "<<number%4<<std::endl;
+  s = DB::Open(options, db_name, &db->db);
+
+  //..............
+```
