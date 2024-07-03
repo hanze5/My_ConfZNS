@@ -6,7 +6,7 @@
 // #define NVME_DEFAULT_ZONE_SIZE      (128 * MiB)
 #define NVME_DEFAULT_MAX_AZ_SIZE    (128 * KiB)
 #define ZNS_PAGE_SIZE               (16 * KiB)
-#define NVME_DEFAULT_ZONE_SIZE      (128 * MiB) //72 * MiB
+#define NVME_DEFAULT_ZONE_SIZE      (256 * MiB) //72 * MiB
 uint64_t lag = 0;
 //union signal sv;
 
@@ -213,7 +213,7 @@ static inline uint64_t dz_zns_advanced_chnl_idx(FemuCtrl *n,NvmeNamespace *ns ,u
     struct zns *zns = n->zns;
     struct zns_ssdparams *spp = &zns->sp;
 
-    uint32_t zone_idx = zns_zone_idx(ns,slba);
+    // uint32_t zone_idx = zns_zone_idx(ns,slba);
     NvmeZone * zone = zns_get_zone_by_slba(ns, slba);
     //计算slba在该zone中的相对地址
     uint64_t zone_rela_slba = slba - zone->d.zslba;
@@ -221,12 +221,22 @@ static inline uint64_t dz_zns_advanced_chnl_idx(FemuCtrl *n,NvmeNamespace *ns ,u
     //计算出应该写第几个页请求了  
     uint64_t zone_rela_slpa = zone_rela_slba/(ZNS_PAGE_SIZE / 512);
 
-    int big_iter = zone_rela_slpa / (spp->nchnls*spp->ways*spp->dies_per_chip*spp->planes_per_die);
+    // int big_iter = zone_rela_slpa / (spp->nchnls*spp->ways*spp->dies_per_chip*spp->planes_per_die);
     int big_offset = zone_rela_slpa % (spp->nchnls*spp->ways*spp->dies_per_chip*spp->planes_per_die);
 
     int die_idx = big_offset/spp->planes_per_die;
 
-    uint16_t die = zone->d.local_dies[die_idx];
+    uint16_t die;
+    if(zns->allocateType == DYNAMIC){
+        die= workloads[zone->d.stealing].local_dies_for_workload[die_idx];
+    }
+    else if(zns->allocateType == STATIC){
+        die= zone->d.local_dies[die_idx];
+    }
+    else{
+        uint32_t zone_idx = zns_zone_idx(ns,slba);
+        die= workloads[zone_idx/MAX_WORKLOADS].local_dies_for_workload[die_idx];
+    }
 
     uint64_t channel =  die / (spp->dies_per_chip*spp->ways);
     return channel;
@@ -237,7 +247,7 @@ static inline uint64_t dz_zns_advanced_plane_idx(FemuCtrl *n,NvmeNamespace *ns ,
     struct zns *zns = n->zns;
     struct zns_ssdparams *spp = &zns->sp;
 
-    uint32_t zone_idx = zns_zone_idx(ns,slba);
+    // uint32_t zone_idx = zns_zone_idx(ns,slba);
     NvmeZone * zone = zns_get_zone_by_slba(ns, slba);
 
     //计算slba在该zone中的相对地址
@@ -251,7 +261,17 @@ static inline uint64_t dz_zns_advanced_plane_idx(FemuCtrl *n,NvmeNamespace *ns ,
     int die_idx = big_offset/spp->planes_per_die;
     uint64_t plane_idx =big_offset%spp->planes_per_die;
 
-    uint16_t die = zone->d.local_dies[die_idx];
+    uint16_t die;
+    if(zns->allocateType == DYNAMIC){
+        die= workloads[zone->d.stealing].local_dies_for_workload[die_idx];
+    }
+    else if(zns->allocateType == STATIC){
+        die= zone->d.local_dies[die_idx];
+    }
+    else{
+        uint32_t zone_idx = zns_zone_idx(ns,slba);
+        die= workloads[zone_idx/MAX_WORKLOADS].local_dies_for_workload[die_idx];
+    }
 
 
     uint64_t plane = plane_idx + die*spp->planes_per_die;
@@ -259,34 +279,153 @@ static inline uint64_t dz_zns_advanced_plane_idx(FemuCtrl *n,NvmeNamespace *ns ,
     return plane;
 
 }
+
+static inline void dz_zns_advanced_resource(FemuCtrl *n, NvmeNamespace *ns, uint64_t slba, uint64_t *channel, uint64_t *plane) {
+    struct zns *zns = n->zns;
+    struct zns_ssdparams *spp = &zns->sp;
+
+    // 通过slba获取相应的zone
+    NvmeZone *zone = zns_get_zone_by_slba(ns, slba);
+
+    // 计算slba在该zone中的相对地址
+    uint64_t zone_rela_slba = slba - zone->d.zslba;
+
+    // 计算出应该写第几个页请求了
+    uint64_t zone_rela_slpa = zone_rela_slba / (ZNS_PAGE_SIZE / 512);
+
+    // 根据整体配置计算offset
+    int big_offset = zone_rela_slpa % (spp->nchnls * spp->ways * spp->dies_per_chip * spp->planes_per_die);
+
+    // 从offset中计算die索引和平面索引
+    int die_idx = big_offset / spp->planes_per_die;
+    uint64_t plane_idx = big_offset % spp->planes_per_die;
+
+    uint16_t die;
+    if (zns->allocateType == DYNAMIC) {
+        // 动态分配，根据工作负载来分配die
+        die = workloads[zone->d.stealing].local_dies_for_workload[die_idx];
+    } else if (zns->allocateType == STATIC) {
+        // 静态分配，直接从zone信息中获取die
+        die = zone->d.local_dies[die_idx];
+    } else {
+        // 默认情况，根据zone索引和工作负载计算die
+        uint32_t zone_idx = zns_zone_idx(ns, slba);
+        zone = &n->zone_array[(zone_idx % MAX_WORKLOADS)*(zns->num_zones/MAX_WORKLOADS)];
+        die = zone->d.local_dies[die_idx];
+    }
+
+    // 计算平面索引和通道
+    *plane = plane_idx + die * spp->planes_per_die;
+    *channel = die / (spp->dies_per_chip * spp->ways);
+}
+
+
+
+
 //返回die上磨损最少的 blkgrp_idx
-static inline uint32_t get_best_blkgrp(ZNS *zns, int die_idx) {
+static inline uint32_t get_youngest_blkgrp(ZNS *zns, int die_idx) {
     uint32_t best_blkgrp = 0;
     uint16_t min_erase_cnt = UINT16_MAX;
 
+    int find = 0;
+
     for (int i = 0; i < zns->sp.zones; i++) {
-        if(die_idx == 0){
-            print_count++;
-        } 
         uint32_t blkgrp_idx = zns->dies[die_idx].blkgrps_in_die[i];
-        if (!(zns->blkgrps[blkgrp_idx].is_being_used) && (zns->blkgrps[blkgrp_idx].erase_cnt < min_erase_cnt)) {
+
+        if(find == 0 && !(zns->blkgrps[blkgrp_idx].is_being_used)){
+            find = 1;
             best_blkgrp = blkgrp_idx;
             min_erase_cnt = zns->blkgrps[blkgrp_idx].erase_cnt;
+        }else if (!(zns->blkgrps[blkgrp_idx].is_being_used) && (zns->blkgrps[blkgrp_idx].erase_cnt < min_erase_cnt)) {
+            best_blkgrp = blkgrp_idx;
+            min_erase_cnt = zns->blkgrps[best_blkgrp].erase_cnt;
         }
     }
 
     return best_blkgrp;
 }
 
-static inline void zns_allocate_blkgrp(ZNS *zns,NvmeZone *zone)
+
+//返回平均值+1或者+2的
+static inline uint32_t get_oldest_blkgrp(ZNS *zns, int die_idx ,int workload_idx ) {
+    uint32_t oldest_blkgrp = 0;
+    uint16_t max_erase_cnt = 0;
+
+    int find = 0;
+
+    for (int i = 0; i < zns->sp.zones; i++) {
+        uint32_t blkgrp_idx = zns->dies[die_idx].blkgrps_in_die[i];
+
+        if(find == 0 && !(zns->blkgrps[blkgrp_idx].is_being_used)){
+            find = 1;
+            oldest_blkgrp = blkgrp_idx;
+            max_erase_cnt = zns->blkgrps[blkgrp_idx].erase_cnt;
+        }else if (!(zns->blkgrps[blkgrp_idx].is_being_used) && (zns->blkgrps[blkgrp_idx].erase_cnt == (workloads[workload_idx].reset_count/256)+1 || zns->blkgrps[blkgrp_idx].erase_cnt == (workloads[workload_idx].reset_count/256)+2)) {
+            oldest_blkgrp = blkgrp_idx;
+            max_erase_cnt = zns->blkgrps[oldest_blkgrp].erase_cnt;
+            break;
+        }
+    }
+
+    return oldest_blkgrp;
+}
+
+//返回平均值 或者-1的
+static inline uint32_t get_older_blkgrp(ZNS *zns, int die_idx ,int workload_idx ) {
+    uint32_t oldest_blkgrp = 0;
+    uint16_t max_erase_cnt = 0;
+
+    int find = 0;
+
+    for (int i = 0; i < zns->sp.zones; i++) {
+        uint32_t blkgrp_idx = zns->dies[die_idx].blkgrps_in_die[i];
+
+        if(find == 0 && !(zns->blkgrps[blkgrp_idx].is_being_used)){
+            find = 1;
+            oldest_blkgrp = blkgrp_idx;
+            max_erase_cnt = zns->blkgrps[blkgrp_idx].erase_cnt;
+        }else if (!(zns->blkgrps[blkgrp_idx].is_being_used) && (zns->blkgrps[blkgrp_idx].erase_cnt == (workloads[workload_idx].reset_count/256)-1 || zns->blkgrps[blkgrp_idx].erase_cnt == (workloads[workload_idx].reset_count/256))) {
+            oldest_blkgrp = blkgrp_idx;
+            max_erase_cnt = zns->blkgrps[oldest_blkgrp].erase_cnt;
+            break;
+        }
+    }
+
+    return oldest_blkgrp;
+}
+
+//返回die上磨损最少的 blkgrp_idx
+static inline uint32_t get_next_blkgrp(ZNS *zns, int die_idx) {
+    uint32_t next_blkgrp = 0;
+
+    for (int i = 0; i < zns->sp.zones; i++) {
+        uint32_t blkgrp_idx = zns->dies[die_idx].blkgrps_in_die[(zns->dies[die_idx].next_free_blkgrp++)%zns->sp.zones];
+
+        if(!(zns->blkgrps[blkgrp_idx].is_being_used)){
+            return blkgrp_idx;
+        }
+    }
+    printf("不可能\n");
+    return -1;
+}
+
+
+
+static inline void zns_allocate_youngest_blkgrp(ZNS *zns,NvmeZone *zone)
 {
 
     // struct zns * zns = n->zns;
     struct zns_ssdparams *spp = &zns->sp;
     uint32_t best_blkgrp=0;
     for (int i = 0; i < spp->nchnls*spp->ways*spp->dies_per_chip; i++) {
-        int die_idx = zone->d.local_dies[i];     
-        best_blkgrp = get_best_blkgrp(zns, die_idx);
+        int die_idx;
+        if(zns->allocateType ==DYNAMIC){
+            die_idx = workloads[zone->d.stealing].local_dies_for_workload[i];  
+        }else{
+            die_idx = zone->d.local_dies[i];  
+        }
+          
+        best_blkgrp = get_youngest_blkgrp(zns, die_idx);
         zone->d.local_blkgrps[i] = best_blkgrp;
         zns->blkgrps[best_blkgrp].is_being_used=true;
     }
@@ -294,59 +433,180 @@ static inline void zns_allocate_blkgrp(ZNS *zns,NvmeZone *zone)
 
 }
 
+static inline void zns_allocate_older_blkgrp(ZNS *zns,NvmeZone *zone)
+{
+    // struct zns * zns = n->zns;
+    struct zns_ssdparams *spp = &zns->sp;
+    uint32_t best_blkgrp=0;
+    for (int i = 0; i < spp->nchnls*spp->ways*spp->dies_per_chip; i++) {
+        int die_idx;
+        if(zns->allocateType ==DYNAMIC){
+            die_idx = workloads[zone->d.stealing].local_dies_for_workload[i];  
+        }else{
+            die_idx = zone->d.local_dies[i];  
+        }
+            
+        // best_blkgrp = get_oldest_blkgrp(zns, die_idx);
+        best_blkgrp = get_older_blkgrp(zns, die_idx,zone->d.stealing);
+        zone->d.local_blkgrps[i] = best_blkgrp;
+        zns->blkgrps[best_blkgrp].is_being_used=true;
+    }
+    zone->d.is_mapped=true;
+
+}
+
+static inline void zns_allocate_oldest_blkgrp(ZNS *zns,NvmeZone *zone)
+{
+    // struct zns * zns = n->zns;
+    struct zns_ssdparams *spp = &zns->sp;
+    uint32_t best_blkgrp=0;
+    for (int i = 0; i < spp->nchnls*spp->ways*spp->dies_per_chip; i++) {
+        int die_idx;
+        if(zns->allocateType ==DYNAMIC){
+            die_idx = workloads[zone->d.stealing].local_dies_for_workload[i];  
+        }else{
+            die_idx = zone->d.local_dies[i];  
+        }
+            
+        best_blkgrp = get_oldest_blkgrp(zns, die_idx,zone->d.stealing);
+        zone->d.local_blkgrps[i] = best_blkgrp;
+        zns->blkgrps[best_blkgrp].is_being_used=true;
+    }
+    zone->d.is_mapped=true;
+
+}
+
+static inline void zns_allocate_next_blkgrp(ZNS *zns,NvmeZone *zone)
+{
+    // struct zns * zns = n->zns;
+    struct zns_ssdparams *spp = &zns->sp;
+    uint32_t best_blkgrp=0;
+    for (int i = 0; i < spp->nchnls*spp->ways*spp->dies_per_chip; i++) {
+        int die_idx;
+        if(zns->allocateType ==DYNAMIC){
+            die_idx = workloads[zone->d.stealing].local_dies_for_workload[i];  
+        }else{
+            die_idx = zone->d.local_dies[i];  
+        }
+             
+        best_blkgrp = get_next_blkgrp(zns, die_idx);
+        zone->d.local_blkgrps[i] = best_blkgrp;
+        zns->blkgrps[best_blkgrp].is_being_used=true;
+    }
+    zone->d.is_mapped=true;
+
+}
+
+
 static inline void zns_reclaim_blkgrp(ZNS *zns,NvmeZone *zone)
 {
 
+    if(zone->d.is_mapped==false) return;
     struct zns_ssdparams *spp = &zns->sp;
+    // printf("擦除了");
     for (int i = 0; i < spp->nchnls*spp->ways*spp->dies_per_chip; i++) {
         // uint16_t  die_idx = zone->d.local_dies[i];
         uint32_t  blkgrp_idx =  zone->d.local_blkgrps[i];
 
-        zns->blkgrps[blkgrp_idx].is_being_used=false;
+        zns->blkgrps[blkgrp_idx].is_being_used=dont_reclaim_;
         zns->blkgrps[blkgrp_idx].erase_cnt++;
+        // printf("%u ",blkgrp_idx);
     }
-    zone->d.is_mapped=false;
-
-    // printf("当前blkgrps磨损情况:\n");
-    // for(int i = 0;i<spp->nchnls*spp->ways*spp->dies_per_chip;i++){
-    //     for(int j = 0;j<spp->zones;j++)
-    //     {
-    //         printf("%u ", zns->blkgrps[zns->dies[i].blkgrps_in_die[j]].erase_cnt);
-    //     }
-    //     printf("\n");
-    // }
+    zone->d.is_mapped=dont_reclaim_;  
 }
 
 
-
+//60
 void dz_reset_zone(ZNS *zns,int zone_idx,NvmeZone *zone) {
     // ... 其他重置逻辑 ...
     //判断属于是哪个workload
+    if(zone->d.is_mapped==false) return;
+    struct zns_ssdparams *spp = &zns->sp;
     int workload_idx = zone_idx/(zns->sp.zones/MAX_WORKLOADS);
-    printf("======>要 reset workload %d 的 zone %d \n",workload_idx,zone_idx);
+    if(workload_idx!=zone->d.stealing){
+        printf("======> reset workload %d s zone %d stealing workload %d \n",workload_idx,zone_idx,zone->d.stealing);
+    }else{
+        printf("======> reset workload %d s zone %d \n",workload_idx,zone_idx);
+    }
+    int queue_head = get_queue_head(workloads[workload_idx].openzones);
+        
+    NvmeZone *zone_head = &zns->namespaces->ctrl->zone_array[queue_head];
 
+    //冷数据迁移逻辑
+    if(!emptyQueue(workloads[workload_idx].openzones) && zone_idx!=queue_head)
+    {
+        workloads[workload_idx].same_cnt++;
+    }else
+    {
+        workloads[workload_idx].same_cnt=0;
+    }
+
+    dequeue(workloads[workload_idx].openzones,zone_idx);
+    printf("workload %d queue:",workload_idx);
+    printQueue(workloads[workload_idx].openzones);
+
+
+
+    if(workloads[workload_idx].same_cnt>=16 && zns->blkgrps[zone_head->d.local_blkgrps[0]].erase_cnt < ((workloads[workload_idx].reset_count/256)-2)){
+
+
+
+        int zone_need_moration_idx = dequeue_head(workloads[workload_idx].openzones);
+        
+        NvmeZone *zone_need_moration = &zns->namespaces->ctrl->zone_array[zone_need_moration_idx];
+
+        printf("迁移%d \n",zone_need_moration_idx);
+        zns_reclaim_blkgrp(zns,zone_need_moration);
+        workloads[workload_idx].reset_count++;
+
+        // memcpy(zone_need_moration->d.local_dies, workloads[workload_idx].local_dies_for_workload, die_num * sizeof(*zone_need_moration->d.local_dies));
+        zns_allocate_oldest_blkgrp(zns,zone_need_moration);
+        enqueue(workloads[workload_idx].openzones,zone_need_moration_idx);
+
+        workloads[workload_idx].same_cnt = 0;
+
+    }
+
+    
     //主要是擦除计数
     zns_reclaim_blkgrp(zns,zone);
-    // 更新重置记录
-    if (workloads[workload_idx].reset_count < MAX_RESET_RECORDS) {
-        // 如果还没有达到最大记录数，直接添加新记录
-        workloads[workload_idx].reset_records[workloads[workload_idx].reset_end_index]= zone_idx;
-        workloads[workload_idx].zone_reset_count[zone_idx]++;
 
-        workloads[workload_idx].reset_end_index = (workloads[workload_idx].reset_end_index + 1) % MAX_RESET_RECORDS;
-        
-        workloads[workload_idx].reset_count++;
-    } else {
-        // 如果已经达到最大记录数，需要删除最早的记录，然后添加新记录
-        int delete_zone_idx = workloads[workload_idx].reset_records[workloads[workload_idx].reset_start_index];
-        workloads[workload_idx].zone_reset_count[delete_zone_idx]--;
+    //用户reset次数++
+    workloads[zone->d.stealing].reset_count++;
 
-        workloads[workload_idx].reset_records[workloads[workload_idx].reset_end_index] = zone_idx;
-        workloads[workload_idx].zone_reset_count[zone_idx]++;
+    //找到第一个die
+    uint16_t die_index =  workloads[workload_idx].local_dies_for_workload[1];
 
-        workloads[workload_idx].reset_end_index = (workloads[workload_idx].reset_end_index + 1) % MAX_RESET_RECORDS;
-        workloads[workload_idx].reset_start_index = (workloads[workload_idx].reset_start_index + 1) % MAX_RESET_RECORDS;
+
+    // printf("当前blkgrps磨损情况:\n");
+    for(int i = 0;i<spp->zones;i+=4)
+    {
+        // printf("%u:%u ", zns->dies[die_index].blkgrps_in_die[i],zns->blkgrps[zns->dies[die_index].blkgrps_in_die[i]].erase_cnt);
+        printf("%u ",zns->blkgrps[zns->dies[die_index].blkgrps_in_die[i]].erase_cnt);
     }
+    printf("\n");
+
+
+    // // 更新重置记录
+    // if (workloads[workload_idx].reset_count < MAX_RESET_RECORDS) {
+    //     // 如果还没有达到最大记录数，直接添加新记录
+    //     workloads[workload_idx].reset_records[workloads[workload_idx].reset_end_index]= zone_idx;
+    //     workloads[workload_idx].zone_reset_count[zone_idx]++;
+
+    //     workloads[workload_idx].reset_end_index = (workloads[workload_idx].reset_end_index + 1) % MAX_RESET_RECORDS;
+        
+    //     workloads[workload_idx].reset_count++;
+    // } else {
+    //     // 如果已经达到最大记录数，需要删除最早的记录，然后添加新记录
+    //     int delete_zone_idx = workloads[workload_idx].reset_records[workloads[workload_idx].reset_start_index];
+    //     workloads[workload_idx].zone_reset_count[delete_zone_idx]--;
+
+    //     workloads[workload_idx].reset_records[workloads[workload_idx].reset_end_index] = zone_idx;
+    //     workloads[workload_idx].zone_reset_count[zone_idx]++;
+
+    //     workloads[workload_idx].reset_end_index = (workloads[workload_idx].reset_end_index + 1) % MAX_RESET_RECORDS;
+    //     workloads[workload_idx].reset_start_index = (workloads[workload_idx].reset_start_index + 1) % MAX_RESET_RECORDS;
+    // }
 }
 
 static inline NvmeZone *zns_get_zone_by_slba(NvmeNamespace *ns, uint64_t slba)
@@ -452,6 +712,7 @@ static void zns_init_zoned_state(NvmeNamespace *ns)
         zone->d.zslba = start;
         zone->d.wp = start;
         zone->w_ptr = start;
+        // zone->d.lifetime = SHORT;
         start += zone_size;
     }
 
@@ -1475,6 +1736,8 @@ static uint16_t zns_zone_mgmt_recv(FemuCtrl *n, NvmeRequest *req)
 static inline bool nvme_csi_has_nvm_support(NvmeNamespace *ns)
 {
     switch (ns->ctrl->csi) {
+
+        
     case NVME_CSI_NVM:
     case NVME_CSI_ZONED:
         return true;
@@ -1684,14 +1947,14 @@ double update_workload_pressure(struct zns * zns,uint64_t current_time) {
 }
 
 //每次打印的时候更新
-inline void print_pressure_info(struct zns * zns){
+void print_pressure_info(struct zns * zns){
 
-    printf("距离上次打印 添加记录数:");
-    for(int i = 0;i<MAX_WORKLOADS;i++){
-        printf("Workload%d: %lu |",i,add_count[i]);
-        add_count[i]=0;
-    }
-    printf("\n");
+    // printf("距离上次打印 添加记录数:");
+    // for(int i = 0;i<MAX_WORKLOADS;i++){
+    //     printf("Workload%d: %lu |",i,add_count[i]);
+    //     add_count[i]=0;
+    // }
+    // printf("\n");
     printf("workload 压力情况:");
     for(int i = 0;i<MAX_WORKLOADS;i++)
     {
@@ -1744,8 +2007,8 @@ static uint64_t znsssd_write(FemuCtrl *n, NvmeRequest *req){
     }
 
     //femu_err("PROFILING znsssd_write %lu\n", (req->expire_time -req->stime));
-    // 384 = 192K 450us 65us
-    // 96  = 48K  450/4 65/4
+    // 384 = 192K 45 0us 65us
+    // 96  = 48K  45 0/4 65/4
     // 32  = 16K  
     // 8   = 
     //说明一次写16KiB   一页   不是512
@@ -1776,15 +2039,15 @@ static uint64_t znsssd_write(FemuCtrl *n, NvmeRequest *req){
 #if SK_HYNIX_VALIDATION
         my_chnl_idx = hynix_zns_get_chnl_idx(ns, slba); //SK Hynix
 #endif
-#if !(SK_HYNIX_VALIDATION)
 
-        my_chnl_idx=zns_advanced_chnl_idx(ns, slba); 
-#endif
-        my_plane_idx=zns_advanced_plane_idx(ns, slba); 
-        if(zns->allocateType > 0x00){
-            my_chnl_idx=dz_zns_advanced_chnl_idx(n,ns, slba);
-            my_plane_idx = dz_zns_advanced_plane_idx(n,ns, slba); 
-            // femu_log("写了zone[%u] chnl [%u] die[%u] plane[%u]\n",zns_zone_idx(ns, slba),my_chnl_idx, my_plane_idx/4, my_plane_idx);
+        if(zns->allocateType == STATIC || zns->allocateType == DYNAMIC){
+            // my_chnl_idx = dz_zns_advanced_chnl_idx(n,ns, slba);
+            // my_plane_idx = dz_zns_advanced_plane_idx(n,ns, slba); 
+            dz_zns_advanced_resource(n, ns, slba, &my_chnl_idx, &my_plane_idx);
+            // femu_log("读了 chnl [%u] die[%u] plane[%u]\n",my_chnl_idx,my_plane_idx/4,my_plane_idx);
+        }else{
+            my_chnl_idx=zns_advanced_chnl_idx(ns, slba); 
+            my_plane_idx=zns_advanced_plane_idx(ns, slba);
         }
         chnl = &(zns->ch[my_chnl_idx]);
         plane= &(zns->planes[my_plane_idx]);
@@ -1801,7 +2064,7 @@ static uint64_t znsssd_write(FemuCtrl *n, NvmeRequest *req){
             //1s = 1000000000
             if(cmd_stime-last_time>=10000000){ 
                 update_workload_pressure(zns,cmd_stime);
-                print_pressure_info(zns);
+                // print_pressure_info(zns);
             }
         }
 
@@ -1888,13 +2151,15 @@ static uint64_t  znsssd_read(FemuCtrl *n, NvmeRequest *req){
     for (uint64_t i = 0; i<nlb ; i+=(ZNS_PAGE_SIZE / 512)){
         slba += i;
 
-        my_chnl_idx=zns_advanced_chnl_idx(ns, slba); 
-        my_plane_idx=zns_advanced_plane_idx(ns, slba);
-        if(zns->allocateType > 0x00){
-            //my_chip_idx=zns_get_multiway_chip_idx(ns, slba); 
-            my_chnl_idx = dz_zns_advanced_chnl_idx(n,ns, slba);
-            my_plane_idx = dz_zns_advanced_plane_idx(n,ns, slba); 
+
+        if(zns->allocateType == STATIC || zns->allocateType == DYNAMIC){
+            // my_chnl_idx = dz_zns_advanced_chnl_idx(n,ns, slba);
+            // my_plane_idx = dz_zns_advanced_plane_idx(n,ns, slba); 
+            dz_zns_advanced_resource(n, ns, slba, &my_chnl_idx, &my_plane_idx);
             // femu_log("读了 chnl [%u] die[%u] plane[%u]\n",my_chnl_idx,my_plane_idx/4,my_plane_idx);
+        }else{
+            my_chnl_idx=zns_advanced_chnl_idx(ns, slba); 
+            my_plane_idx=zns_advanced_plane_idx(ns, slba);
         }
         //chip = &(zns->chips[my_chip_idx]);
         chnl = &(zns->ch[my_chnl_idx]);
@@ -1910,7 +2175,7 @@ static uint64_t  znsssd_read(FemuCtrl *n, NvmeRequest *req){
             //1s = 1000000000
             if(cmd_stime-last_time>=10000000){ 
                 update_workload_pressure(zns,cmd_stime);
-                print_pressure_info(zns);
+                // print_pressure_info(zns);
             }
         }
 
@@ -2014,8 +2279,10 @@ static uint64_t znssd_reset_zones(ZNS *zns, NvmeRequest *req){
     chip_start_idx = zone_idx % (spp->nchnls / spp->chnls_per_zone);
     chip_idx = chip_start_idx;
     n->zone_array[zone_idx].cnt_reset +=1;
+    if(zns->allocateType == DYNAMIC || zns->allocateType ==STATIC){
+        dz_reset_zone(zns,zone_idx,&n->zone_array[zone_idx]);
+    }
 
-    dz_reset_zone(zns,zone_idx,&n->zone_array[zone_idx]);
 
     for(uint64_t ass=0; ass < spp->chnls_per_zone; ass++){
         for(uint64_t i =0 ; i < spp->ways ; i++){
@@ -2152,6 +2419,7 @@ err:
     return status | NVME_DNR;
 }
 
+
 int find_low_pressure_workload()
 {
     int min_pressure_index = 0;
@@ -2159,25 +2427,42 @@ int find_low_pressure_workload()
 
     for(int i = 1; i < MAX_WORKLOADS; i++) {
         if(workloads[i].pressure < min_pressure) {
+            // if(i == last) continue;
             min_pressure = workloads[i].pressure;
             min_pressure_index = i;
         }
     }
-    if(min_pressure<=0.2) return min_pressure_index;
-    else return -1;
+    if(min_pressure<=0.4){
+        last = min_pressure_index;
+        return min_pressure_index;
+    }
+    else{
+        last = -1;
+        return -1;
+    } 
+}
+
+int find_min_wear_workload(int workload){
+    int min_wear_index = workload;
+    double min_wear = workloads[workload].reset_count;
+
+    for(int i = 0; i < MAX_WORKLOADS; i++) {
+        if(workloads[i].reset_count < min_wear*0.95 && workloads[i].pressure<0.1) {
+            // if(i == last) continue;
+            min_wear = workloads[i].reset_count;
+            min_wear_index = i;
+        }
+    }
+
+    last = min_wear_index;
+    return min_wear_index;
+
 }
 
 //dz added
 void zone_remapping(uint64_t zidx,struct zns * zns ,NvmeZone *zone,int workload){
     // printf("====================================为zone %ld 分配资源====================================\n",zidx);
     // print_pressure_info(zns);
-    int die_num = (zns->sp.nchnls)*(zns->sp.ways)*(zns->sp.dies_per_chip);
-
-    //先拿回来
-    // for(int i = 0;i<die_num;i++){
-    //     zone->d.local_dies[i]=workloads[workload].local_dies_for_workload[i];
-    // } 
-    memcpy(zone->d.local_dies, workloads[workload].local_dies_for_workload, die_num * sizeof(*zone->d.local_dies));
 
     if(zone->d.stealing!=workload){
         // printf("属于workload %d 的 zone %d 之前窃取了workload%d 后者被偷了%u\n",workload,zidx,zone->d.stealing,workloads[zone->d.stealing].stolen);
@@ -2186,52 +2471,49 @@ void zone_remapping(uint64_t zidx,struct zns * zns ,NvmeZone *zone,int workload)
     }
 
     // 判断是否需要窃取  压力很大  且   zone reset 频繁
-    if(workloads[workload].pressure>0.5)
+    if(workloads[workload].pressure>0)
     {
-        printf("workload %d 可能会压力过大\n",workload);
-        int min_pressure_index = find_low_pressure_workload();
+        // printf("workload %d 可能会压力过大\n",workload);
+        // int min_pressure_index = find_low_pressure_workload();
+        int min_pressure_index = find_min_wear_workload(workload);
+
         if(min_pressure_index!=-1){
-            // int num_zones = zns->num_zones;
-            // ZoneReset zone_resets[num_zones];
 
-            // for (int i = 0; i < num_zones; i++) {
-            //     zone_resets[i].zone_index = i;
-            //     zone_resets[i].reset_count = workloads[workload].zone_reset_count[i];
-            // }
-            // qsort(zone_resets, num_zones, sizeof(ZoneReset), compare);
-
-            // 打印排序后的结果
-            // printf("Zone reset 次数\n");
-            //如果本次要remap的zone reset 次数 大于8 且频率在前几位  就窃取
-            // bool flag = false;
-            // int count = 0;
-            // for(int i = 0 ; i < 80 ; i++ ){
-            //     if(zidx == zone_resets[i].zone_index){
-            //         flag = true;
-            //         count = zone_resets[i].reset_count;
-            //         printf("count=%d\n",count);
-            //         break;
-            //     }
-            // }
-            // if(flag && count > 8){
-            if(zidx % (zns->num_zones/MAX_WORKLOADS)<=80){
-                memcpy(zone->d.local_dies, workloads[min_pressure_index].local_dies_for_workload, die_num * sizeof(*zone->d.local_dies));
+            // if(zidx % (zns->num_zones/MAX_WORKLOADS)<65 && workloads[min_pressure_index].reset_count< workloads[workload].reset_count ){
+            if(zidx % (zns->num_zones/MAX_WORKLOADS)<=128){
                 zone->d.stealing = min_pressure_index;
                 workloads[min_pressure_index].stolen++;
-                printf("属于workload %d 的 zone %d 窃取了workload%d 后者被偷了%u\n",workload,zidx,min_pressure_index,workloads[min_pressure_index].stolen);
+                // printf("属于workload %d 的 zone %d 窃取了workload%d 后者被偷了%u\n",workload,zidx,min_pressure_index,workloads[min_pressure_index].stolen);
             }
+
+        }
+    }
+    //80
+
+    if(zone->d.is_mapped==false){
+        // zns_allocate_next_blkgrp(zns,zone);
+        if(zidx % (zns->num_zones/MAX_WORKLOADS)<=16){
+            zns_allocate_youngest_blkgrp(zns,zone);
+        }else if(zidx % (zns->num_zones/MAX_WORKLOADS)>16&&zidx % (zns->num_zones/MAX_WORKLOADS)<128){
+            // zns_allocate_youngest_blkgrp(zns,zone);
+            zns_allocate_older_blkgrp(zns,zone);
+        }else{
+            // zns_allocate_youngest_blkgrp(zns,zone);
+            zns_allocate_older_blkgrp(zns,zone);
+            //zns_allocate_oldest_blkgrp(zns,zone);
+            
         }
     }
 
-    
-    
-    //然后就正常为 这个zone分配blk就好了
-    zns_allocate_blkgrp(zns,zone);
-    zone->d.is_mapped=true;
 
-    // femu_log("分配完后 Initial values of every zone:\n"); 
 
-    // printf("zone %d :",zidx);
+
+    ////冷数据迁移逻辑
+    enqueue(workloads[workload].openzones,zidx);
+    printf(" workload %d queue add %d :",workload,zidx);
+    printQueue(workloads[workload].openzones);
+
+    // printf("zone %d 分配完后:",zidx);
     // for(int j = 0;j<die_num;j++){
     //     printf(" %u ", zone->d.local_dies[j]);
     // }
@@ -2242,11 +2524,6 @@ void zone_remapping(uint64_t zidx,struct zns * zns ,NvmeZone *zone,int workload)
     // }
     // printf("\n");
 
-
-    //冷数据迁移逻辑  与之前的所有逻辑无关  是独立的
-    if(workloads[workload].pressure<0.2){//当小于0.2 要进行冷数据迁移以维护磨损
-        //找到有数据且reset次数最少的
-    }
 }
 
 static uint16_t zns_write(FemuCtrl *n, NvmeNamespace *ns, NvmeCmd *cmd,
@@ -2268,7 +2545,12 @@ static uint16_t zns_write(FemuCtrl *n, NvmeNamespace *ns, NvmeCmd *cmd,
     zone = zns_get_zone_by_slba(ns, slba);
 
 
-    if(zns->allocateType >= STATIC_MANUAL4411 && zone->d.is_mapped==false)
+    // if(zns->allocateType == DYNAMIC && zone->d.is_mapped==false)
+    // {
+    //     zone_remapping(zidx,zns,zone,zidx/(zns->num_zones/MAX_WORKLOADS));
+    // }
+
+    if((zns->allocateType == DYNAMIC ||zns->allocateType == STATIC ||zns->allocateType == CONFZNS) && zone->d.is_mapped==false)
     {
         zone_remapping(zidx,zns,zone,zidx/(zns->num_zones/MAX_WORKLOADS));
     }
@@ -2415,10 +2697,11 @@ static void zns_init(FemuCtrl *n, Error **errp)
     znsssd_init(n);
 }
 static void znsssd_init_params(FemuCtrl * n, struct zns_ssdparams *spp){
-    spp->pg_rd_lat = NAND_READ_LATENCY;
-    spp->pg_wr_lat = NAND_PROG_LATENCY;
-    spp->blk_er_lat = NAND_ERASE_LATENCY;
-    spp->ch_xfer_lat = NAND_CHNL_PAGE_TRANSFER_LATENCY;
+    int wear_leveling = 1;
+    spp->pg_rd_lat = NAND_READ_LATENCY/wear_leveling;
+    spp->pg_wr_lat = NAND_PROG_LATENCY/wear_leveling;
+    spp->blk_er_lat = NAND_ERASE_LATENCY/wear_leveling;
+    spp->ch_xfer_lat = NAND_CHNL_PAGE_TRANSFER_LATENCY/wear_leveling;
     /**
      * 1. SSD size  2. zone size 3. # of chnls 4. # of chnls per zone
     */
@@ -2426,10 +2709,10 @@ static void znsssd_init_params(FemuCtrl * n, struct zns_ssdparams *spp){
     spp->chnls_per_zone = 2;   
     spp->zones          = n->num_zones;     
     spp->ways           = 4;    //default : 2
-    spp->ways_per_zone  = 2;    //default :==spp->ways
+    spp->ways_per_zone  = 4;    //default :==spp->ways
 
     spp->dies_per_chip  = 1;    //default : 1
-    spp->planes_per_die = 4;    //default : 4  //因为plane默认不可并行 可能是confzns的错误  因此先设置为1
+    spp->planes_per_die = 1;    //default : 4  //因为plane默认不可并行 可能是confzns的错误  因此先设置为1
     spp->register_model = 1;    
     /*Inho @ Temporarly, FEMU doesn't support more than 1 namespace. Parameters below is for supporting different zone configurations temporarly*/
 
@@ -2545,7 +2828,7 @@ void znsssd_init(FemuCtrl * n){
     zns->namespaces = n->namespaces;
     znsssd_init_params(n, spp);
     uint64_t nplanes = (spp->ways * spp->planes_per_die* spp->dies_per_chip * spp->nchnls);
-    
+    last = -1;
     femu_log("zns.c:1820 znssd_init(): nplanes %ld spp->ways %ld spp->planes_per_die %ld\
              spp->dies_per_chip %ld \
              spp->nchnls %ld \n ", nplanes, spp->ways, spp->planes_per_die, spp->dies_per_chip, spp->nchnls);
@@ -2596,7 +2879,11 @@ void znsssd_init(FemuCtrl * n){
         workloads[i].reset_count = 0;
         workloads[i].pressure = 0;
 
+
+        workloads[i].openzones = createQueue();
+
         workloads[i].stolen = 0;
+        workloads[i].same_cnt = 0;
         
         workloads[i].local_dies_for_workload = g_malloc0(sizeof(uint16_t) * spp->nchnls*spp->ways*spp->dies_per_chip);
         // zns->zone_array[i].d.num_unit = spp->nchnls*spp->ways*spp->dies_per_chip;
@@ -2616,7 +2903,7 @@ void znsssd_init(FemuCtrl * n){
     }
     femu_log("初始化每个die\n");
     for (int i = 0; i < spp->nchnls * spp->ways * spp->dies_per_chip; i++) {
-        zns->dies[i].int_test = 0x123456;
+        zns->dies[i].next_free_blkgrp = 0;
 
         zns->dies[i].blkgrps_in_die =  g_malloc0(sizeof(uint32_t) * spp->zones);
 
@@ -2630,7 +2917,7 @@ void znsssd_init(FemuCtrl * n){
     for (uint64_t i=0; i<nplanes; i++){
         zns_init_plane(&zns->planes[i], spp);
     }
-    /*自定义分配*/
+    /*自定义分配 70*/
     zns->allocateType=DYNAMIC;
     switch (zns->allocateType) {
         case STATIC_HORIZONTAL_FIRST:
@@ -2640,7 +2927,7 @@ void znsssd_init(FemuCtrl * n){
             for(int j = 0 ;j < spp->ways;  j += spp->ways_per_zone){
                 for(int i = 0 ;i < spp->nchnls;i += spp->chnls_per_zone){
                     while(zns->dz_unit_allocate[i][j]!=0){
-                        test_print(n);
+                        // test_print(n);
                         uint16_t* dies_arr = malloc(spp->chnls_per_zone * spp->ways_per_zone * sizeof(uint16_t));
                         int cnt = 0;
                         for(int m = 0;m< spp->ways_per_zone; m++){
@@ -2654,7 +2941,7 @@ void znsssd_init(FemuCtrl * n){
                         for(int m = 0;m<spp->nchnls*spp->ways*spp->dies_per_chip;m++){
                             zone->d.local_dies[m] = dies_arr[m%cnt];
                         }
-                        zns_allocate_blkgrp(zns,zone);
+                        zns_allocate_youngest_blkgrp(zns,zone);
                         free(dies_arr);
                     }          
                 }
@@ -2682,7 +2969,7 @@ void znsssd_init(FemuCtrl * n){
                         for(int m = 0;m<spp->nchnls*spp->ways*spp->dies_per_chip;m++){
                             zone->d.local_dies[m] = dies_arr[m%cnt];
                         }
-                        zns_allocate_blkgrp(zns,zone);
+                        zns_allocate_youngest_blkgrp(zns,zone);
                         free(dies_arr);
                     }             
                 }
@@ -2720,7 +3007,7 @@ void znsssd_init(FemuCtrl * n){
                             zone->d.local_dies[m] = dies_arr[m%cnt];
                         }
                         test_print(n);
-                        zns_allocate_blkgrp(zns,zone);
+                        zns_allocate_youngest_blkgrp(zns,zone);
                         free(dies_arr);
                     }   
                 }
@@ -2769,7 +3056,7 @@ void znsssd_init(FemuCtrl * n){
                         for(int m = 0;m<spp->nchnls*spp->ways*spp->dies_per_chip;m++){
                             zone->d.local_dies[m] = dies_arr[m%cnt];
                         }
-                        zns_allocate_blkgrp(zns,zone);
+                        zns_allocate_youngest_blkgrp(zns,zone);
                         free(dies_arr);
                     }   
                 }
@@ -2788,7 +3075,9 @@ void znsssd_init(FemuCtrl * n){
             break;
         }
         case DYNAMIC:
-        {
+        {   //50
+            dont_reclaim_ = false;
+            printf("Size of enum: %zu bytes\n", sizeof(enum ZoneLifetime));
             int zone_idx = 0;  
             uint64_t chnls_per_zone;  
             uint64_t ways_per_zone; 
@@ -2814,7 +3103,7 @@ void znsssd_init(FemuCtrl * n){
                             zone->d.local_dies[m] = dies_arr[m%cnt];
                         }
                         // test_print(n);
-                        // zns_allocate_blkgrp(zns,zone);
+                        // zns_allocate_next_blkgrp(zns,zone);
 
                         free(dies_arr);
                     }   
@@ -2834,6 +3123,54 @@ void znsssd_init(FemuCtrl * n){
             break;
         }
         case CONFZNS:
+        case STATIC:
+        {
+            dont_reclaim_ = true;
+            printf("Size of enum: %zu bytes\n", sizeof(enum ZoneLifetime));
+            int zone_idx = 0;  
+            uint64_t chnls_per_zone;  
+            uint64_t ways_per_zone; 
+
+            chnls_per_zone = spp->nchnls/MAX_WORKLOADS;
+            ways_per_zone = spp->ways;
+            //先划分 
+            for(int i = 0     ;i < spp->nchnls;i += chnls_per_zone){
+                for(int j = 0 ;j < spp->ways;  j += ways_per_zone){
+                    //更新构造
+                    while(zns->dz_unit_allocate[i][j]!=0){                      
+                        uint16_t* dies_arr = malloc(chnls_per_zone * ways_per_zone * sizeof(uint16_t));
+                        int cnt = 0;
+                        for(int m = 0;m< ways_per_zone;m++){  
+                            for(int n = 0;n< chnls_per_zone;n++){                         
+                                dies_arr[cnt++]=(i+n)*spp->ways+j+m;
+                                zns->dz_unit_allocate[i+n][j+m]-=(spp->nchnls*spp->ways*spp->dies_per_chip)/(chnls_per_zone * ways_per_zone*spp->dies_per_chip);
+                                zns->dz_unit_using[i+n][j+m]+=(spp->nchnls*spp->ways*spp->dies_per_chip)/(chnls_per_zone * ways_per_zone*spp->dies_per_chip);
+                            }
+                        }
+                        struct NvmeZone* zone = &zns->zone_array[zone_idx++];
+                        for(int m = 0;m<spp->nchnls*spp->ways*spp->dies_per_chip;m++){
+                            zone->d.local_dies[m] = dies_arr[m%cnt];
+                        }
+                        // test_print(n);
+                        zns_allocate_next_blkgrp(zns,zone);
+
+                        free(dies_arr);
+                    }   
+                }
+            }
+            for (int i = 0; i < MAX_WORKLOADS; i++) {
+                memcpy(workloads[i].local_dies_for_workload, zns->zone_array[i*(spp->zones/MAX_WORKLOADS)].d.local_dies, sizeof(uint16_t) * spp->nchnls*spp->ways*spp->dies_per_chip);
+            }
+            femu_log("Initial values of local_dies_for_workload:\n"); 
+            for (int i = 0; i < MAX_WORKLOADS; i++) {
+                printf("Workload %d: ", i);
+                for (int j = 0; j < spp->nchnls*spp->ways*spp->dies_per_chip; j++) {
+                    printf("%u ", workloads[i].local_dies_for_workload[j]);
+                }
+                printf("\n");
+            }           
+            break;
+        }     
         default:         
             break;
     }
@@ -2842,7 +3179,7 @@ void znsssd_init(FemuCtrl * n){
 
     /*=================================++++++++===============================*/
    
-    // for (uint64_t i =0; i < 1600; i+=16){
+    // for (uint64_t i =0; i < 16 00; i+=16){
     //     femu_err("[TEST] zns.c:1767 slba:%lu  ppa:%lu plane:%lu chidx:%lu chnnl:%lu \n",
     //     i, zns_get_multichnlway_ppn_idx(n->namespaces,i), 
     //     zns_advanced_plane_idx(n->namespaces, i), 
@@ -2872,7 +3209,6 @@ static void zns_exit(FemuCtrl *n)
     g_free(zns);
     
 
-
     // 释放dz_unit_allocate
     for(int i = 0; i < spp->nchnls; i++) {
         g_free(zns->dz_unit_allocate[i]);
@@ -2895,6 +3231,7 @@ static void zns_exit(FemuCtrl *n)
     {
         g_free(workloads[i].zone_reset_count);
         g_free(workloads[i].local_dies_for_workload);
+        freeQueue(workloads[i].openzones);
         // zns->zone_array[i].d.num_unit = spp->nchnls*spp->ways*spp->dies_per_chip;
     }
 

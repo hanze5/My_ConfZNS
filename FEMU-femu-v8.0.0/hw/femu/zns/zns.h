@@ -37,6 +37,8 @@ enum {
 #define MAX_ZONES 1024
 
 uint64_t last_time=0;
+int last;
+bool dont_reclaim_ = true;  //只擦除不回收
 
 /**
  * @brief 
@@ -82,7 +84,7 @@ typedef struct zns_ssd_lun {
 typedef struct zns_ssd_die {
     // uint64_t next_avail_time; // in nanoseconds
     // pthread_spinlock_t time_lock;
-    uint32_t int_test;
+    uint32_t next_free_blkgrp;
     uint32_t *blkgrps_in_die; //die用于维护自身blkgrp idx
 
 }zns_ssd_die;
@@ -130,6 +132,209 @@ struct zns_ssdparams{
 
 int print_count;
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+// #include <stdio.h>
+// #include <stdlib.h>
+
+// typedef struct Node {
+//     int data;
+//     struct Node* next;
+// } Node;
+
+// typedef struct Queue {
+//     Node* head;
+//     Node* tail;
+// } Queue;
+
+// Queue* createQueue() {
+//     Queue* queue = (Queue*)malloc(sizeof(Queue));
+//     queue->head = NULL;
+//     queue->tail = NULL;
+//     return queue;
+// }
+// bool emptyQueue(Queue* queue){
+//     return queue->head == NULL;
+// }
+// void freeQueue(Queue* queue) {
+//     Node* temp;
+//     while (queue->head != NULL) {
+//         temp = queue->head;
+//         queue->head = queue->head->next;
+//         free(temp);
+//     }
+//     free(queue);
+// }
+// void enqueue(Queue* queue, int data) {
+//     Node* newNode = (Node*)malloc(sizeof(Node));
+//     newNode->data = data;
+//     newNode->next = NULL;
+//     if (queue->head == NULL) {
+//         queue->head = newNode;
+//     } else {
+//         queue->tail->next = newNode;
+//     }
+//     queue->tail = newNode;
+// }
+
+// void dequeue(Queue* queue, int value) {
+//     if (queue->head == NULL) {
+//         printf("队列为空\n");
+//         return;
+//     }
+//     Node* temp = queue->head;
+//     Node* prev = NULL;
+//     while (temp != NULL && temp->data != value) {
+//         prev = temp;
+//         temp = temp->next;
+//     }
+//     if (temp == NULL) {
+//         printf("队列中没有找到值为 %d 的元素\n", value);
+//         return;
+//     }
+//     if (prev == NULL) {
+//         queue->head = temp->next;
+//     } else {
+//         prev->next = temp->next;
+//     }
+//     free(temp);
+//     if (queue->head == NULL) {
+//         queue->tail = NULL;
+//     }
+// }
+
+// int dequeue_head(Queue* queue) {
+//     if (queue->head == NULL) {
+//         printf("队列为空\n");
+//         return -1;  // 或者你可以选择一个更合适的错误值
+//     }
+//     Node* temp = queue->head;
+//     int value = temp->data;
+//     queue->head = queue->head->next;
+//     free(temp);
+//     if (queue->head == NULL) {
+//         queue->tail = NULL;
+//     }
+//     return value;
+// }
+
+// void printQueue(Queue* queue) {
+//     Node* temp = queue->head;
+//     while (temp != NULL) {
+//         printf("%d ", temp->data);
+//         temp = temp->next;
+//     }
+//     printf("\n");
+// }
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_QUEUE_SIZE 256  // 队列的最大长度
+
+typedef struct Queue {
+    int data[MAX_QUEUE_SIZE];
+    int front;
+    int rear;
+    int size;
+} Queue;
+
+Queue* createQueue() {
+    Queue* queue = (Queue*)malloc(sizeof(Queue));
+    queue->front = 0;
+    queue->rear = -1;
+    queue->size = 0;
+    return queue;
+}
+
+bool emptyQueue(Queue* queue) {
+    return queue->size == 0;
+}
+
+bool fullQueue(Queue* queue) {
+    return queue->size == MAX_QUEUE_SIZE;
+}
+
+void freeQueue(Queue* queue) {
+    free(queue);
+}
+
+void enqueue(Queue* queue, int data) {
+    if (fullQueue(queue)) {
+        printf("队列已满，无法入队\n");
+        return;
+    }
+    queue->rear = (queue->rear + 1) % MAX_QUEUE_SIZE;
+    queue->data[queue->rear] = data;
+    queue->size++;
+}
+
+int dequeue(Queue* queue, int value) {
+    if (emptyQueue(queue)) {
+        printf("队列为空\n");
+        return -1;  // 或者你可以选择一个更合适的错误值
+    }
+    int index = queue->front;
+    int foundIndex = -1;  // 用于记录找到的元素的下标
+    while (index != queue->rear) {
+        if (queue->data[index] == value) {
+            foundIndex = index;
+            break;
+        }
+        index = (index + 1) % MAX_QUEUE_SIZE;
+    }
+    if (queue->data[index] == value) {  // 处理队尾的情况
+        foundIndex = index;
+    }
+    if (foundIndex == -1) {
+        printf("队列中没有找到值为 %d 的元素\n", value);
+        return -1;  // 或者你可以选择一个更合适的错误值
+    }
+    int deletedValue = queue->data[foundIndex];
+    for (int i = foundIndex; i != queue->rear; i = (i + 1) % MAX_QUEUE_SIZE) {
+        queue->data[i] = queue->data[(i + 1) % MAX_QUEUE_SIZE];
+    }
+    queue->rear = (queue->rear - 1 + MAX_QUEUE_SIZE) % MAX_QUEUE_SIZE;
+    queue->size--;
+    return deletedValue;
+}
+
+int dequeue_head(Queue* queue) {
+    if (emptyQueue(queue)) {
+        printf("队列为空\n");
+        return -1;  // 或者你可以选择一个更合适的错误值
+    }
+    int value = queue->data[queue->front];
+    queue->front = (queue->front + 1) % MAX_QUEUE_SIZE;
+    queue->size--;
+    return value;
+}
+
+int get_queue_head(Queue* queue) {
+    if (emptyQueue(queue)) {
+        printf("队列为空\n");
+        return -1;  // 或者你可以选择一个更合适的错误值
+    }
+    return queue->data[queue->front];
+}
+
+
+void printQueue(Queue* queue) {
+    int index = queue->front;
+    for (int i = 0; i < queue->size; i++) {
+        printf("%d ", queue->data[index]);
+        index = (index + 1) % MAX_QUEUE_SIZE;
+    }
+    printf("\n");
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+
 typedef struct {
     uint16_t reset_records[MAX_RESET_RECORDS];
     // 用于跟踪重置记录的起始和结束索引
@@ -138,13 +343,18 @@ typedef struct {
     // 用于跟踪重置次数是否达到了MAX_RESET_RECORDS
     int reset_count;
 
+    int same_cnt;
+
     uint16_t stolen;
+
+    Queue* openzones;
 
     uint16_t *zone_reset_count;
 
     uint16_t *local_dies_for_workload;
     double pressure;
 } Workload;
+
 
 Workload workloads[MAX_WORKLOADS];
 
@@ -169,8 +379,11 @@ enum RecourseAllocateType{
     STATIC_MANUAL4422       = 0x04,
 
     DYNAMIC                 = 0x05,
+    STATIC                  = 0x06,
 
 };
+
+
 
 
 /**
@@ -264,6 +477,11 @@ enum NvmeZoneSendAction {
     NVME_ZONE_ACTION_SET_ZD_EXT      = 0x10,
 };
 
+enum ZoneLifetime{
+    SHORT                 = 0x00,
+    MEDIUM                = 0x01,
+    LONG                  = 0x02,
+};
 
 
 typedef struct QEMU_PACKED NvmeZoneDescr {
@@ -275,6 +493,7 @@ typedef struct QEMU_PACKED NvmeZoneDescr {
     uint8_t stealing;
 
     bool is_mapped;
+    
 
     uint64_t    zcap;
     uint64_t    zslba;
@@ -320,6 +539,7 @@ typedef struct QEMU_PACKED NvmeIdNsZoned {
 typedef struct NvmeZone {
     NvmeZoneDescr   d;
     uint64_t        w_ptr;
+    
     
     uint64_t        cnt_reset;      //新加入 统计重置次数？
     pthread_spinlock_t w_ptr_lock;  //新加更新写指针锁

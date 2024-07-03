@@ -70,7 +70,7 @@ static void nvme_process_sq_io(void *opaque, int index_poller)
 
         if (n->print_log) {
             femu_debug("%s,cid:%d\n", __func__, cmd.cid);
-        }
+        } 
 
         status = nvme_io_cmd(n, &cmd, req);
         if (1 && status == NVME_SUCCESS) {
