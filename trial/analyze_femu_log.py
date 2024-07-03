@@ -64,7 +64,7 @@ for i in range(len(workloads)):
 plt.title('Pressure Graph')
 plt.xlabel('Time')
 plt.ylabel('Pressure')
-plt.legend()  # 显示图例
+plt.legend(loc='upper right')  # 显示图例
 plt.savefig('Pressure_Graph.png')  # 保存图像
 plt.close()
 

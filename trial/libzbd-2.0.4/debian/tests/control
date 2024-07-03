@@ -1,3 +1,0 @@
-Test-Command: gzbd --help; gzbd-viewer --help
-Depends: @
-Restrictions: superficial

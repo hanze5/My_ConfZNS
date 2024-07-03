@@ -110,7 +110,7 @@ Status BuildTable(
   //dz modified
   std::string fname = TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
                                     meta->fd.GetPathId());
-  std::cout<<"builder.cc:"<<meta->fd.packed_number_and_path_id<<std::endl;                                
+  // std::cout<<"builder.cc:"<<meta->fd.packed_number_and_path_id<<std::endl;                                
 
 
   // std::cout<<"dz BuildTable:column_family_name is "+tboptions.column_family_name<<" but fname is "<<fname

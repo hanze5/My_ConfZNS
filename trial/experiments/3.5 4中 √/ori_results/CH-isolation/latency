@@ -1,0 +1,118 @@
+=====================================
+mixgrapha    :   12909.459 micros/op 648 ops/sec 183.592 seconds 118992 operations;   80.8 MB/s ( Gets:7003 Puts:6996 Seek:0, reads 7003 in 7003 found, avg size: 131072.0 value, -nan scan)
+
+mixgraphb    :   12461.818 micros/op 655 ops/sec 180.042 seconds 117992 operations;   81.9 MB/s ( Gets:7515 Puts:7484 Seek:0, reads 7515 in 7515 found, avg size: 131072.0 value, -nan scan)
+
+mixgraphc    :   12992.071 micros/op 649 ops/sec 180.047 seconds 116992 operations;   81.3 MB/s ( Gets:7482 Puts:7517 Seek:0, reads 7482 in 7482 found, avg size: 131072.0 value, -nan scan)
+
+mixgraphd    :   13229.482 micros/op 653 ops/sec 180.490 seconds 117992 operations;   81.7 MB/s ( Gets:7447 Puts:7552 Seek:0, reads 7447 in 7447 found, avg size: 131072.0 value, -nan scan)
+
+mixgraph_together :   12898.033 micros/op 2621 ops/sec 180.042 seconds 471968 operations;  327.5 MB/s ( Gets:7003 Puts:6996 Seek:0, reads 7003 in 7003 found, avg size: 131072.0 value, -nan scan)
+
+<===================================前0个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 59443
+rocksdb.l0.hit COUNT : 21
+rocksdb.l1.hit COUNT : 4457
+rocksdb.l2andup.hit COUNT : 54531
+rocksdb.number.keys.written COUNT : 59549
+rocksdb.number.keys.read COUNT : 59443
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 7809077213
+rocksdb.bytes.read COUNT : 7734427648
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 92205907
+rocksdb.flush.write.bytes COUNT : 233793305
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 8822.721681 P95 : 30555.247949 P99 : 45764.211526 P100 : 83877.000000 COUNT : 59443 SUM : 668379443
+rocksdb.db.write.micros P50 : 50.604547 P95 : 157.740562 P99 : 365.248057 P100 : 317435.000000 COUNT : 59549 SUM : 95991028
+rocksdb.table.sync.micros P50 : 2717.391304 P95 : 6086.666667 P99 : 8646.000000 P100 : 9159.000000 COUNT : 266 SUM : 804878
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 278920.704846 P95 : 317361.000000 P99 : 317361.000000 P100 : 317361.000000 COUNT : 353 SUM : 92205907
+rocksdb.sst.read.micros P50 : 991.666651 P95 : 3040.947105 P99 : 4300.380377 P100 : 35998.000000 COUNT : 533349 SUM : 651678720
+rocksdb.file.read.flush.micros P50 : 930.468750 P95 : 2702.702703 P99 : 3735.000000 P100 : 4123.000000 COUNT : 266 SUM : 288047
+rocksdb.file.read.get.micros P50 : 977.513515 P95 : 2875.686528 P99 : 4257.372763 P100 : 35998.000000 COUNT : 525814 SUM : 629220520
+rocksdb.db.flush.micros P50 : 108171.641791 P95 : 199333.333333 P99 : 225059.000000 P100 : 225059.000000 COUNT : 266 SUM : 30542789
+
+<===================================前1个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 1
+rocksdb.memtable.miss COUNT : 58896
+rocksdb.l0.hit COUNT : 23
+rocksdb.l1.hit COUNT : 5113
+rocksdb.l2andup.hit COUNT : 53760
+rocksdb.number.keys.written COUNT : 59095
+rocksdb.number.keys.read COUNT : 58897
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 7749541015
+rocksdb.bytes.read COUNT : 7719747584
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 34155337
+rocksdb.flush.write.bytes COUNT : 232726628
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 8954.386897 P95 : 30937.671722 P99 : 46019.665493 P100 : 79424.000000 COUNT : 58897 SUM : 671050059
+rocksdb.db.write.micros P50 : 50.742933 P95 : 154.361067 P99 : 315.141026 P100 : 317045.000000 COUNT : 59095 SUM : 37946523
+rocksdb.table.sync.micros P50 : 2689.256198 P95 : 6175.000000 P99 : 8808.000000 P100 : 8808.000000 COUNT : 265 SUM : 793950
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 285388.888889 P95 : 316937.000000 P99 : 316937.000000 P100 : 316937.000000 COUNT : 131 SUM : 34155337
+rocksdb.sst.read.micros P50 : 1072.786819 P95 : 3217.955721 P99 : 4322.951561 P100 : 28175.000000 COUNT : 509090 SUM : 655686699
+rocksdb.file.read.flush.micros P50 : 1022.454545 P95 : 2865.277778 P99 : 4656.666667 P100 : 5100.000000 COUNT : 265 SUM : 316877
+rocksdb.file.read.get.micros P50 : 1058.867533 P95 : 2998.829025 P99 : 4283.318403 P100 : 28175.000000 COUNT : 501850 SUM : 633237648
+rocksdb.db.flush.micros P50 : 111304.347826 P95 : 197000.000000 P99 : 239400.000000 P100 : 248177.000000 COUNT : 265 SUM : 30871127
+
+<===================================前2个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 58629
+rocksdb.l0.hit COUNT : 19
+rocksdb.l1.hit COUNT : 3946
+rocksdb.l2andup.hit COUNT : 54664
+rocksdb.number.keys.written COUNT : 58363
+rocksdb.number.keys.read COUNT : 58629
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 7653548731
+rocksdb.bytes.read COUNT : 7684620288
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 93908874
+rocksdb.flush.write.bytes COUNT : 228999348
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 8327.505416 P95 : 31141.266257 P99 : 46388.307263 P100 : 89068.000000 COUNT : 58629 SUM : 658484944
+rocksdb.db.write.micros P50 : 50.969968 P95 : 152.875053 P99 : 352.489838 P100 : 396236.000000 COUNT : 58363 SUM : 97626093
+rocksdb.table.sync.micros P50 : 2783.177570 P95 : 6195.357143 P99 : 8815.125000 P100 : 9271.000000 COUNT : 263 SUM : 813696
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 310251.141553 P95 : 396124.000000 P99 : 396124.000000 P100 : 396124.000000 COUNT : 321 SUM : 93908874
+rocksdb.sst.read.micros P50 : 1033.151823 P95 : 3007.160912 P99 : 4287.696054 P100 : 35922.000000 COUNT : 519257 SUM : 644737911
+rocksdb.file.read.flush.micros P50 : 953.611111 P95 : 2645.312500 P99 : 3611.000000 P100 : 4270.000000 COUNT : 263 SUM : 297000
+rocksdb.file.read.get.micros P50 : 1017.538434 P95 : 2863.324687 P99 : 4238.450833 P100 : 35922.000000 COUNT : 510779 SUM : 620034514
+rocksdb.db.flush.micros P50 : 112307.692308 P95 : 194631.578947 P99 : 238926.315789 P100 : 240209.000000 COUNT : 263 SUM : 30614168
+
+<===================================前3个线程报告===================================>
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 59143
+rocksdb.l0.hit COUNT : 26
+rocksdb.l1.hit COUNT : 3807
+rocksdb.l2andup.hit COUNT : 55310
+rocksdb.number.keys.written COUNT : 58849
+rocksdb.number.keys.read COUNT : 59143
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 7717281313
+rocksdb.bytes.read COUNT : 7751991296
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 142198631
+rocksdb.flush.write.bytes COUNT : 234145643
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 9339.750474 P95 : 29096.441532 P99 : 42142.708703 P100 : 71865.000000 COUNT : 59143 SUM : 658202899
+rocksdb.db.write.micros P50 : 51.367451 P95 : 186.362846 P99 : 129811.450382 P100 : 317271.000000 COUNT : 58849 SUM : 146103930
+rocksdb.table.sync.micros P50 : 2713.725490 P95 : 6145.333333 P99 : 9477.600000 P100 : 16230.000000 COUNT : 264 SUM : 808978
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 194271.844660 P95 : 317190.000000 P99 : 317190.000000 P100 : 317190.000000 COUNT : 701 SUM : 142198631
+rocksdb.sst.read.micros P50 : 943.796063 P95 : 2841.167016 P99 : 4221.329939 P100 : 36175.000000 COUNT : 550991 SUM : 641786421
+rocksdb.file.read.flush.micros P50 : 1005.370370 P95 : 2755.172414 P99 : 4092.500000 P100 : 4519.000000 COUNT : 264 SUM : 304938
+rocksdb.file.read.get.micros P50 : 928.609945 P95 : 2784.920320 P99 : 4168.817044 P100 : 36175.000000 COUNT : 542288 SUM : 618013640
+rocksdb.db.flush.micros P50 : 107700.729927 P95 : 184000.000000 P99 : 236118.000000 P100 : 236118.000000 COUNT : 264 SUM : 30336724

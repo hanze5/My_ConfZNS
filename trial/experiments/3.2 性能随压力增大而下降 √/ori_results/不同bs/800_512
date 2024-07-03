@@ -1,0 +1,29 @@
+mixgrapha    :   37485.417 micros/op 248 ops/sec 181.198 seconds 44992 operations;  124.2 MB/s ( Gets:3012 Puts:2987 Seek:0, reads 3012 in 3012 found, avg size: 524288.0 value, -nan scan)
+
+STATISTICS:
+rocksdb.memtable.hit COUNT : 0
+rocksdb.memtable.miss COUNT : 22402
+rocksdb.l0.hit COUNT : 19
+rocksdb.l1.hit COUNT : 2415
+rocksdb.l2andup.hit COUNT : 19968
+rocksdb.number.keys.written COUNT : 22590
+rocksdb.number.keys.read COUNT : 22402
+rocksdb.number.keys.updated COUNT : 0
+rocksdb.bytes.written COUNT : 11845134270
+rocksdb.bytes.read COUNT : 11745099776
+rocksdb.db.iter.bytes.read COUNT : 0
+rocksdb.stall.micros COUNT : 5137229881702659
+rocksdb.flush.write.bytes COUNT : 12592414
+rocksdb.number.direct.load.table.properties COUNT : 0
+rocksdb.merge.operation.time.nanos COUNT : 0
+rocksdb.db.get.micros P50 : 50150.355385 P95 : 109736.486486 P99 : 159576.583493 P100 : 255006.000000 COUNT : 22402 SUM : 1207504163
+rocksdb.db.write.micros P50 : 151.665765 P95 : 175246.636771 P99 : 281424.137931 P100 : 1997510.000000 COUNT : 22590 SUM : 469330342
+rocksdb.table.sync.micros P50 : 3960.606061 P95 : 7563.600000 P99 : 8798.000000 P100 : 8798.000000 COUNT : 354 SUM : 1376430
+rocksdb.db.seek.micros P50 : 0.000000 P95 : 0.000000 P99 : 0.000000 P100 : 0.000000 COUNT : 0 SUM : 0
+rocksdb.db.write.stall P50 : 147913.135593 P95 : 314394.827586 P99 : 369030.689655 P100 : 1712409806993951.000000 COUNT : 3047 SUM : 5137229881702659
+rocksdb.sst.read.micros P50 : 4207.413658 P95 : 6874.719474 P99 : 9350.913906 P100 : 26385.000000 COUNT : 305266 SUM : 1280067030
+rocksdb.file.read.flush.micros P50 : 3187.500000 P95 : 6227.466667 P99 : 7320.000000 P100 : 7320.000000 COUNT : 354 SUM : 1133841
+rocksdb.file.read.get.micros P50 : 4211.061013 P95 : 6807.925710 P99 : 9330.065943 P100 : 26385.000000 COUNT : 274684 SUM : 1152670514
+rocksdb.db.flush.micros P50 : 215000.000000 P95 : 467645.161290 P99 : 554432.258065 P100 : 760987.000000 COUNT : 354 SUM : 82324950
+
+0.8721751428571428

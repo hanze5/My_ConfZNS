@@ -108,7 +108,7 @@ rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
   -sine_d=450 \
   --duration=180 \
   -num=1000000 \
-  -key_size=48 > outputa.txt
+  -key_size=48 > output.txt
 
 
 
@@ -129,19 +129,6 @@ rm -rf /home/femu/workspace/My_ConfZNS/trial/rocksdblogs/*
   --num=20000000
 
 
-mixgraph_together :    1543.369 micros/op 647 ops/sec 60.190 seconds 38999 operations;   40.8 MB/s ( Gets:19375 Puts:19624 Seek:0, reads 0 in 19375 found, avg size: 131072.0 value, -nan scan)
-
-mixgraph_together :    1876.106 micros/op 533 ops/sec 61.910 seconds 32999 operations;   33.5 MB/s ( Gets:16390 Puts:16609 Seek:0, reads 0 in 16390 found, avg size: 131072.0 value, -nan scan)
-
-mixgraph_together :    2619.180 micros/op 381 ops/sec 60.239 seconds 22999 operations;   23.9 MB/s ( Gets:11504 Puts:11495 Seek:0, reads 0 in 11504 found, avg size: 131072.0 value, -nan scan)
-
-mixgraph_together :    2522.561 micros/op 396 ops/sec 60.539 seconds 23999 operations;   24.7 MB/s ( Gets:12036 Puts:11963 Seek:0, reads 0 in 12036 found, avg size: 131072.0 value, -nan scan)
-
-
-43.7
-35.4
-24.0
-12.7 
 
 ```
 

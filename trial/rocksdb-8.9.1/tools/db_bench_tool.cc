@@ -142,6 +142,30 @@ DEFINE_string(
     "mixgraphc,"
     "mixgraphd,"
     "mixgraphtogether,"
+    "a_qps,"
+    "a_bs,"
+    "a_rw,"
+    "b_qps,"
+    "b_bs,"
+    "b_rw,"
+    "c_qps,"
+    "c_bs,"
+    "c_rw,"
+    "d_qps,"
+    "d_bs,"
+    "d_rw,"
+    "a_wm_qps,"
+    "a_wm_bs,"
+    "a_wm_rw,"
+    "b_wm_qps,"
+    "b_wm_bs,"
+    "b_wm_rw,"
+    "c_wm_qps,"
+    "c_wm_bs,"
+    "c_wm_rw,"
+    "d_wm_qps,"
+    "d_wm_bs,"
+    "d_wm_rw,"
     "readseq,"
     "readtorowcache,"
     "readtocache,"
@@ -259,6 +283,65 @@ DEFINE_string(
     "\tbackup --  Create a backup of the current DB and verify that a new backup is corrected. "
     "Rate limit can be specified through --backup_rate_limit\n"
     "\trestore -- Restore the DB from the latest backup available, rate limit can be specified through --restore_rate_limit\n");
+int dz_total_thread_count=0;
+int dz_seeddiff = 0;
+int n_per_thread=5;
+
+int warmup_times = 0;
+int dz_times = 1 ;
+
+
+//dz_args
+
+// DEFINE_double(a_qps,800.0,"qps");
+// DEFINE_int32(a_bs,128,"bs");
+// DEFINE_double(a_rw,0.5,"rw");
+
+// DEFINE_double(b_qps,200.0,"qps");
+// DEFINE_int32(b_bs,16 ,"bs");
+// DEFINE_double(b_rw,0.5,"rw");
+
+// DEFINE_double(c_qps,200.0,"qps");
+// DEFINE_int32(c_bs,16 ,"bs");
+// DEFINE_double(c_rw,0.5,"rw");
+
+// DEFINE_double(d_qps,200.0,"qps");
+// DEFINE_int32(d_bs,16 ,"bs");
+// DEFINE_double(d_rw,0.5,"rw");
+
+DEFINE_double(a_qps,3200.0,"qps");
+DEFINE_int32(a_bs,16,"bs");
+DEFINE_double(a_rw,0.5,"rw");
+
+DEFINE_double(b_qps,1600.0,"qps");
+DEFINE_int32(b_bs,16 ,"bs");
+DEFINE_double(b_rw,0.5,"rw");
+
+DEFINE_double(c_qps,800.0,"qps");
+DEFINE_int32(c_bs,16 ,"bs");
+DEFINE_double(c_rw,0.5,"rw");
+
+DEFINE_double(d_qps,400.0,"qps");
+DEFINE_int32(d_bs,16 ,"bs");
+DEFINE_double(d_rw,0.5,"rw");
+
+//======================================================
+DEFINE_double(a_wm_qps,200.0,"qps");
+DEFINE_int32(a_wm_bs,128 ,"bs");
+DEFINE_double(a_wm_rw,1.0,"rw");
+
+DEFINE_double(b_wm_qps,1600.0,"qps");
+DEFINE_int32(b_wm_bs,16 ,"bs");
+DEFINE_double(b_wm_rw,1.0,"rw");
+
+DEFINE_double(c_wm_qps,1600.0,"qps");
+DEFINE_int32(c_wm_bs,16 ,"bs");
+DEFINE_double(c_wm_rw,1.0,"rw");
+
+DEFINE_double(d_wm_qps,1600.0,"qps");
+DEFINE_int32(d_wm_bs,16,"bs");
+DEFINE_double(d_wm_rw,1.0,"rw");
+
 
 DEFINE_int64(num, 1000000, "Number of key/values to place in database");
 
@@ -362,7 +445,7 @@ DEFINE_int32(key_size, 16, "size of each key");
 DEFINE_int32(user_timestamp_size, 0,
              "number of bytes in a user-defined timestamp");
 
-int n_per_thread=10;
+
 
 DEFINE_int32(num_multi_db, 4*n_per_thread,
              "Number of DBs used in the benchmark. 0 means single DB.");
@@ -505,36 +588,36 @@ DEFINE_int64(max_write_buffer_size_to_maintain,
              "after they are flushed.  If this value is set to -1, "
              "'max_write_buffer_number' will be used.");
 
-DEFINE_int32(max_background_jobs,
-             ROCKSDB_NAMESPACE::Options().max_background_jobs,
-             "The maximum number of concurrent background jobs that can occur "
-             "in parallel.");
 // DEFINE_int32(max_background_jobs,
-//              2,
+//              ROCKSDB_NAMESPACE::Options().max_background_jobs,
 //              "The maximum number of concurrent background jobs that can occur "
 //              "in parallel.");
+DEFINE_int32(max_background_jobs,
+             2,
+             "The maximum number of concurrent background jobs that can occur "
+             "in parallel.");
 
 
-DEFINE_int32(num_bottom_pri_threads, 0,
+DEFINE_int32(num_bottom_pri_threads, 1,
              "The number of threads in the bottom-priority thread pool (used "
              "by universal compaction only).");
 
-DEFINE_int32(num_high_pri_threads, 0,
+DEFINE_int32(num_high_pri_threads, 1,
              "The maximum number of concurrent background compactions"
              " that can occur in parallel.");
 
-DEFINE_int32(num_low_pri_threads, 0,
+DEFINE_int32(num_low_pri_threads, 1,
              "The maximum number of concurrent background compactions"
              " that can occur in parallel.");
 
-DEFINE_int32(max_background_compactions,
-             ROCKSDB_NAMESPACE::Options().max_background_compactions,
-             "The maximum number of concurrent background compactions"
-             " that can occur in parallel.");
 // DEFINE_int32(max_background_compactions,
-//              8,
+//              ROCKSDB_NAMESPACE::Options().max_background_compactions,
 //              "The maximum number of concurrent background compactions"
 //              " that can occur in parallel.");
+DEFINE_int32(max_background_compactions,
+             2,
+             "The maximum number of concurrent background compactions"
+             " that can occur in parallel.");
 
 
 
@@ -546,14 +629,14 @@ DEFINE_uint64(subcompactions, 1,
 static const bool FLAGS_subcompactions_dummy __attribute__((__unused__)) =
     RegisterFlagValidator(&FLAGS_subcompactions, &ValidateUint32Range);
 
-DEFINE_int32(max_background_flushes,
-             ROCKSDB_NAMESPACE::Options().max_background_flushes,
-             "The maximum number of concurrent background flushes"
-             " that can occur in parallel.");
 // DEFINE_int32(max_background_flushes,
-//              8,
+//              ROCKSDB_NAMESPACE::Options().max_background_flushes,
 //              "The maximum number of concurrent background flushes"
 //              " that can occur in parallel.");
+DEFINE_int32(max_background_flushes,
+             2,
+             "The maximum number of concurrent background flushes"
+             " that can occur in parallel.");
 
 static ROCKSDB_NAMESPACE::CompactionStyle FLAGS_compaction_style_e;
 DEFINE_int32(compaction_style,
@@ -904,7 +987,7 @@ DEFINE_uint64(max_bytes_for_level_base,
 DEFINE_bool(level_compaction_dynamic_level_bytes, false,
             "Whether level size base is dynamic");
 
-DEFINE_double(max_bytes_for_level_multiplier, 4,
+DEFINE_double(max_bytes_for_level_multiplier, 2,
               "A multiplier to compute max bytes for level-N (N >= 2)");
 
 static std::vector<int> FLAGS_max_bytes_for_level_multiplier_additional_v;
@@ -916,10 +999,10 @@ DEFINE_int32(level0_file_num_compaction_trigger,
              4,
              "Number of files in level-0 when compactions start.");
 DEFINE_int32(level0_slowdown_writes_trigger,
-             20,
+             16,
              "Number of files in level-0 that will slow down writes.");
 DEFINE_int32(level0_stop_writes_trigger,
-             36,
+             32,
              "Number of files in level-0 that will trigger put stop.");
 
 // DEFINE_int32(level0_file_num_compaction_trigger,
@@ -3249,7 +3332,7 @@ class Benchmark {
         key_size_(FLAGS_key_size),//设置键的大小(key_size_)
         user_timestamp_size_(FLAGS_user_timestamp_size),//用户定义的时间戳大小
         prefix_size_(FLAGS_prefix_size),//前缀大小
-        total_thread_count_(0),
+        total_thread_count_(dz_total_thread_count),
         keys_per_prefix_(FLAGS_keys_per_prefix),//每个前缀的键数
         entries_per_batch_(1),
         reads_(FLAGS_reads < 0 ? FLAGS_num : FLAGS_reads),
@@ -3527,7 +3610,7 @@ class Benchmark {
       bool fresh_db = false;
       int num_threads = FLAGS_threads;
 
-      int num_repeat = 1;
+      int num_repeat;
       int num_warmup = 0;//预热阶段？
       if (!name.empty() && *name.rbegin() == ']') {
         auto it = name.find('[');
@@ -3937,7 +4020,7 @@ class Benchmark {
         std::cout<<"等待10s......"<<std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
 
-
+        num_repeat = 1;
         if (num_repeat > 1) {
           printf("Running benchmark for %d times\n", num_repeat);
         }
@@ -3995,7 +4078,6 @@ class Benchmark {
                 s.ToString().c_str());
       }
     }
-    std::cout<<"过来了吗"<<std::endl;
 
     if (FLAGS_statistics) {
       // fprintf(stdout, "STATISTICS:\n%s\n", dbstats->ToString().c_str());
@@ -4004,7 +4086,8 @@ class Benchmark {
         fprintf(stdout, "STATISTICS:\n%s\n", multi_dbstats[i]->ToString().c_str());
       }
     }
-    std::cout<<"不太对"<<std::endl;
+
+
     if (FLAGS_simcache_size >= 0) {
       fprintf(
           stdout, "SIMULATOR CACHE STATISTICS:\n%s\n",
@@ -4110,7 +4193,7 @@ class Benchmark {
       arg[i].bm = this;
       arg[i].method = method;
       arg[i].shared = &shared;
-      total_thread_count_++;
+      total_thread_count_+=dz_seeddiff;
       arg[i].thread = new ThreadState(i, total_thread_count_);
       arg[i].thread->stats.SetReporterAgent(reporter_agent.get());
       arg[i].thread->shared = &shared;
@@ -4201,7 +4284,7 @@ class Benchmark {
         arg[i].method = methods[i%4];
       }
       arg[i].shared = &shared;
-      total_thread_count_++;
+      total_thread_count_+=dz_seeddiff;
       arg[i].thread = new ThreadState(i, total_thread_count_);
       std::cout<<"随机数种子为"<<*seed_base+total_thread_count_<<std::endl;
       arg[i].thread->stats.SetReporterAgent(reporter_agent.get());
@@ -7001,13 +7084,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 505.0;
+    double qps = FLAGS_a_qps;
     qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
-    std::vector<double> ratio{0.5, 0.5,0};
-    int32_t diy_valsz = 512 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+
+    std::vector<double> ratio{1-FLAGS_a_rw, FLAGS_a_rw, 0};
+    int32_t diy_valsz = FLAGS_a_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7036,14 +7120,16 @@ class Benchmark {
       use_random_modeling = true;
     }
 
+
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }
 
-    Duration duration(FLAGS_duration, 0);
+    Duration duration(dz_times* FLAGS_duration, 0);
     while (!duration.Done(1)) {
 
       int64_t ini_rand, rand_v, key_rand, key_seed;
@@ -7069,6 +7155,9 @@ class Benchmark {
         //key_rand+=1;
       }
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
+
+      // zipf
+      // GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
       // std::cout<<"ini_rand:"<<ini_rand<<" key:"<<key.size()<<" "<<key.data()<<std::endl;
       
       // Start the query
@@ -7088,17 +7177,59 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
+
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
+
+        // // ======================================================the Get query
+        // gets++;
+        // if (FLAGS_num_column_families > 1) {
+        //   s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+        //                            key, &pinnable_val);
+        // } else {
+        //   pinnable_val.Reset();
+        //   s = db_with_cfh->db->Get(read_options_,
+        //                            db_with_cfh->db->DefaultColumnFamily(), key,
+        //                            &pinnable_val);
+        // }
+        // // std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        // if (s.ok()) {
+        //   get_found++;
+        //   bytes += key.size() + pinnable_val.size();
+        //   total_val_size += pinnable_val.size();
+        // } else if (!s.IsNotFound()) {
+        //   fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+        //   abort();
+        // }
+
+        // if (thread->read_rate_limiter&& gets % 100 == 0) {
+        //   thread->read_rate_limiter->Request(100, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
+        // // if (thread->read_rate_limiter) {
+        // //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        // //                                              nullptr /*stats*/);
+        // // }
+
+        // thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+        // // ======================================================the Get query
+
+
+
         // the Put query
         puts++;
 
@@ -7114,10 +7245,15 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+        if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
+
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -7156,7 +7292,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -7183,14 +7319,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 101.0;
+    double qps = FLAGS_b_qps;
     qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
 
-    std::vector<double> ratio{0.5, 0.5,0};
-    int32_t diy_valsz = 64 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+    std::vector<double> ratio{1-FLAGS_b_rw, FLAGS_b_rw, 0};
+    int32_t diy_valsz = FLAGS_b_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7221,12 +7357,13 @@ class Benchmark {
 
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }
 
-    Duration duration(FLAGS_duration, 0);
+    Duration duration(dz_times* FLAGS_duration, 0);
     while (!duration.Done(1)) {
 
       int64_t ini_rand, rand_v, key_rand, key_seed;
@@ -7271,17 +7408,56 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
+        //         // ======================================================the Get query
+        // gets++;
+        // if (FLAGS_num_column_families > 1) {
+        //   s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+        //                            key, &pinnable_val);
+        // } else {
+        //   pinnable_val.Reset();
+        //   s = db_with_cfh->db->Get(read_options_,
+        //                            db_with_cfh->db->DefaultColumnFamily(), key,
+        //                            &pinnable_val);
+        // }
+        // // std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        // if (s.ok()) {
+        //   get_found++;
+        //   bytes += key.size() + pinnable_val.size();
+        //   total_val_size += pinnable_val.size();
+        // } else if (!s.IsNotFound()) {
+        //   fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+        //   abort();
+        // }
+
+        // if (thread->read_rate_limiter&& gets % 100 == 0) {
+        //   thread->read_rate_limiter->Request(100, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
+        // // if (thread->read_rate_limiter) {
+        // //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        // //                                              nullptr /*stats*/);
+        // // }
+
+        // thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+        // // ======================================================the Get query
+
+
         // the Put query
         puts++;
 
@@ -7298,10 +7474,14 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+           if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -7340,7 +7520,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -7367,13 +7547,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 101.0;
+    double qps = FLAGS_c_qps;
     qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
-    std::vector<double> ratio{0.5, 0.5,0};
-    int32_t diy_valsz = 32 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+
+    std::vector<double> ratio{1-FLAGS_c_rw, FLAGS_c_rw, 0};
+    int32_t diy_valsz = FLAGS_c_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7404,12 +7585,13 @@ class Benchmark {
 
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }
 
-    Duration duration(FLAGS_duration, 0);
+    Duration duration(dz_times* FLAGS_duration, 0);
     while (!duration.Done(1)) {
     
       int64_t ini_rand, rand_v, key_rand, key_seed;
@@ -7455,17 +7637,58 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
+
+
+        //         // ======================================================the Get query
+        // gets++;
+        // if (FLAGS_num_column_families > 1) {
+        //   s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+        //                            key, &pinnable_val);
+        // } else {
+        //   pinnable_val.Reset();
+        //   s = db_with_cfh->db->Get(read_options_,
+        //                            db_with_cfh->db->DefaultColumnFamily(), key,
+        //                            &pinnable_val);
+        // }
+        // // std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        // if (s.ok()) {
+        //   get_found++;
+        //   bytes += key.size() + pinnable_val.size();
+        //   total_val_size += pinnable_val.size();
+        // } else if (!s.IsNotFound()) {
+        //   fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+        //   abort();
+        // }
+
+        // if (thread->read_rate_limiter&& gets % 100 == 0) {
+        //   thread->read_rate_limiter->Request(100, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
+        // // if (thread->read_rate_limiter) {
+        // //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        // //                                              nullptr /*stats*/);
+        // // }
+
+        // thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+        // // ======================================================the Get query
+
+
         // the Put query
         puts++;
 
@@ -7482,10 +7705,14 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+           if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -7524,7 +7751,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -7551,14 +7778,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 101.0;
+    double qps = FLAGS_d_qps;
     qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
 
-    std::vector<double> ratio{0.5, 0.5,0};
-    int32_t diy_valsz = 16 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+    std::vector<double> ratio{1-FLAGS_d_rw, FLAGS_d_rw, 0};
+    int32_t diy_valsz = FLAGS_d_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7589,12 +7816,14 @@ class Benchmark {
 
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }    
 
-    Duration duration(FLAGS_duration, 0);
+
+    Duration duration(dz_times* FLAGS_duration, 0);
     while (!duration.Done(1)) {
     
       int64_t ini_rand, rand_v, key_rand, key_seed;
@@ -7640,17 +7869,58 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
+
+
+        //         // ======================================================the Get query
+        // gets++;
+        // if (FLAGS_num_column_families > 1) {
+        //   s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
+        //                            key, &pinnable_val);
+        // } else {
+        //   pinnable_val.Reset();
+        //   s = db_with_cfh->db->Get(read_options_,
+        //                            db_with_cfh->db->DefaultColumnFamily(), key,
+        //                            &pinnable_val);
+        // }
+        // // std::cout<<"get 到了"<<pinnable_val.size()<<std::endl;
+        // if (s.ok()) {
+        //   get_found++;
+        //   bytes += key.size() + pinnable_val.size();
+        //   total_val_size += pinnable_val.size();
+        // } else if (!s.IsNotFound()) {
+        //   fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+        //   abort();
+        // }
+
+        // if (thread->read_rate_limiter&& gets % 100 == 0) {
+        //   thread->read_rate_limiter->Request(100, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
+        // // if (thread->read_rate_limiter) {
+        // //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        // //                                              nullptr /*stats*/);
+        // // }
+
+        // thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+        // // ======================================================the Get query
+
+
         // the Put query
         puts++;
 
@@ -7665,10 +7935,14 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+           if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -7707,7 +7981,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -7739,13 +8013,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 125.0;
+    double qps = FLAGS_a_wm_qps;
     qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
-    std::vector<double> ratio{0, 1,0};
-    int32_t diy_valsz = 512 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+
+    std::vector<double> ratio{1-FLAGS_a_wm_rw, FLAGS_a_wm_rw, 0};
+    int32_t diy_valsz = FLAGS_a_wm_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7774,10 +8049,11 @@ class Benchmark {
       use_random_modeling = true;
     }
 
-    Duration duration(1.1*FLAGS_duration, reads_);
+    Duration duration(warmup_times*FLAGS_duration, 0);
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }
@@ -7826,15 +8102,20 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
         // the Put query
@@ -7853,10 +8134,14 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+           if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -7895,7 +8180,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -7922,14 +8207,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 1000.0;
-    qps = qps/n_per_thread; 
+    double qps = FLAGS_b_wm_qps;
+    qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
 
-    std::vector<double> ratio{0, 1,0};
-    int32_t diy_valsz = 64 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+    std::vector<double> ratio{1-FLAGS_b_wm_rw, FLAGS_b_wm_rw, 0};
+    int32_t diy_valsz = FLAGS_b_wm_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -7959,12 +8244,13 @@ class Benchmark {
     }
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }
 
-    Duration duration(1.1*FLAGS_duration, reads_);
+    Duration duration(warmup_times*FLAGS_duration, 0);
     while (!duration.Done(1)) {
       int64_t ini_rand, rand_v, key_rand, key_seed;
       ini_rand = GetRandomKey(&thread->rand);
@@ -8009,15 +8295,20 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
         // the Put query
@@ -8036,10 +8327,14 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+           if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -8078,7 +8373,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -8105,13 +8400,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 2000.0;
-    qps = qps/n_per_thread; 
+    double qps = FLAGS_c_wm_qps;
+    qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
-    std::vector<double> ratio{0, 1,0};
-    int32_t diy_valsz = 32 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+
+    std::vector<double> ratio{1-FLAGS_c_wm_rw, FLAGS_c_wm_rw, 0};
+    int32_t diy_valsz = FLAGS_c_wm_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -8141,14 +8437,15 @@ class Benchmark {
     }
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
 
 
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }
-    
-    Duration duration(1.1*FLAGS_duration, reads_);
+
+    Duration duration(warmup_times*FLAGS_duration, 0);
     while (!duration.Done(1)) {
 
       int64_t ini_rand, rand_v, key_rand, key_seed;
@@ -8194,15 +8491,20 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
         // the Put query
@@ -8221,10 +8523,14 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+           if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -8263,7 +8569,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -8290,14 +8596,14 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
 
-    double qps = 4000.0;
-    qps = qps/n_per_thread; 
+    double qps = FLAGS_d_wm_qps;
+    qps = qps/n_per_thread;  
+    double read_rate =2* qps;
     double write_rate = qps;
-    double read_rate = qps;
 
-    std::vector<double> ratio{0, 1,0};
-    int32_t diy_valsz = 16 KiB;
-    RandomGenerator gen(diy_valsz ,diy_valsz, diy_valsz);
+    std::vector<double> ratio{1-FLAGS_d_wm_rw, FLAGS_d_wm_rw, 0};
+    int32_t diy_valsz = FLAGS_d_wm_bs KiB;
+    RandomGenerator gen(diy_valsz-48 ,diy_valsz-48, diy_valsz-48);
     Status s;
     // if (value_max > FLAGS_mix_max_value_size) {
     //   value_max = FLAGS_mix_max_value_size;
@@ -8327,12 +8633,13 @@ class Benchmark {
     }
     DBWithColumnFamilies* db_with_cfh;      
     if(FLAGS_num_multi_db==4*n_per_thread){
-      db_with_cfh = &multi_dbs_[thread->tid];
+      // db_with_cfh = &multi_dbs_[thread->tid];
+      db_with_cfh = &multi_dbs_[thread->tid%4];
     }else{
       db_with_cfh = SelectDBWithCfh(thread);
     }
-    
-    Duration duration(1.1*FLAGS_duration, reads_);
+
+    Duration duration(warmup_times*FLAGS_duration, 0);
     while (!duration.Done(1)) {
 
       int64_t ini_rand, rand_v, key_rand, key_seed;
@@ -8378,15 +8685,20 @@ class Benchmark {
         if (s.ok()) {
           get_found++;
           bytes += key.size() + pinnable_val.size();
+          total_val_size += pinnable_val.size();
         } else if (!s.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
           abort();
         }
 
-        if (thread->read_rate_limiter && gets%100 == 0) {
+        if (thread->read_rate_limiter&& gets % 100 == 0) {
           thread->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
+        // if (thread->read_rate_limiter) {
+        //   thread->read_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                              nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
       } else if (query_type == 1) {
         // the Put query
@@ -8405,10 +8717,14 @@ class Benchmark {
           ErrorExit();
         }
 
-        if (thread->write_rate_limiter && puts%100 == 0) {
+           if (thread->write_rate_limiter&& puts % 100 == 0) {
           thread->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
+        // if (thread->write_rate_limiter) {
+        //   thread->write_rate_limiter->Request(1, Env::IO_HIGH,
+        //                                               nullptr /*stats*/);
+        // }
         thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
       } else if (query_type == 2) {
         // Seek query
@@ -8447,7 +8763,7 @@ class Benchmark {
              " found, "
              "avg size: %.1f value, %.1f scan)\n",
              gets, puts, seek, get_found + seek_found, gets + seek,
-             total_val_size / puts, total_scan_length / seek);
+             total_val_size / (puts+gets), total_scan_length / seek);
     thread->stats.AddBytes(bytes);
     thread->stats.AddMessage(msg);
   }
@@ -9987,7 +10303,7 @@ class Benchmark {
         db_with_cfh = SelectDBWithCfh(thread);
       }
       // zipf
-      GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
+      // GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
 
       int next_op = thread->rand.Next() % 100;
       double r_w_rate = 0.5;
@@ -10109,7 +10425,7 @@ class Benchmark {
       DB* db = SelectDB(thread);
 
       // zipf
-      GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
+      // GenerateKeyFromInt(nextValue() % FLAGS_num, FLAGS_num, &key);
 
       int next_op = thread->rand.Next() % 100;
       if (next_op < 95) {
